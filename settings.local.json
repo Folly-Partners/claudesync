@@ -1,0 +1,39 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep:*)",
+      "Bash(npm run build:*)",
+      "Bash(pkill:*)",
+      "Bash(lsof:*)",
+      "Bash(npm ls:*)",
+      "Bash(xargs kill:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(gh repo sync:*)",
+      "Bash(gh auth:*)",
+      "Bash(gh repo list:*)",
+      "Bash(gh repo clone:*)",
+      "Bash(find:*)",
+      "Bash(cat:*)",
+      "Bash(head:*)",
+      "Bash(du:*)",
+      "Bash(wc:*)",
+      "Bash(git init:*)",
+      "Bash(git remote:*)",
+      "Bash(git fetch:*)",
+      "Bash(git checkout:*)"
+    ],
+    "deny": [],
+    "ask": []
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "things-mcp",
+    "webflow",
+    "browserbase",
+    "tavily",
+    "zapier",
+    "ahrefs"
+  ]
+}

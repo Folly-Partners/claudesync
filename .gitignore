@@ -1,0 +1,23 @@
+# Debug logs and temporary files
+debug/
+*.log
+*.tmp
+
+# Session-specific data
+shell-snapshots/
+session-env/
+
+# Statistics and analytics (may contain personal data)
+statsig/
+
+# Downloads directory (may contain sensitive files)
+downloads/
+
+# Local environment variables or secrets
+.env
+*.key
+*.pem
+auth_token
+
+# OAuth session tokens (machine-specific, would cause conflicts)
+.credentials.json

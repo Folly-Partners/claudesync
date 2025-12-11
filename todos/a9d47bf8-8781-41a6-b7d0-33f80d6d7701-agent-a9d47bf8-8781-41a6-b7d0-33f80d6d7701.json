@@ -1,0 +1,27 @@
+[
+  {
+    "content": "Extract property information from the Shawnigan Retreats website",
+    "status": "completed",
+    "activeForm": "Extracting property information from the Shawnigan Retreats website"
+  },
+  {
+    "content": "Navigate to HomeExchange website and locate sign-up",
+    "status": "completed",
+    "activeForm": "Navigating to HomeExchange website and locating sign-up"
+  },
+  {
+    "content": "Complete HomeExchange registration form",
+    "status": "completed",
+    "activeForm": "Completing HomeExchange registration form"
+  },
+  {
+    "content": "Verify email address from inbox",
+    "status": "completed",
+    "activeForm": "Verifying email address from inbox"
+  },
+  {
+    "content": "Add property listing to HomeExchange",
+    "status": "in_progress",
+    "activeForm": "Adding property listing to HomeExchange"
+  }
+]
