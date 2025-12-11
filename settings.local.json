@@ -24,7 +24,11 @@
       "Bash(git fetch:*)",
       "Bash(git checkout:*)",
       "Bash(chmod:*)",
-      "Bash(~/.claude/sync-claude-config.sh)"
+      "Bash(~/.claude/sync-claude-config.sh)",
+      "Bash(launchctl list:*)",
+      "Bash(crontab:*)",
+      "Bash(launchctl load:*)",
+      "Bash(launchctl start:*)"
     ],
     "deny": [],
     "ask": []
