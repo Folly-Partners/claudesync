@@ -22,7 +22,9 @@
       "Bash(git init:*)",
       "Bash(git remote:*)",
       "Bash(git fetch:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(chmod:*)",
+      "Bash(~/.claude/sync-claude-config.sh)"
     ],
     "deny": [],
     "ask": []

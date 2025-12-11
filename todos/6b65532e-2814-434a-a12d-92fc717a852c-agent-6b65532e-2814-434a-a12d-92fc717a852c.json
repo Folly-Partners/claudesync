@@ -21,17 +21,17 @@
   },
   {
     "content": "Force push config to GitHub repo",
-    "status": "in_progress",
+    "status": "completed",
     "activeForm": "Force pushing config to GitHub"
   },
   {
     "content": "Make sync script executable",
-    "status": "pending",
+    "status": "completed",
     "activeForm": "Making sync script executable"
   },
   {
     "content": "Test the sync setup",
-    "status": "pending",
+    "status": "in_progress",
     "activeForm": "Testing sync setup"
   }
 ]
