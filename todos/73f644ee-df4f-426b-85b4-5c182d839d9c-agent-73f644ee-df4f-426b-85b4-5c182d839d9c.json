@@ -1,1 +1,32 @@
-[]
+[
+  {
+    "content": "Create Supabase database schema SQL",
+    "status": "in_progress",
+    "activeForm": "Creating database schema"
+  },
+  {
+    "content": "Create Supabase service client for server-side operations",
+    "status": "pending",
+    "activeForm": "Creating service client"
+  },
+  {
+    "content": "Update /api/complete to save profiles to Supabase",
+    "status": "pending",
+    "activeForm": "Updating API to save profiles"
+  },
+  {
+    "content": "Create API route to retrieve past assessments",
+    "status": "pending",
+    "activeForm": "Creating retrieval API"
+  },
+  {
+    "content": "Update Dashboard to show past assessments",
+    "status": "pending",
+    "activeForm": "Updating Dashboard"
+  },
+  {
+    "content": "Deploy and test",
+    "status": "pending",
+    "activeForm": "Deploying changes"
+  }
+]
