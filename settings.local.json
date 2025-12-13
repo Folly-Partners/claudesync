@@ -68,7 +68,14 @@
       "Bash(sqlite3:*)",
       "Bash(open:*)",
       "Bash(DB=\"$HOME/Library/Group Containers/JLMPQHK86H.com.culturedcode.ThingsMac/ThingsData-RIMFH/Things Database.thingsdatabase/main.sqlite\":*)",
-      "Bash(killall:*)"
+      "Bash(killall:*)",
+      "Bash(swift create_icon.swift:*)",
+      "Bash(iconutil:*)",
+      "mcp__things-mcp__things_add_todo",
+      "WebFetch(domain:club.macstories.net)",
+      "Bash(git pull:*)",
+      "Bash(bash /tmp/add_icon_to_app.sh:*)",
+      "Bash(pgrep:*)"
     ],
     "deny": [],
     "ask": []
