@@ -75,7 +75,13 @@
       "WebFetch(domain:club.macstories.net)",
       "Bash(git pull:*)",
       "Bash(bash /tmp/add_icon_to_app.sh:*)",
-      "Bash(pgrep:*)"
+      "Bash(pgrep:*)",
+      "WebFetch(domain:culturedcode.com)",
+      "Bash(log show:*)",
+      "Bash(/Users/andrewwilkinson/Library/Developer/Xcode/DerivedData/Things_Today_Panel-fefyusbvywuycidnatlimihntbdk/Build/Products/Release/Things Today Panel.app/Contents/MacOS/Things Today Panel)",
+      "Bash(xargs:*)",
+      "WebFetch(domain:docs.anthropic.com)",
+      "WebFetch(domain:docs.claude.com)"
     ],
     "deny": [],
     "ask": []

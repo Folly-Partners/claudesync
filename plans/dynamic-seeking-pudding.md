@@ -1,814 +1,429 @@
-# Vercel Deployment Plan: Deep Personality App
+# Deep Personality: Cards Redesign & Typography Fix
 
 ## Overview
 
-Migrate Deep Personality app to Vercel with Supabase authentication and secure credential management. Enable Google/Email authentication with guest mode for anonymous users who can download results without creating an account.
-
-## Current State
-
-- **File-based storage**: Profiles saved to `/profiles/*.json` (won't work on Vercel serverless)
-- **No authentication**: Completely public, no user accounts
-- **Exposed credentials**: `.env.local` contains live API keys (not committed, but needs rotation)
-- **File-based logging**: `services/logger.ts` writes to disk (incompatible with Vercel)
-- **Dark Triad marked "admin only"**: Need to make visible to all users
-
-## User Requirements
-
-1. **Authentication**: Google OAuth, Email/Password, OR Guest mode (download results)
-2. **Storage**: Supabase PostgreSQL for authenticated users
-3. **Guest Mode**: Allow assessment without account, download results file
-4. **Dark Triad**: Remove "admin only" label, show to all users
-5. **Email**: Nice to have (keep for admin notifications)
-6. **Budget**: ~$5-20/month (Supabase free tier + low Anthropic usage)
-7. **Public Access**: Open to anyone on the internet
-
-## Implementation Phases
-
-### Phase 1: Security & Credential Rotation (DAY 1 - 1 hour)
-
-**Priority**: CRITICAL - Do before any deployment
-
-#### 1.1 Rotate API Keys
-
-**Anthropic API Key**:
-1. Go to https://console.anthropic.com/settings/keys
-2. Create new key: "Deep-Personality-Production-2024"
-3. Copy immediately (only shown once)
-4. Revoke old key: `sk-ant-api03-y8GPpXr...`
-
-**Gmail Credentials**:
-1. Go to https://myaccount.google.com/apppasswords
-2. Revoke old "Deep Personality" password
-3. Generate new with same name
-4. Copy 16-character password
-
-**Generate API Secret**:
-```bash
-openssl rand -base64 32
-```
-
-#### 1.2 Create `.env.example`
-
-Create file for documentation (commit this):
-```bash
-# Deep Personality - Environment Variables
-# Copy to .env.local and fill in your values
-
-# Required: Anthropic API
-ANTHROPIC_API_KEY=sk-ant-api03-your-key-here
-
-# Required: Supabase
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-service-key
-
-# Optional: Gmail notifications
-GMAIL_USER=your-email@gmail.com
-GMAIL_APP_PASSWORD=your-app-password
-
-# Optional: API protection (leave empty for dev)
-API_SECRET_KEY=
-```
-
-#### 1.3 Update `.gitignore`
-
-Verify these lines exist (they should):
-```
-.env
-.env.local
-.env*.local
-```
-
-**Files to modify**:
-- `.env.example` (CREATE NEW)
-- `.gitignore` (verify)
+Three main tasks:
+1. Fix UnderstandMeCards to show actual content (currently broken due to data key mismatch)
+2. Redesign cards as fun "baseball card" style with detailed, actionable content
+3. Fix AI analysis typography - larger font, Claude's font family
 
 ---
 
-### Phase 2: Supabase Setup (DAY 1 - 2 hours)
+## Part 1: Fix UnderstandMeCards Content (Critical Bug)
 
-#### 2.1 Create Supabase Project
+### Root Cause
 
-1. Go to https://supabase.com
-2. Create new project
-3. Choose region (US East recommended)
-4. Set database password (save securely)
-5. Wait for provisioning (~2 minutes)
+**The component is looking for the wrong data keys.** The scoring system generates:
+- `ipip_50` → but component expects `bigFive` or `big_five`
+- `ecr_s` → but component expects `attachment`
+- `pvq_21` → but component expects `values`
+- `onet_mini_ip` → but component expects `riasec`
+- `weims` → but component expects `workMotivation`
 
-#### 2.2 Get Credentials
+### Fix: Update Data Extraction in UnderstandMeCards.tsx
 
-From Supabase Dashboard → Settings → API:
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY` (public, safe for client)
-- `SUPABASE_SERVICE_ROLE_KEY` (secret, server-only)
+**File:** `components/UnderstandMeCards.tsx`
 
-#### 2.3 Create Database Schema
+Change all data lookups to use actual keys:
 
-Execute in Supabase SQL Editor:
+```typescript
+// OLD (broken):
+const bigFive = profile.assessments?.bigFive || profile.assessments?.big_five;
 
-```sql
--- Profiles table
-CREATE TABLE profiles (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+// NEW (correct):
+const bigFive = profile.assessments?.ipip_50?.domainScores;
 
-  -- Metadata
-  name TEXT NOT NULL,
-  email TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW(),
+// OLD (broken):
+const attachment = profile.assessments?.attachment;
 
-  -- Demographics
-  age INTEGER,
+// NEW (correct):
+const attachment = profile.assessments?.ecr_s;
 
-  -- Assessment data (JSONB)
-  assessments JSONB NOT NULL DEFAULT '{}',
-  custom_responses JSONB DEFAULT '{}',
-  dark_triad JSONB,
-  ai_analysis TEXT,
+// OLD (broken):
+const values = profile.assessments?.values;
 
-  -- Anti-gaming
-  restart_count INTEGER DEFAULT 0,
-  response_timings JSONB,
+// NEW (correct):
+const values = profile.assessments?.pvq_21;
 
-  -- Constraints
-  CONSTRAINT valid_age CHECK (age >= 13 AND age <= 120)
-);
+// OLD (broken):
+const riasec = profile.assessments?.riasec;
 
--- Indexes
-CREATE INDEX idx_profiles_user_id ON profiles(user_id);
-CREATE INDEX idx_profiles_created_at ON profiles(created_at DESC);
+// NEW (correct):
+const riasec = profile.assessments?.onet_mini_ip?.scores;
 
--- Auto-update timestamp
-CREATE OR REPLACE FUNCTION update_updated_at()
-RETURNS TRIGGER AS $$
-BEGIN
-  NEW.updated_at = NOW();
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+// OLD (broken):
+const workMotivation = profile.assessments?.workMotivation || profile.assessments?.work_motivation;
 
-CREATE TRIGGER profiles_updated_at
-  BEFORE UPDATE ON profiles
-  FOR EACH ROW
-  EXECUTE FUNCTION update_updated_at();
+// NEW (correct):
+const workMotivation = profile.assessments?.weims;
 ```
-
-#### 2.4 Enable Row Level Security (RLS)
-
-```sql
-ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
-
--- Users can view own profiles
-CREATE POLICY "Users view own profiles"
-  ON profiles FOR SELECT
-  USING (auth.uid() = user_id);
-
--- Users can insert own profiles
-CREATE POLICY "Users create own profiles"
-  ON profiles FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
-
--- Service role has full access
-CREATE POLICY "Service role full access"
-  ON profiles FOR ALL
-  USING (auth.role() = 'service_role');
-```
-
-#### 2.5 Configure Auth Providers
-
-In Supabase Dashboard → Authentication → Providers:
-
-**Enable Email/Password**:
-- Toggle on
-- Optional: Disable email confirmations for MVP
-
-**Enable Google OAuth**:
-1. Go to Google Cloud Console
-2. Create OAuth 2.0 credentials
-3. Authorized redirect: `https://[project-ref].supabase.co/auth/v1/callback`
-4. Copy Client ID and Secret to Supabase
-
-**Files to modify**: None (Supabase UI configuration)
 
 ---
 
-### Phase 3: Install Dependencies (DAY 1 - 15 min)
+## Part 2: Relocate Cards
 
-```bash
-npm install @supabase/supabase-js @supabase/auth-helpers-nextjs
-npm install zod  # Input validation
-```
+### Move from Wellbeing Section to Under "Train Your Personal AI"
 
-**Files to modify**:
-- `package.json` (npm install does this)
+**File:** `components/Dashboard.tsx`
 
----
+**Current location:** Line ~2455 in the visualizations grid
+**New location:** Below the "Train Your Personal AI" section header, above the analysis CTA
 
-### Phase 4: Supabase Client Setup (DAY 1 - 30 min)
-
-#### 4.1 Create Client Utilities
-
-**File**: `lib/supabase/client.ts` (CREATE NEW)
-```typescript
-import { createBrowserClient } from '@supabase/ssr'
-
-export function createClient() {
-  return createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
-}
-```
-
-**File**: `lib/supabase/server.ts` (CREATE NEW)
-```typescript
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
-
-export async function createClient() {
-  const cookieStore = await cookies()
-
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value
-        },
-        set(name: string, value: string, options) {
-          try {
-            cookieStore.set({ name, value, ...options })
-          } catch {}
-        },
-        remove(name: string, options) {
-          try {
-            cookieStore.set({ name, value: '', ...options })
-          } catch {}
-        },
-      },
-    }
-  )
-}
-```
-
-**File**: `lib/supabase/service.ts` (CREATE NEW)
-```typescript
-import { createClient } from '@supabase/supabase-js'
-
-// Service role for admin operations (Dark Triad, etc.)
-export function createServiceClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false
-      }
-    }
-  )
-}
-```
-
-**Files to create**:
-- `lib/supabase/client.ts`
-- `lib/supabase/server.ts`
-- `lib/supabase/service.ts`
+**Rationale:** Cards are shareable content related to AI-generated insights, so they belong with the AI section, not buried in wellbeing visualizations.
 
 ---
 
-### Phase 5: Authentication UI (DAY 2 - 3 hours)
+## Part 3: Redesign Cards as Baseball Cards
 
-#### 5.1 Auth Modal Component
+### Design Goals
+- Fun, collectible baseball card aesthetic
+- Detailed, actionable content (not just headers)
+- Visual stats/ratings like a sports card
+- Profile photo placeholder area
+- Position/role title
+- Key stats displayed prominently
 
-**File**: `components/AuthModal.tsx` (CREATE NEW)
+### Baseball Card Layout
 
-Create modal with:
-- Google OAuth button
-- Email/Password form
-- Mode switching (Sign In / Sign Up / Magic Link)
-- Error handling
-- Loading states
-
-Key features:
-```typescript
-const handleGoogleSignIn = async () => {
-  const { error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
-    options: { redirectTo: `${window.location.origin}/auth/callback` }
-  })
-}
-
-const handleEmailSignUp = async () => {
-  const { error } = await supabase.auth.signUp({
-    email, password,
-    options: { data: { name } }
-  })
-}
+```
+┌─────────────────────────────────────────────┐
+│  ┌─────────┐  HOW TO WORK WITH ME          │
+│  │  🏢    │  ─────────────────────          │
+│  │ ICON   │  ROLE: The Creative Ideator    │
+│  └─────────┘                                │
+├─────────────────────────────────────────────┤
+│  ⚡ COMMUNICATION STYLE                     │
+│  • Prefers async over meetings             │
+│  • Direct feedback appreciated             │
+│  • Responds best to big-picture briefs     │
+├─────────────────────────────────────────────┤
+│  💪 STRENGTHS        │  ⚠️ WATCH OUT FOR   │
+│  • Innovation        │  • May miss details │
+│  • Big ideas         │  • Dislikes routine │
+│  • Quick pivots      │  • Can overcommit   │
+├─────────────────────────────────────────────┤
+│  📊 STATS                                   │
+│  ┌────┐ ┌────┐ ┌────┐ ┌────┐ ┌────┐       │
+│  │ 85 │ │ 72 │ │ 45 │ │ 90 │ │ 60 │       │
+│  │ O  │ │ C  │ │ N  │ │ E  │ │ A  │       │
+│  └────┘ └────┘ └────┘ └────┘ └────┘       │
+├─────────────────────────────────────────────┤
+│  ✅ BEST TASKS FOR ME:                      │
+│  Brainstorming, Strategy, Client Pitches   │
+│                                             │
+│  ⓘ Generated by Deep Personality           │
+└─────────────────────────────────────────────┘
 ```
 
-#### 5.2 Auth Callback Route
+### Card Content - Make It Detailed & Actionable
 
-**File**: `app/auth/callback/route.ts` (CREATE NEW)
+**Work Card ("How to Work With Me")**
+- Communication Style: 3-4 specific bullet points
+- Strengths: Top 3-4 work strengths
+- Watch Out For: 2-3 potential friction areas
+- Best Tasks: What they excel at
+- Big Five stats bar visualization
 
-```typescript
-import { createClient } from '@/lib/supabase/server'
-import { NextResponse } from 'next/server'
+**Friendship Card ("How to Be My Friend")**
+- Social Style: Introvert/extrovert, group vs 1-on-1
+- What I Value: Loyalty, honesty, humor, etc.
+- How to Support Me: Specific actions
+- Let's Do Together: Activity suggestions
+- Attachment style indicator
 
-export async function GET(request: Request) {
-  const requestUrl = new URL(request.url)
-  const code = requestUrl.searchParams.get('code')
+**Romantic Card ("How to Love Me")**
+- Attachment Style: Clear label with what it means
+- Love Language: Based on traits
+- What I Need: Emotional needs
+- Support Me By: Specific actions
+- Avoid: What triggers insecurity
 
-  if (code) {
-    const supabase = await createClient()
-    await supabase.auth.exchangeCodeForSession(code)
-  }
+### Styling Approach
 
-  return NextResponse.redirect(new URL('/', requestUrl.origin))
+```css
+/* Baseball card aesthetic */
+.card {
+  border: 3px solid;
+  border-radius: 12px;
+  background: linear-gradient(to-b, white, slate-50);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+/* Stats boxes */
+.stat-box {
+  background: gradient;
+  font-weight: bold;
+  font-size: 1.5rem;
+  min-width: 48px;
+}
+
+/* Card header */
+.card-header {
+  background: gradient by type;
+  padding: 1rem;
+  border-radius: 8px 8px 0 0;
 }
 ```
-
-**Files to create**:
-- `components/AuthModal.tsx`
-- `app/auth/callback/route.ts`
 
 ---
 
-### Phase 6: Update Wizard Component (DAY 2 - 2 hours)
+## Part 4: Fix AI Analysis Typography
 
-**File**: `components/Wizard.tsx` (MODIFY)
+### Current Issues
+- Font: Lora serif at 17px - user finds it too small
+- User wants: Claude's font with better sizing
 
-#### 6.1 Add Auth State
-
-Add at top of component:
-```typescript
-import { createClient } from '@/lib/supabase/client'
-import { AuthModal } from './AuthModal'
-
-const [user, setUser] = useState<User | null>(null)
-const [showAuthModal, setShowAuthModal] = useState(false)
-const supabase = createClient()
-
-useEffect(() => {
-  supabase.auth.getSession().then(({ data: { session } }) => {
-    setUser(session?.user ?? null)
-  })
-
-  const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-    setUser(session?.user ?? null)
-  })
-
-  return () => subscription.unsubscribe()
-}, [])
+### Claude's Typography (Reference)
+Claude uses system fonts with fallbacks:
+```css
+font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+/* OR simply: */
+font-family: system-ui, -apple-system, sans-serif;
 ```
 
-#### 6.2 Add Auth Prompt After Completion
+Claude's body text is typically:
+- Font size: 16-18px on desktop
+- Line height: 1.5-1.6
+- Color: #374151 (gray-700) or similar
 
-Modify ResultsStep (around line 473) to show auth choice before displaying results:
+### Changes to globals.css
 
-```typescript
-if (currentStep.type === 'finish') {
-  const profile = generateProfile(basicInfo, answers);
+**File:** `styles/globals.css`
 
-  if (!user) {
-    return (
-      <div className="space-y-6">
-        <h3 className="text-2xl font-bold">Assessment Complete!</h3>
-        <p>Create an account to save your results, or continue as guest to download only.</p>
+```css
+/* OLD */
+.prose-report {
+  font-family: 'Lora', Georgia, 'Times New Roman', serif;
+  font-size: 1.0625rem; /* 17px */
+  line-height: 1.75;
+}
 
-        <div className="flex flex-col gap-4 max-w-sm mx-auto">
-          <button
-            onClick={() => setShowAuthModal(true)}
-            className="bg-blue-600 text-white px-8 py-4 rounded-xl font-semibold"
-          >
-            Sign Up to Save Results
-          </button>
-
-          <button
-            onClick={() => setGuestMode(true)}
-            className="text-slate-600 hover:text-slate-900"
-          >
-            Continue as guest (download only)
-          </button>
-        </div>
-
-        <AuthModal
-          isOpen={showAuthModal}
-          onClose={() => setShowAuthModal(false)}
-          onSuccess={() => setShowAuthModal(false)}
-        />
-      </div>
-    )
-  }
-
-  return <ResultsStep profile={profile} rawAnswers={answers} user={user} />
+/* NEW */
+.prose-report {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 1.125rem; /* 18px - larger for readability */
+  line-height: 1.65;
+  letter-spacing: -0.01em;
 }
 ```
 
-#### 6.3 Update API Call to Include User ID
+### Changes to Dashboard.tsx MarkdownComponents
 
-In ResultsStep component (line 484-490), update fetch:
-```typescript
-const response = await fetch('/api/complete', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    profile,
-    rawAnswers,
-    userId: user?.id || null  // Add this
-  })
-});
+Update paragraph styling:
+```tsx
+// OLD
+p: ({ children }) => (
+  <p className="font-serif text-slate-600 dark:text-slate-400 leading-relaxed mb-4 text-[16px]">
+
+// NEW
+p: ({ children }) => (
+  <p className="text-slate-700 dark:text-slate-300 leading-relaxed mb-5 text-[18px]">
 ```
 
-**Files to modify**:
-- `components/Wizard.tsx` (multiple sections)
+Update list items:
+```tsx
+// OLD
+li: ({ children }) => (
+  <li className="font-serif text-[16px] text-slate-600 dark:text-slate-400">
+
+// NEW
+li: ({ children }) => (
+  <li className="text-[18px] text-slate-700 dark:text-slate-300 leading-relaxed">
+```
 
 ---
 
-### Phase 7: Update API Routes (DAY 2-3 - 3 hours)
+## Implementation Order
 
-#### 7.1 Modify `/api/complete/route.ts`
-
-**Replace file save logic** (lines 348-360) with Supabase:
-
-```typescript
-import { createServiceClient } from '@/lib/supabase/service'
-
-// Remove fs.writeFileSync code, replace with:
-try {
-  const supabase = createServiceClient()
-  const userId = body.userId || null  // From request
-
-  if (userId) {
-    // Authenticated user - save to database
-    const { data, error } = await supabase
-      .from('profiles')
-      .insert({
-        user_id: userId,
-        name: profile.name,
-        email: profile.email || profile.demographics?.email,
-        age: profile.demographics?.age,
-        assessments: profile.assessments,
-        custom_responses: profile.customQuestionResponses,
-        dark_triad: darkTriad,
-        ai_analysis: aiAnalysis,
-        restart_count: profile._internal?.restartCount || 0,
-        response_timings: profile._internal?.responseTimings
-      })
-      .select()
-      .single()
-
-    if (error) throw error
-    logServerEvent(`💾 Profile saved to Supabase: ${data.id}`)
-    profile.id = data.id
-  } else {
-    // Guest mode - no save, just process
-    logServerEvent(`👤 Guest profile generated (not saved)`)
-  }
-
-} catch (saveError) {
-  logServerEvent(`❌ Failed to save: ${saveError.message}`, 'ERROR')
-}
-```
-
-**Add Dark Triad to response** (remove "admin only"):
-
-```typescript
-const cleanProfile = {
-  ...profile,
-  darkTriad: {
-    machiavellianism: darkTriad.machiavellianism,
-    narcissism: darkTriad.narcissism,
-    psychopathy: darkTriad.psychopathy
-  }
-};
-return NextResponse.json({ success: true, profile: cleanProfile });
-```
-
-#### 7.2 Update Logger (Remove File Writes)
-
-**File**: `services/logger.ts` (MODIFY)
-
-Replace entire file content:
-```typescript
-export type LogLevel = 'INFO' | 'WARN' | 'ERROR';
-
-export function logServerEvent(message: string, level: LogLevel = 'INFO', errorDetails?: any) {
-  const timestamp = new Date().toISOString();
-  let logMessage = `[${timestamp}] [${level}] ${message}`;
-
-  if (errorDetails) {
-    if (errorDetails instanceof Error) {
-      logMessage += `\n Stack: ${errorDetails.stack}`;
-    } else {
-      logMessage += `\n Details: ${JSON.stringify(errorDetails)}`;
-    }
-  }
-
-  // Vercel automatically captures console logs
-  if (level === 'ERROR') {
-    console.error(logMessage);
-  } else if (level === 'WARN') {
-    console.warn(logMessage);
-  } else {
-    console.log(logMessage);
-  }
-}
-```
-
-**Files to modify**:
-- `app/api/complete/route.ts` (major changes)
-- `services/logger.ts` (complete rewrite)
+1. **Fix data key mismatch** in UnderstandMeCards.tsx (critical bug)
+2. **Update typography** in globals.css and Dashboard.tsx MarkdownComponents
+3. **Redesign card component** with baseball card layout
+4. **Move cards location** in Dashboard.tsx to under AI section
 
 ---
 
-### Phase 8: Guest Download Enhancement (DAY 3 - 2 hours)
+## Files to Modify
 
-#### 8.1 Add PDF Download Option
-
-Install dependencies:
-```bash
-npm install jspdf html2canvas
-```
-
-#### 8.2 Create Report Template
-
-**File**: `lib/reportTemplate.ts` (CREATE NEW)
-
-```typescript
-export function generateReportHTML(profile: IndividualProfile): string {
-  return `
-    <div class="report" style="font-family: sans-serif; max-width: 800px; margin: 0 auto;">
-      <h1 style="color: #1e40af; border-bottom: 3px solid #3b82f6;">
-        Personality Assessment Report
-      </h1>
-      <p><strong>Name:</strong> ${profile.name}</p>
-      <p><strong>Date:</strong> ${new Date(profile.timestamp).toLocaleDateString()}</p>
-
-      <h2>Big Five Personality</h2>
-      ${renderBigFiveTable(profile.assessments.ipip_50)}
-
-      <h2>Attachment Style</h2>
-      <p><strong>${profile.assessments.ecr_s?.attachmentStyleLabel}</strong></p>
-
-      <!-- Add all other sections -->
-    </div>
-  `;
-}
-
-function renderBigFiveTable(ipip: any) {
-  return `
-    <table style="width:100%; border-collapse: collapse;">
-      <tr>
-        <th style="border-bottom: 2px solid #e5e7eb; padding: 12px; text-align: left;">Trait</th>
-        <th style="border-bottom: 2px solid #e5e7eb; padding: 12px; text-align: left;">Percentile</th>
-      </tr>
-      ${Object.entries(ipip.domainScores).map(([domain, data]: [string, any]) => `
-        <tr>
-          <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">${capitalize(domain)}</td>
-          <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">${data.percentile}th</td>
-        </tr>
-      `).join('')}
-    </table>
-  `;
-}
-```
-
-#### 8.3 Add Download Buttons to ResultsStep
-
-In `components/Wizard.tsx` ResultsStep, add:
-
-```typescript
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
-import { generateReportHTML } from '@/lib/reportTemplate';
-
-const downloadPDF = async () => {
-  setGeneratingPDF(true);
-  const reportDiv = document.createElement('div');
-  reportDiv.innerHTML = generateReportHTML(cleanProfile || profile);
-  reportDiv.style.cssText = 'position:absolute;left:-9999px;width:800px;';
-  document.body.appendChild(reportDiv);
-
-  const canvas = await html2canvas(reportDiv, { scale: 2 });
-  const pdf = new jsPDF('portrait', 'mm', 'a4');
-  const imgData = canvas.toDataURL('image/png');
-  const pdfWidth = 210;
-  const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-
-  pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-  pdf.save(`personality-report-${profile.name}.pdf`);
-
-  document.body.removeChild(reportDiv);
-  setGeneratingPDF(false);
-};
-```
-
-**Files to create/modify**:
-- `lib/reportTemplate.ts` (CREATE)
-- `components/Wizard.tsx` (add PDF download)
+| File | Changes |
+|------|---------|
+| `app/api/generate-card/route.ts` | **NEW** - Haiku API endpoint for card content |
+| `components/UnderstandMeCards.tsx` | Fix data keys, redesign as baseball cards, add API calls |
+| `components/Dashboard.tsx` | Move cards location, update MarkdownComponents typography |
+| `styles/globals.css` | Update `.prose-report` font family and size |
 
 ---
 
-### Phase 9: Security Headers & Vercel Config (DAY 3 - 1 hour)
+## Content Generation: Claude Haiku API
 
-#### 9.1 Update `next.config.js`
+### Why Haiku?
+- **Fast**: ~1-2 second response time
+- **Cheap**: ~$0.001 per card ($0.25/1M input, $1.25/1M output)
+- **Smart enough**: Structured content generation is well within Haiku's capabilities
 
-```javascript
-const nextConfig = {
-  reactStrictMode: true,
+### New API Endpoint
 
-  async headers() {
-    return [
-      {
-        source: '/:path*',
-        headers: [
-          { key: 'X-Frame-Options', value: 'DENY' },
-          { key: 'X-Content-Type-Options', value: 'nosniff' },
-          { key: 'X-XSS-Protection', value: '1; mode=block' },
-          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-        ],
-      },
-      {
-        source: '/api/:path*',
-        headers: [
-          { key: 'Access-Control-Allow-Origin', value: '*' },
-          { key: 'Access-Control-Allow-Methods', value: 'POST, OPTIONS' },
-          { key: 'Cache-Control', value: 'no-store' },
-        ],
-      },
-    ];
-  },
-};
+**File:** `app/api/generate-card/route.ts` (NEW)
 
-module.exports = nextConfig;
+```typescript
+import Anthropic from '@anthropic-ai/sdk';
+
+const anthropic = new Anthropic();
+
+export async function POST(req: Request) {
+  const { profile, cardType } = await req.json();
+
+  // Extract relevant data based on card type
+  const bigFive = profile.assessments?.ipip_50?.domainScores;
+  const attachment = profile.assessments?.ecr_s;
+  const values = profile.assessments?.pvq_21;
+
+  const prompt = buildCardPrompt(profile.name, cardType, bigFive, attachment, values);
+
+  const response = await anthropic.messages.create({
+    model: 'claude-3-5-haiku-20241022',
+    max_tokens: 500,
+    messages: [{ role: 'user', content: prompt }]
+  });
+
+  return Response.json({ content: response.content[0].text });
+}
 ```
 
-#### 9.2 Create `vercel.json`
+### Prompt Templates
 
-```json
+**Work Card Prompt:**
+```
+Based on this person's personality data, generate a "How to Work With Me" card.
+
+Name: ${name}
+Big Five Traits:
+- Openness: ${O}th percentile
+- Conscientiousness: ${C}th percentile
+- Extraversion: ${E}th percentile
+- Agreeableness: ${A}th percentile
+- Neuroticism: ${N}th percentile
+
+Generate JSON with these fields:
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": ".next",
-  "functions": {
-    "app/api/analyze/route.ts": {
-      "maxDuration": 60,
-      "memory": 1024
-    },
-    "app/api/complete/route.ts": {
-      "maxDuration": 60,
-      "memory": 1024
-    }
-  },
-  "regions": ["iad1"]
+  "role": "A fun 2-3 word title like 'The Creative Strategist'",
+  "communicationStyle": ["3-4 specific bullet points"],
+  "strengths": ["3-4 work strengths"],
+  "watchOutFor": ["2-3 potential friction areas"],
+  "bestTasks": ["3-4 tasks they'd excel at"]
+}
+
+Be specific and actionable. Use their actual percentiles to inform the content.
+```
+
+**Friendship Card Prompt:**
+```
+Based on this person's personality, generate a "How to Be My Friend" card.
+
+Name: ${name}
+Extraversion: ${E}th percentile
+Agreeableness: ${A}th percentile
+Openness: ${O}th percentile
+Top Values: ${topValues}
+
+Generate JSON:
+{
+  "socialStyle": "One line describing their social preferences",
+  "whatIValue": ["3-4 things they value in friendships"],
+  "howToSupportMe": ["3-4 specific actions"],
+  "letsDo": ["3-4 activity suggestions based on their traits"]
 }
 ```
 
-**Note**: Free tier = 60s max, Pro tier = 180s. Start with 60s, reduce timeouts in code if needed.
+**Romantic Card Prompt:**
+```
+Based on this person's attachment style and personality, generate a "How to Love Me" card.
 
-**Files to create/modify**:
-- `next.config.js` (modify)
-- `vercel.json` (create)
+Name: ${name}
+Attachment: Anxiety=${anxiety}, Avoidance=${avoidance}
+Neuroticism: ${N}th percentile
+Agreeableness: ${A}th percentile
+Extraversion: ${E}th percentile
 
----
-
-### Phase 10: Deployment (DAY 4 - 1 hour)
-
-#### 10.1 Set Environment Variables in Vercel
-
-Go to Vercel Dashboard → Project → Settings → Environment Variables:
-
-Set these for **Production, Preview, Development**:
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY`
-- `ANTHROPIC_API_KEY` (NEW rotated key)
-- `GMAIL_USER`
-- `GMAIL_APP_PASSWORD` (NEW rotated password)
-- `API_SECRET_KEY` (optional, for Production only)
-
-#### 10.2 Deploy to Vercel
-
-```bash
-npm install -g vercel
-vercel login
-vercel  # Preview deployment
-# Test thoroughly
-vercel --prod  # Production deployment
+Generate JSON:
+{
+  "attachmentStyle": "Secure/Anxious/Avoidant/Fearful-Avoidant",
+  "attachmentMeaning": "One sentence explaining what this means",
+  "whatINeed": ["3-4 emotional needs"],
+  "supportMeBy": ["3-4 specific loving actions"],
+  "avoid": ["2-3 things that trigger insecurity"]
+}
 ```
 
-#### 10.3 Verify Deployment
+### Caching Strategy
 
-- [ ] Visit homepage - loads correctly
-- [ ] Complete quiz as guest - download works
-- [ ] Sign up with Google - redirects correctly
-- [ ] Complete quiz authenticated - saves to Supabase
-- [ ] Check Vercel logs - no errors
-- [ ] Verify Dark Triad visible in results
+Cache generated cards in localStorage to avoid re-generating:
+```typescript
+const cacheKey = `card_${cardType}_${profile.id}`;
+const cached = localStorage.getItem(cacheKey);
+if (cached) return JSON.parse(cached);
 
----
-
-## Critical Files Summary
-
-### Files to CREATE:
-1. `.env.example` - Environment variable template
-2. `lib/supabase/client.ts` - Browser Supabase client
-3. `lib/supabase/server.ts` - Server Supabase client
-4. `lib/supabase/service.ts` - Service role client
-5. `components/AuthModal.tsx` - Authentication UI
-6. `app/auth/callback/route.ts` - OAuth callback handler
-7. `lib/reportTemplate.ts` - PDF report generator
-8. `vercel.json` - Vercel configuration
-
-### Files to MODIFY:
-1. `components/Wizard.tsx` - Add auth state, update API call
-2. `app/api/complete/route.ts` - Replace file writes with Supabase
-3. `services/logger.ts` - Remove fs, use console.log
-4. `next.config.js` - Add security headers
-5. `.env.local` - Update with new credentials (local only, don't commit)
-
-### Files to VERIFY:
-1. `.gitignore` - Ensure `.env.local` excluded
-2. `package.json` - Verify all dependencies installed
-
----
-
-## Cost Breakdown
-
-| Service | Tier | Monthly Cost |
-|---------|------|--------------|
-| **Supabase** | Free | $0 (500MB DB, 50K users) |
-| **Vercel** | Hobby | $0 (100GB bandwidth) |
-| **Anthropic** | Pay-per-use | ~$5-20 (depends on usage) |
-| **Total** | | **$5-20/month** |
-
----
-
-## Testing Checklist
-
-### Guest Flow
-- [ ] Complete quiz without signing in
-- [ ] Download JSON works
-- [ ] Download PDF works (if implemented)
-- [ ] No data saved to database
-
-### Authenticated Flow
-- [ ] Sign up with Google OAuth
-- [ ] Sign up with Email/Password
-- [ ] Complete quiz - saves to Supabase
-- [ ] Logout and login - can see saved profile
-- [ ] Dark Triad scores visible
-
-### Security
-- [ ] API routes require authentication in production
-- [ ] RLS prevents cross-user access
-- [ ] Credentials rotated and working
-- [ ] No sensitive data in logs
-
----
-
-## Rollback Plan
-
-If deployment fails:
-```bash
-vercel rollback [deployment-url]
+// Generate new card...
+localStorage.setItem(cacheKey, JSON.stringify(cardContent));
 ```
 
-Or via Vercel Dashboard → Deployments → Previous → "Promote to Production"
+### Cost Estimate
+- Input: ~300 tokens × $0.25/1M = $0.000075
+- Output: ~200 tokens × $1.25/1M = $0.00025
+- **Total: ~$0.0003 per card** (0.03 cents)
+- All 3 cards: ~$0.001 (0.1 cents)
 
 ---
 
-## Next Steps After Deployment
+---
 
-1. Monitor Vercel logs for errors
-2. Check Anthropic usage vs budget
-3. Set up alerts (Sentry optional)
-4. Document API_SECRET_KEY usage
-5. Test from multiple devices/browsers
-6. Collect user feedback
+## Part 5: Fix Book/Podcast Recommendations
+
+### Issues
+1. Titles have unnecessary quotes: `"The War of Art"` → `The War of Art`
+2. No links to actually find/buy the books or podcasts
+
+### Solution
+
+Update the AI prompt in `app/api/analyze-parallel/route.ts` to:
+
+1. **Remove quotes** from titles in the markdown output
+2. **Add Amazon/Goodreads links** for books
+3. **Add Spotify/Apple Podcast links** for podcasts
+
+**Updated prompt section:**
+```
+## 📚 Books for You
+
+| Book | Author | Why It's Perfect for ${name} |
+|------|--------|------------------------------|
+| [The War of Art](https://www.amazon.com/s?k=The+War+of+Art+Steven+Pressfield) | Steven Pressfield | [Personal reason] |
+
+## 🎧 Podcasts for You
+
+| Podcast | Why ${name} Will Love It |
+|---------|--------------------------|
+| [The Tim Ferriss Show](https://open.spotify.com/show/5qSUyCrk9KR69lEiXbjwXM) | [Personal reason] |
+```
+
+**Link format:**
+- Books: Amazon search URL `https://www.amazon.com/s?k=${encodeURIComponent(title + ' ' + author)}`
+- Podcasts: Spotify search or direct show link if known
+
+**Implementation:**
+- Add instruction to AI prompt: "Format book titles as markdown links to Amazon search. Format podcast titles as links to Spotify. Do NOT use quotes around titles."
+
+### File to Modify
+| File | Changes |
+|------|---------|
+| `app/api/analyze-parallel/route.ts` | Update book/podcast prompt to include links, remove quotes |
 
 ---
 
-## Estimated Timeline
+## Summary
 
-- **Day 1**: Security rotation + Supabase setup (3-4 hours)
-- **Day 2**: Auth UI + Wizard updates (5-6 hours)
-- **Day 3**: API changes + Guest downloads + Security config (5-6 hours)
-- **Day 4**: Testing + Deployment (2-3 hours)
-
-**Total**: 15-20 hours over 4 days
-
----
-
-## Success Criteria
-
-✅ No file system operations (Vercel-compatible)
-✅ Users can sign up via Google or Email
-✅ Guest mode allows download without account
-✅ Dark Triad visible to all users
-✅ All profiles stored in Supabase with RLS
-✅ Credentials rotated and secure
-✅ Cost under $20/month
-✅ Public access working correctly
+This plan fixes:
+1. **Critical bug**: Cards showing empty because of data key mismatch
+2. **UX request**: Move cards to more prominent location under AI section
+3. **Design request**: Baseball card aesthetic with detailed, actionable content
+4. **Typography request**: Larger, Claude-style sans-serif font for AI analysis
+5. **Book/Podcast links**: Remove quotes, add Amazon/Spotify links

@@ -1,3 +1,38 @@
 {
-  "model": "opus"
+  "model": "opus",
+  "permissions": {
+    "allow": [
+      "Bash",
+      "Read",
+      "Write",
+      "Edit",
+      "MultiEdit",
+      "NotebookEdit",
+      "WebFetch",
+      "WebSearch",
+      "Glob",
+      "Grep",
+      "Task",
+      "TodoWrite",
+      "mcp__tavily",
+      "mcp__things-mcp",
+      "mcp__browserbase",
+      "mcp__zapier",
+      "mcp__ahrefs",
+      "mcp__xero"
+    ],
+    "deny": [
+      "Bash(sudo :*)",
+      "Bash(rm -rf /:*)",
+      "Bash(rm -rf ~:*)",
+      "Bash(rm -rf /*:*)",
+      "Bash(mkfs:*)",
+      "Bash(dd if=/dev:*)",
+      "Bash(chmod -R 777 /:*)",
+      "Bash(chown -R :*)",
+      "Bash(> /dev/sda:*)",
+      "Bash(mv ~ :*)",
+      "Bash(mv / :*)"
+    ]
+  }
 }

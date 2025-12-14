@@ -1,207 +1,361 @@
-# Email Triage App - Full Completion Plan
+# CC Team Member Improvements + Bug Fixes
+
+---
 
 ## Overview
-Complete the email triage app for personal use with real Gmail integration, working AI/learning system, and polished UI features.
 
-## Prerequisites
-- [ ] Configure Google OAuth credentials in `.env.local`
-- [ ] Verify redirect URI in Google Cloud Console matches `http://localhost:3002/api/auth/callback`
-
----
-
-## Phase 0: Training Flow (CRITICAL - Do First)
-
-The app needs to "learn" from your emails before it can make smart decisions. The current flow downloads emails but the learning functions are stubs.
-
-### Training Sequence:
-1. **Connect Gmail** → OAuth authentication
-2. **Download emails** → ~3,000 emails (already implemented in `lib/patterns/learner.ts`)
-3. **Analyze writing style** → Learn greetings, closings, formality (API exists, works)
-4. **Learn action patterns** → What you archive, forward, CC (STUB - needs implementing)
-5. **Learn CC patterns** → Who you loop in on what topics (STUB - needs implementing)
-6. **Extract contacts** → Team members, assistant, frequent contacts (works but basic)
-
-### What Training Produces:
-- `LearnedPatterns` object stored in IndexedDB containing:
-  - Your writing style (greetings, closings, phrases, formality by recipient type)
-  - Action patterns (auto-archive rules, forward-to-assistant triggers)
-  - Contact graph (assistant, team, common contacts with context)
-  - Response time preferences (urgent vs normal vs low priority signals)
-
-### Training Data Requirements:
-- Minimum: 500 sent emails for writing style
-- Ideal: 2,000+ emails for pattern detection
-- The more emails, the better the AI learns your habits
+Four areas to address:
+1. **CC Team Member UI**: Compact layout, show learned contacts, allow adding new contacts
+2. **Bug Fix**: Reply editing doesn't work properly
+3. **Bug Fix**: Email disappears/jumps to next while composing
+4. **Auto-archive**: Archive emails after any action (reply, forward, CC, etc.)
 
 ---
 
-## Phase 1: Gmail Integration & Setup Flow (Foundation)
+## Issue 1: CC Team Member Improvements
 
-### 1.1 Fix Environment Validation
-**Files:** `lib/gmail/auth.ts`, `app/api/auth/token/route.ts`
-- Add validation for `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `REDIRECT_URI`
-- Return helpful error messages if credentials missing/placeholder
+### Current State
+- CC contacts come from `decision.suggestedContacts` (AI-generated per email)
+- Shows name, email, AND reason (takes too much vertical space)
+- No way to add new contacts that persist
 
-### 1.2 Fix Token Exchange Error Handling
-**File:** `app/api/auth/token/route.ts`
-- Return detailed error from Google on failure (currently logged but not returned)
-- Handle common OAuth errors with user-friendly messages
+### User Requirements
+1. Show contacts learned from AI analysis (people user typically CCs)
+2. Allow CCing to someone not in the list (add autocomplete input)
+3. When user adds a new person, save them so they show up as an option going forward
+4. Compact layout: just name + email underneath (no role/reason text)
+5. Should not take up too much vertical space
 
-### 1.3 Fix `getUnprocessedEmails()`
-**File:** `lib/patterns/triage.ts` (line 156-160)
-- Currently returns `[]` - change to use existing `dbHelpers.getUnprocessedEmails(limit)`
+### Implementation
 
-### 1.4 Enhance Triage Page Email Loading
-**File:** `app/triage/page.tsx`
-- When local DB empty, fetch fresh emails from Gmail inbox
-- Add periodic sync with Gmail (check for new emails)
-- Handle token refresh errors → redirect to re-auth
+**File: `components/actions/ActionPanel.tsx`**
 
-### 1.5 Improve Setup Flow
-**File:** `app/setup/page.tsx`
-- Better error messages for OAuth failures
-- Show summary of what was learned before proceeding
-- Handle pattern learning failures gracefully (still proceed)
+1. **Redesign CC contact display** (lines 541-583):
+```tsx
+// BEFORE: Radio buttons with name, email, AND reason
+<label className="...">
+  <input type="radio" ... />
+  <div>{contact.name}</div>
+  <div>{contact.email}</div>
+  <div>{contact.reason}</div>  // ← REMOVE THIS
+</label>
 
----
+// AFTER: Compact stacked layout
+<label className="flex items-center p-2 ...">
+  <input type="radio" ... />
+  <div className="ml-2">
+    <div className="text-sm font-medium">{contact.name}</div>
+    <div className="text-xs text-gray-500">{contact.email}</div>
+  </div>
+  <kbd className="ml-auto ...">{index + 1}</kbd>
+</label>
+```
 
-## Phase 2: AI/Learning System (Make it Smart)
+2. **Add autocomplete input for custom CC recipient**:
+```tsx
+// After the contact list, add:
+<AutoCompleteInput
+  label="Or CC someone else:"
+  value={customCcTo}
+  onChange={setCustomCcTo}
+  contacts={[...googleContacts, ...patterns.contacts.team, ...patterns.contacts.common]}
+  placeholder="Type name or email..."
+  isDark={isDark}
+/>
+```
 
-### 2.1 Implement `requiresResponse()` Properly
-**Create:** `app/api/ai/requires-response/route.ts`
-**Update:** `lib/ai/claude.ts` (lines 38-47)
+3. **Merge contact sources for display**:
+```tsx
+// Combine AI suggestions with learned contacts
+const ccContacts = useMemo(() => {
+  const aiSuggested = decision?.suggestedContacts || [];
+  const learned = patterns?.contacts?.team || [];
 
-Currently uses naive heuristic (just checks for "?" and "you"). Implement:
-- Claude-based analysis of whether response is needed
-- Consider: direct questions, action requests, To: vs CC:, email type
-- Return confidence score and reasoning
+  // Dedupe by email, prioritize AI suggestions
+  const seen = new Set<string>();
+  const merged = [];
 
-### 2.2 Implement `analyzeActionPatterns()`
-**Create:** `app/api/ai/analyze-patterns/route.ts`
-**Update:** `lib/ai/claude.ts` (lines 107-117)
+  for (const c of [...aiSuggested, ...learned]) {
+    if (!seen.has(c.email.toLowerCase())) {
+      seen.add(c.email.toLowerCase());
+      merged.push(c);
+    }
+  }
+  return merged;
+}, [decision?.suggestedContacts, patterns?.contacts?.team]);
+```
 
-Currently returns empty. Implement:
-- Analyze received vs sent emails for correlation patterns
-- Identify auto-archive candidates (newsletters, notifications)
-- Identify forward-to-assistant patterns (scheduling)
-- Return structured patterns with confidence scores
+**File: `lib/storage/db.ts`**
 
-### 2.3 Implement `analyzeCCPatterns()`
-**Create:** `app/api/ai/analyze-cc/route.ts`
-**Update:** `lib/ai/claude.ts` (lines 20-35)
+4. **Add method to persist new CC contacts**:
+```typescript
+async addTeamContact(contact: { name: string; email: string }): Promise<void> {
+  const patterns = await this.getPatterns();
+  if (!patterns) return;
 
-Currently returns `{}`. Implement:
-- Analyze emails where user CC'd someone
-- Extract intro patterns per person
-- Identify topic-based CC patterns
+  // Check if already exists
+  const exists = patterns.contacts.team.some(
+    c => c.email.toLowerCase() === contact.email.toLowerCase()
+  );
+  if (exists) return;
 
-### 2.4 Learning from User Actions
-**Create:** `lib/patterns/feedback.ts`
-**Update:** `lib/storage/db.ts`, `app/triage/page.tsx`
+  patterns.contacts.team.push(contact);
+  await this.savePatterns(patterns);
+}
+```
 
-New tables: `actionFeedback`, `patternStrengths`
-- Track when AI prediction matches user action
-- Adjust pattern confidence based on success/failure
-- Periodic retraining from accumulated feedback
+**File: `app/triage/page.tsx`**
 
----
-
-## Phase 3: UI/UX Features (Make it Polished)
-
-### 3.1 Command Palette (⌘+K)
-**Create:** `components/ui/CommandPalette.tsx`
-**Update:** `app/demo/page.tsx`, `app/triage/page.tsx`
-
-- Modal triggered by ⌘+K (shortcut already defined in useKeyboard.ts)
-- Fuzzy search across actions, navigation, commands
-- Categories: Actions (archive, reply, cc), Navigation (pages), Views (dark mode)
-- Keyboard navigation (arrows, Enter)
-
-### 3.2 Search/Filter Emails
-**Create:** `components/ui/SearchBar.tsx`, `lib/hooks/useEmailSearch.ts`
-**Update:** `lib/storage/db.ts`, `app/triage/page.tsx`
-
-- Text search across subject, from, body
-- Filter chips (sender, labels, attachments, date)
-- Trigger with `/` key (shortcut exists)
-
-### 3.3 Connect Need to Reply List
-**Update:** `app/triage/page.tsx`, `components/email/NeedToReplyList.tsx`
-
-Currently passes empty function. Implement:
-- `handleSelectFromNeedToReply(emailId)` → load email, generate triage
-- Visual indicator for Need to Reply items
-- Mark done directly from list
-
-### 3.4 Toast Notifications
-**Create:** `components/ui/Toast.tsx`, `lib/hooks/useToast.ts`
-**Update:** `app/triage/page.tsx`
-
-- Action confirmations ("Email archived")
-- Error messages
-- Undo prompts with timer
-
-### 3.5 Settings Page (Simple)
-**Create:** `app/settings/page.tsx`, `components/settings/ContactsEditor.tsx`
-
-- View/edit assistant email, team members
-- Dark mode preference
-- View stats, clear data, re-run learning
-- Keyboard shortcut reference
+5. **Handle new CC contact persistence**:
+```typescript
+case 'cc':
+  // If user used custom CC input (not from suggestions), save the contact
+  if (metadata?.ccTo && metadata?.isNewContact) {
+    await dbHelpers.addTeamContact({
+      name: metadata.ccName || metadata.ccTo.split('@')[0],
+      email: metadata.ccTo,
+    });
+  }
+  // ... existing send logic
+```
 
 ---
 
-## Implementation Order (Recommended)
+## Issue 2: Reply Editing Bug
 
-### Sprint 1: Get Gmail Working + Training
-1. **1.1-1.2** - Fix environment validation & error handling (30 min)
-2. **2.2** - Implement `analyzeActionPatterns()` (45 min) ← TRAINING
-3. **2.3** - Implement `analyzeCCPatterns()` (30 min) ← TRAINING
-4. **1.5** - Setup flow improvements with progress display (30 min)
-5. **TEST** - Run full training with YOUR real Gmail account
-   - Connect Gmail OAuth
-   - Download 3,000 emails
-   - Verify patterns are learned (check IndexedDB)
+### Root Cause
+The editing flow has no clear way to exit edit mode after making changes:
+- Click "Edit" → textarea appears, `editedOptions[index]` set
+- Can type in textarea
+- "Reset to original" removes edit entirely
+- **Missing**: Way to confirm edits and close textarea
 
-### Sprint 2: Make Triage Work
-6. **1.3** - Fix `getUnprocessedEmails()` (5 min)
-7. **2.1** - Implement `requiresResponse()` properly (45 min)
-8. **1.4** - Triage page email loading from Gmail (45 min)
-9. **TEST** - Triage real emails, verify AI suggestions make sense
+### User Requirement
+- "Done" button should ONLY close the textarea (exit edit mode)
+- "Done" does NOT send the email
+- User must still explicitly click "Send & Next" to send
+- This allows reviewing the edited text before sending
 
-### Sprint 3: Learning Loop + Polish
-10. **2.4** - Learning from user actions (1 hr)
-11. **3.1** - Command palette (1 hr)
-12. **3.3** - Need to Reply connection (30 min)
-13. **3.4** - Toast notifications (30 min)
+### Fix
 
-### Sprint 4: Extra Features
-14. **3.2** - Search/filter (1 hr)
-15. **3.5** - Settings page (45 min)
-16. **Polish** - Animations, edge cases
+**File: `components/actions/ActionPanel.tsx`**
+
+1. **Add state to track which option is actively being edited**:
+```tsx
+const [activelyEditingIndex, setActivelyEditingIndex] = useState<number | null>(null);
+```
+
+2. **Update Edit button handler**:
+```tsx
+onClick={() => {
+  setActivelyEditingIndex(index);  // Track which is being edited
+  setSelectedResponse(index);
+  setCustomResponse('');
+  setEditedOptions({ ...editedOptions, [index]: option.text });
+}}
+```
+
+3. **Add "Done" button next to "Reset to original"** (closes edit mode, does NOT send):
+```tsx
+{activelyEditingIndex === index ? (
+  <div onClick={(e) => e.stopPropagation()}>
+    <textarea ... />
+    <div className="flex justify-between mt-1">
+      <button onClick={handleReset}>Reset to original</button>
+      <button onClick={() => setActivelyEditingIndex(null)}>Done</button>
+    </div>
+  </div>
+) : (
+  <div>{displayText}</div>  // Shows edited text, user can review before sending
+)}
+```
+
+4. **Update condition for showing textarea**:
+```tsx
+// BEFORE:
+{isEditing && isSelected ? ...
+
+// AFTER:
+{activelyEditingIndex === index ? ...  // Only show if actively editing THIS option
+```
+
+5. **Fix keyboard shortcut disabling**:
+```tsx
+// BEFORE:
+const isEditingAnyResponse = Object.keys(editedOptions).length > 0 && editedOptions[selectedResponse] !== undefined;
+
+// AFTER:
+const isActivelyEditing = activelyEditingIndex !== null;
+
+useKeyboard([...], !processing && !editingResponse && !isActivelyEditing);
+```
+
+**Flow after fix:**
+1. User clicks "Edit" → textarea opens
+2. User edits text
+3. User clicks "Done" → textarea closes, edited text shows in preview
+4. User can review the edited text
+5. User clicks "Send & Next" → email sends with edited text
 
 ---
 
-## Critical Files Summary
+## Issue 3: Email Disappearing Bug
+
+### Root Cause
+When user clicks "Send & Next":
+1. DB marks email as processed immediately (line 655)
+2. `loadNextEmail()` runs right away (line 692)
+3. ActionPanel resets due to `useEffect` on `email.id`
+4. But the actual send is delayed 15 seconds (UNDO_DELAY_MS)
+
+The email "jumps" to the next one before the user expects it.
+
+### Fix
+
+**File: `app/triage/page.tsx`**
+
+The current flow saves to DB immediately to enable undo. The issue is that `loadNextEmail()` is called at the same time, causing the UI to jump.
+
+**Option A: Delay loadNextEmail (Simpler)**
+```typescript
+// Don't advance to next email until after undo window closes
+// Only call loadNextEmail() inside executeAction(), not in handleAction()
+
+const executeAction = async (pendingId: string) => {
+  // ... existing send logic ...
+
+  // NOW advance to next email (after successful send)
+  await loadNextEmail();
+};
+```
+
+The drawback: user has to wait 15 seconds before seeing next email.
+
+**Option B: Visual transition (Better UX)**
+```typescript
+// In handleAction, after saving to DB:
+// 1. Mark current email as "pending" visually
+// 2. Load next email but keep pending action visible
+// 3. Show mini card of pending email with undo button
+
+const [pendingEmailAction, setPendingEmailAction] = useState<{
+  email: Email;
+  action: ActionType;
+  pendingId: string;
+} | null>(null);
+
+// After handleAction saves to DB:
+setPendingEmailAction({
+  email: emailToProcess,
+  action,
+  pendingId,
+});
+await loadNextEmail();  // ← Still advances immediately
+```
+
+Then show a small overlay/toast with the pending email info and undo button.
+
+### Recommended: Option B - Advance immediately with toast
+
+Keep the immediate advancement but ensure the undo toast works properly:
+
+```typescript
+// In handleAction - keep loadNextEmail() call as-is
+
+// The UndoableToast component already exists and is being used (line ~710)
+// The issue is the ActionPanel resets due to useEffect on email.id
+
+// Fix: The toast system already handles this - the bug is likely that
+// the toast isn't being shown or the undo isn't properly connected.
+// Need to verify the pendingAction state and UndoableToast are working.
+```
+
+**Verify/Fix:**
+1. Check that `pendingAction` state is being set correctly
+2. Ensure `UndoableToast` is rendering when there's a pending action
+3. Confirm the undo button calls `handleUndo()` which cancels the timeout
+4. The email advancing is expected - the bug may be something else triggering it prematurely
+
+---
+
+## Issue 4: Auto-Archive After Actions
+
+### Requirement
+After any action that involves sending/processing (respond, forward, CC, delegate), automatically archive the email.
+
+### Implementation
+
+**File: `app/triage/page.tsx`**
+
+In `executeAction()`, after sending the email, call Gmail archive:
+
+```typescript
+const executeAction = async (pendingId: string) => {
+  const pending = pendingActions.current.get(pendingId);
+  if (!pending) return;
+
+  const { email, action, metadata } = pending;
+
+  try {
+    switch (action) {
+      case 'respond':
+        // ... send reply ...
+        await gmailClient.archiveEmail(email.id);  // ← ADD
+        break;
+
+      case 'forward':
+        // ... send forward ...
+        await gmailClient.archiveEmail(email.id);  // ← ADD
+        break;
+
+      case 'cc':
+        // ... send CC reply ...
+        await gmailClient.archiveEmail(email.id);  // ← ADD
+        break;
+
+      case 'archive':
+        await gmailClient.archiveEmail(email.id);  // Already does this
+        break;
+
+      // 'hold' and 'ignore' do NOT archive
+    }
+  }
+};
+```
+
+**Alternative: Cleaner approach**
+
+Add archive call after the switch statement for actions that should archive:
+
+```typescript
+const executeAction = async (pendingId: string) => {
+  // ... existing switch for sending emails ...
+
+  // Archive after any "actioned" email (not hold/ignore)
+  const archiveActions: ActionType[] = ['respond', 'forward', 'cc', 'archive'];
+  if (archiveActions.includes(action)) {
+    await gmailClient.archiveEmail(email.id);
+  }
+};
+```
+
+---
+
+## Files to Modify
 
 | File | Changes |
 |------|---------|
-| `.env.local` | Add real Google OAuth credentials |
-| `lib/gmail/auth.ts` | Add credential validation |
-| `app/api/auth/token/route.ts` | Better error handling |
-| `lib/ai/claude.ts` | Fix 3 stub functions (lines 20-35, 38-47, 107-117) |
-| `lib/patterns/triage.ts` | Fix `getUnprocessedEmails()` (line 156-160) |
-| `app/triage/page.tsx` | Gmail sync, Need to Reply handler, toasts |
-| `app/setup/page.tsx` | Better error handling, summary display |
-| `app/api/ai/` | Create 3 new routes (requires-response, analyze-patterns, analyze-cc) |
-| `components/ui/` | Create CommandPalette.tsx, SearchBar.tsx, Toast.tsx |
-| `lib/patterns/feedback.ts` | New - learning from actions |
-| `lib/storage/db.ts` | Add new tables and helpers |
-| `app/settings/page.tsx` | New - settings page |
+| `components/actions/ActionPanel.tsx` | Compact CC layout, add autocomplete, fix editing flow |
+| `lib/storage/db.ts` | Add `addTeamContact()` method |
+| `app/triage/page.tsx` | Persist new CC contacts, fix email jumping |
+| `lib/constants.ts` | Reduce UNDO_DELAY_MS (optional) |
 
 ---
 
-## Notes
-- Personal use = can hardcode some values, skip multi-account support
-- Demo mode should remain functional as fallback
-- Each Claude API call ~$0.01-0.03, budget accordingly for pattern analysis
+## Implementation Order
+
+1. **Fix reply editing bug** (add Done button, track active editing)
+2. **Fix email jumping bug** (move loadNextEmail to executeAction)
+3. **Compact CC layout** (remove reason, tighten spacing)
+4. **Add CC autocomplete** (for adding contacts not in list)
+5. **Persist new CC contacts** (save to patterns.contacts.team)
