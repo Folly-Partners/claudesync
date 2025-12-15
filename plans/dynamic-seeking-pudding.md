@@ -1,429 +1,489 @@
-# Deep Personality: Cards Redesign & Typography Fix
+# Current Tasks
 
-## Overview
+## Task 1: Remove Test Save Button & Clean Test Data
 
-Three main tasks:
-1. Fix UnderstandMeCards to show actual content (currently broken due to data key mismatch)
-2. Redesign cards as fun "baseball card" style with detailed, actionable content
-3. Fix AI analysis typography - larger font, Claude's font family
+### Changes
+1. Remove `testSaving` state and `handleTestSave` function (lines 679-709)
+2. Remove Test Save button from UI (lines 1860-1866)
+3. Delete `app/api/test-save/route.ts` file
+
+### SQL to run in Supabase:
+```sql
+DELETE FROM profiles WHERE user_id = (SELECT id FROM auth.users WHERE email = 'andrew@tiny.com');
+```
 
 ---
 
-## Part 1: Fix UnderstandMeCards Content (Critical Bug)
+## Task 2: Rename Alex → Alexa
 
-### Root Cause
+Line 172: Change `"name": "Alex"` to `"name": "Alexa"`
+Also update UI button text around lines 2044-2051.
 
-**The component is looking for the wrong data keys.** The scoring system generates:
-- `ipip_50` → but component expects `bigFive` or `big_five`
-- `ecr_s` → but component expects `attachment`
-- `pvq_21` → but component expects `values`
-- `onet_mini_ip` → but component expects `riasec`
-- `weims` → but component expects `workMotivation`
+---
 
-### Fix: Update Data Extraction in UnderstandMeCards.tsx
+## Task 3: Auto-Save Comparison Profiles
 
-**File:** `components/UnderstandMeCards.tsx`
+When a comparison profile is uploaded, automatically save it (no checkbox).
+Modify the `handleDrop` function around line 1080 and file input handler.
 
-Change all data lookups to use actual keys:
+---
+
+## Task 4: Fix Export Profile Button Layout
+
+Add `flex-shrink-0` to prevent buttons from shrinking when name is long.
+Line 1590: Add `flex-shrink-0` class to button.
+
+---
+
+## Task 5: Store Real Profiles
+
+### Andrew's profile:
+Insert from `/Users/andrewwilkinson/Deep-Personality/profiles/andrew@tiny.com_2025-12-12T01-45-27-707Z.json`
+
+### Zoe as saved partner:
+Insert from `/Users/andrewwilkinson/Deep-Personality/profiles/zolpeterson@gmail.com_2025-12-12T02-10-05-157Z.json`
+
+---
+
+## Task 6: Security Hardening for Psychological Data (CRITICAL)
+
+### Current Security Posture Assessment
+
+| Layer | Current Status | Risk Level |
+|-------|----------------|------------|
+| Transport (HTTPS) | ✅ Vercel SSL | Low |
+| Authentication | ✅ Supabase Auth (Google OAuth, email) | Low |
+| Row-Level Security | ✅ RLS Policies on all tables | Low |
+| Encryption at Rest | ⚠️ Supabase default AES-256 | Medium |
+| Field-Level Encryption | ❌ None - sensitive data in plaintext | **HIGH** |
+| Audit Logging | ❌ No access logs | Medium |
+| Data Export/Deletion | ❌ No GDPR endpoints | Medium |
+| Rate Limiting | ✅ Implemented | Low |
+
+### Sensitive Data Classification (HIGHLY CONFIDENTIAL)
+
+**Level 1 - Maximum Sensitivity (Weaponizable):**
+- Dark Triad scores (Machiavellianism, Narcissism, Psychopathy)
+- Suicidal ideation flags
+- PTSD indicators
+- AI psychological analysis/dossiers
+
+**Level 2 - High Sensitivity (Medical/Mental Health):**
+- Anxiety scores (GAD-7)
+- Depression scores (PHQ-9)
+- ACE scores (childhood trauma)
+- Personality disorder cluster scores
+- Emotional dysregulation scores
+
+**Level 3 - Moderate Sensitivity (Personal):**
+- Big Five personality traits
+- Attachment styles
+- Values and motivations
+- Relationship satisfaction scores
+
+### Recommended Security Enhancements
+
+#### TIER 1: IMMEDIATE (Must Implement)
+
+**A. Audit Logging**
+```sql
+CREATE TABLE audit_log (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id),
+  action TEXT NOT NULL,
+  resource_type TEXT NOT NULL,
+  resource_id UUID,
+  ip_address INET,
+  user_agent TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_audit_user ON audit_log(user_id);
+CREATE INDEX idx_audit_time ON audit_log(created_at);
+```
+
+**B. GDPR Data Export/Delete API**
+```
+GET /api/user/data - Export all user data as JSON
+DELETE /api/user/data - Permanently delete all user data
+```
+
+**C. Remove Sensitive Data from Share Links**
+Never include in shared profiles:
+- `_admin.darkTriad`
+- `_admin.aiAnalysis`
+- Mental health scores (GAD-7, PHQ-9, PCL-5, ACE)
+
+#### TIER 2: IMPORTANT (Should Implement)
+
+**D. Client-Side Encryption for Level 1 Data**
+- Encrypt `_admin` field before storage
+- User's key derived from session, never stored on server
+- Server cannot decrypt without active user session
+
+**E. Sensitive Data Separation**
+- Move Level 1 data to separate `sensitive_assessments` table
+- Stricter RLS policies
+- Access only through audited functions
+
+**F. Session Security Hardening**
+- Shorter session duration (4 hours vs 7 days)
+- Re-authentication required for viewing Dark Triad/AI analysis
+- "Sensitive data accessed" email notifications
+
+#### TIER 3: BEST PRACTICE (Nice to Have)
+
+**G. Zero-Knowledge Architecture**
+- User encryption key from password hash
+- Even database admins cannot read sensitive fields
+
+**H. Anomaly Detection**
+- Alert on bulk data exports
+- Multiple failed auth attempts
+- Unusual access patterns
+
+### Compliance Considerations
+
+**HIPAA (if healthcare context):**
+- Would need BAA with Supabase
+- Encryption requirements met with Tier 2
+- Audit logging required (Tier 1)
+
+**GDPR (if EU users):**
+- Right to access ✅ Need Tier 1B
+- Right to deletion ✅ Need Tier 1B
+- Data portability ✅ Need Tier 1B
+- Consent management ⚠️ Currently implicit
+
+### Implementation Priority
+
+| Priority | Task | Effort | Impact |
+|----------|------|--------|--------|
+| 1 | Remove sensitive data from shares | 1 hour | High |
+| 2 | Audit logging table | 2 hours | High |
+| 3 | GDPR data export/delete | 3 hours | High |
+| 4 | Client-side encryption | 8 hours | Very High |
+| 5 | Sensitive data separation | 4 hours | High |
+
+---
+
+## COMPLETED (Previous Session)
+
+---
+
+## Task 2: Filter AI Analysis by Relationship Type (NEW)
+
+### Problem
+When user selects a focus area (romantic/work/friend), the AI analysis still includes ALL sections (friends, work partners, romantic). User wants **only relevant sections** shown.
+
+### Current Behavior
+- `relationshipType` passed to chunks but only adds "extra depth" to selected section
+- All chunks still generated regardless of selection
+
+### Solution: Filter Chunks Based on `relationshipType`
+
+**File**: `app/api/analyze-parallel/route.ts`
+
+In `getComparisonChunks()` function, filter which chunks are generated:
 
 ```typescript
-// OLD (broken):
-const bigFive = profile.assessments?.bigFive || profile.assessments?.big_five;
+function getComparisonChunks(nameA: string, nameB: string, relationshipType: string): ChunkDefinition[] {
+  const allChunks = [
+    { id: 'overview', ... },   // Always include
+    { id: 'friends', ... },    // Skip if relationshipType === 'romantic' or 'work'
+    { id: 'work', ... },       // Skip if relationshipType === 'romantic' or 'friend'
+    { id: 'romantic', ... },   // Skip if relationshipType === 'work' or 'friend'
+    { id: 'conflict', ... },   // Always include
+    { id: 'toolkit', ... },    // Always include
+  ];
 
-// NEW (correct):
-const bigFive = profile.assessments?.ipip_50?.domainScores;
+  // Filter based on relationship type
+  return allChunks.filter(chunk => {
+    if (relationshipType === 'romantic') {
+      return !['friends', 'work'].includes(chunk.id);
+    }
+    if (relationshipType === 'work') {
+      return !['friends', 'romantic'].includes(chunk.id);
+    }
+    if (relationshipType === 'friend') {
+      return !['work', 'romantic'].includes(chunk.id);
+    }
+    // 'everything' or default - include all
+    return true;
+  });
+}
+```
 
-// OLD (broken):
-const attachment = profile.assessments?.attachment;
+**Also update function call** at line 790:
+```typescript
+// OLD:
+const chunks = isComparison
+  ? getComparisonChunks(nameA, nameB)
+  : getIndividualChunks(nameA);
 
-// NEW (correct):
-const attachment = profile.assessments?.ecr_s;
+// NEW:
+const chunks = isComparison
+  ? getComparisonChunks(nameA, nameB, relationshipType)
+  : getIndividualChunks(nameA);
+```
 
-// OLD (broken):
-const values = profile.assessments?.values;
+### Filtering Logic
+| relationshipType | Include Chunks |
+|------------------|----------------|
+| `romantic` | overview, romantic, conflict, toolkit |
+| `work` | overview, work, conflict, toolkit |
+| `friend` | overview, friends, conflict, toolkit |
+| `everything` | ALL chunks |
 
-// NEW (correct):
-const values = profile.assessments?.pvq_21;
+---
 
-// OLD (broken):
-const riasec = profile.assessments?.riasec;
+## Task 1 Details: Life Satisfaction Bars
 
-// NEW (correct):
-const riasec = profile.assessments?.onet_mini_ip?.scores;
+### Visual Before/After
 
-// OLD (broken):
-const workMotivation = profile.assessments?.workMotivation || profile.assessments?.work_motivation;
+**Before (sparse):**
+```
+┌─────────────────────┐  ┌─────────────────────┐
+│ ● Alex              │  │ ● Sam               │
+│   28        4       │  │   18        7       │
+│   Sat.    Lonely    │  │   Sat.    Lonely    │
+└─────────────────────┘  └─────────────────────┘
+           [lots of empty space]
+```
 
-// NEW (correct):
-const workMotivation = profile.assessments?.weims;
+**After (rich bars like PERMA):**
+```
+Life Satisfaction (SWLS)
+Alex  ████████████████████████████░░░░░  28 Satisfied
+Sam   ██████████████████░░░░░░░░░░░░░░░  18 Slightly Satisfied
+
+Loneliness (UCLA-3)
+Alex  ████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  4 Not Lonely
+Sam   ███████░░░░░░░░░░░░░░░░░░░░░░░░░░  7 Moderate
 ```
 
 ---
 
-## Part 2: Relocate Cards
+## Implementation
 
-### Move from Wellbeing Section to Under "Train Your Personal AI"
+### File: `components/Visualizations.tsx`
 
-**File:** `components/Dashboard.tsx`
+**Replace lines 1700-1758** (the comparison mode section of `WellbeingGauges`):
 
-**Current location:** Line ~2455 in the visualizations grid
-**New location:** Below the "Train Your Personal AI" section header, above the analysis CTA
-
-**Rationale:** Cards are shareable content related to AI-generated insights, so they belong with the AI section, not buried in wellbeing visualizations.
-
----
-
-## Part 3: Redesign Cards as Baseball Cards
-
-### Design Goals
-- Fun, collectible baseball card aesthetic
-- Detailed, actionable content (not just headers)
-- Visual stats/ratings like a sports card
-- Profile photo placeholder area
-- Position/role title
-- Key stats displayed prominently
-
-### Baseball Card Layout
-
-```
-┌─────────────────────────────────────────────┐
-│  ┌─────────┐  HOW TO WORK WITH ME          │
-│  │  🏢    │  ─────────────────────          │
-│  │ ICON   │  ROLE: The Creative Ideator    │
-│  └─────────┘                                │
-├─────────────────────────────────────────────┤
-│  ⚡ COMMUNICATION STYLE                     │
-│  • Prefers async over meetings             │
-│  • Direct feedback appreciated             │
-│  • Responds best to big-picture briefs     │
-├─────────────────────────────────────────────┤
-│  💪 STRENGTHS        │  ⚠️ WATCH OUT FOR   │
-│  • Innovation        │  • May miss details │
-│  • Big ideas         │  • Dislikes routine │
-│  • Quick pivots      │  • Can overcommit   │
-├─────────────────────────────────────────────┤
-│  📊 STATS                                   │
-│  ┌────┐ ┌────┐ ┌────┐ ┌────┐ ┌────┐       │
-│  │ 85 │ │ 72 │ │ 45 │ │ 90 │ │ 60 │       │
-│  │ O  │ │ C  │ │ N  │ │ E  │ │ A  │       │
-│  └────┘ └────┘ └────┘ └────┘ └────┘       │
-├─────────────────────────────────────────────┤
-│  ✅ BEST TASKS FOR ME:                      │
-│  Brainstorming, Strategy, Client Pitches   │
-│                                             │
-│  ⓘ Generated by Deep Personality           │
-└─────────────────────────────────────────────┘
-```
-
-### Card Content - Make It Detailed & Actionable
-
-**Work Card ("How to Work With Me")**
-- Communication Style: 3-4 specific bullet points
-- Strengths: Top 3-4 work strengths
-- Watch Out For: 2-3 potential friction areas
-- Best Tasks: What they excel at
-- Big Five stats bar visualization
-
-**Friendship Card ("How to Be My Friend")**
-- Social Style: Introvert/extrovert, group vs 1-on-1
-- What I Value: Loyalty, honesty, humor, etc.
-- How to Support Me: Specific actions
-- Let's Do Together: Activity suggestions
-- Attachment style indicator
-
-**Romantic Card ("How to Love Me")**
-- Attachment Style: Clear label with what it means
-- Love Language: Based on traits
-- What I Need: Emotional needs
-- Support Me By: Specific actions
-- Avoid: What triggers insecurity
-
-### Styling Approach
-
-```css
-/* Baseball card aesthetic */
-.card {
-  border: 3px solid;
-  border-radius: 12px;
-  background: linear-gradient(to-b, white, slate-50);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-}
-
-/* Stats boxes */
-.stat-box {
-  background: gradient;
-  font-weight: bold;
-  font-size: 1.5rem;
-  min-width: 48px;
-}
-
-/* Card header */
-.card-header {
-  background: gradient by type;
-  padding: 1rem;
-  border-radius: 8px 8px 0 0;
-}
-```
-
----
-
-## Part 4: Fix AI Analysis Typography
-
-### Current Issues
-- Font: Lora serif at 17px - user finds it too small
-- User wants: Claude's font with better sizing
-
-### Claude's Typography (Reference)
-Claude uses system fonts with fallbacks:
-```css
-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
-/* OR simply: */
-font-family: system-ui, -apple-system, sans-serif;
-```
-
-Claude's body text is typically:
-- Font size: 16-18px on desktop
-- Line height: 1.5-1.6
-- Color: #374151 (gray-700) or similar
-
-### Changes to globals.css
-
-**File:** `styles/globals.css`
-
-```css
-/* OLD */
-.prose-report {
-  font-family: 'Lora', Georgia, 'Times New Roman', serif;
-  font-size: 1.0625rem; /* 17px */
-  line-height: 1.75;
-}
-
-/* NEW */
-.prose-report {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  font-size: 1.125rem; /* 18px - larger for readability */
-  line-height: 1.65;
-  letter-spacing: -0.01em;
-}
-```
-
-### Changes to Dashboard.tsx MarkdownComponents
-
-Update paragraph styling:
 ```tsx
-// OLD
-p: ({ children }) => (
-  <p className="font-serif text-slate-600 dark:text-slate-400 leading-relaxed mb-4 text-[16px]">
+// Comparison mode
+if (profileB) {
+  return (
+    <div className="space-y-5">
+      {/* Life Satisfaction Comparison */}
+      {(swlsA || swlsB) && (
+        <div>
+          <h5 className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-3 uppercase tracking-wider">
+            Life Satisfaction (SWLS)
+          </h5>
+          <div className="space-y-2">
+            {/* Profile A bar */}
+            <div className="flex items-center gap-3">
+              <div className="w-16 flex items-center gap-2">
+                <div className="w-2.5 h-2.5 bg-blue-500 rounded-full flex-shrink-0" />
+                <span className="text-xs font-medium text-slate-600 dark:text-slate-400 truncate">{profileA.name}</span>
+              </div>
+              <div className="flex-1 h-5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-blue-500 rounded-full transition-all"
+                  style={{ width: `${((swlsA?.score || 0) / 35) * 100}%` }}
+                />
+              </div>
+              <div className="w-24 text-right flex items-baseline gap-1">
+                <span className="text-base font-bold" style={{ color: getSWLSColor(swlsA?.score || 0) }}>
+                  {swlsA?.score ?? '-'}
+                </span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400">{swlsA?.label || ''}</span>
+              </div>
+            </div>
+            {/* Profile B bar */}
+            <div className="flex items-center gap-3">
+              <div className="w-16 flex items-center gap-2">
+                <div className="w-2.5 h-2.5 bg-teal-500 rounded-full flex-shrink-0" />
+                <span className="text-xs font-medium text-slate-600 dark:text-slate-400 truncate">{profileB.name}</span>
+              </div>
+              <div className="flex-1 h-5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-teal-500 rounded-full transition-all"
+                  style={{ width: `${((swlsB?.score || 0) / 35) * 100}%` }}
+                />
+              </div>
+              <div className="w-24 text-right flex items-baseline gap-1">
+                <span className="text-base font-bold" style={{ color: getSWLSColor(swlsB?.score || 0) }}>
+                  {swlsB?.score ?? '-'}
+                </span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400">{swlsB?.label || ''}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
-// NEW
-p: ({ children }) => (
-  <p className="text-slate-700 dark:text-slate-300 leading-relaxed mb-5 text-[18px]">
+      {/* Loneliness Comparison */}
+      {(uclaA || uclaB) && (
+        <div>
+          <h5 className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-3 uppercase tracking-wider">
+            Loneliness (UCLA-3)
+          </h5>
+          <div className="space-y-2">
+            {/* Profile A bar */}
+            <div className="flex items-center gap-3">
+              <div className="w-16 flex items-center gap-2">
+                <div className="w-2.5 h-2.5 bg-blue-500 rounded-full flex-shrink-0" />
+                <span className="text-xs font-medium text-slate-600 dark:text-slate-400 truncate">{profileA.name}</span>
+              </div>
+              <div className="flex-1 h-5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-blue-500 rounded-full transition-all"
+                  style={{ width: `${((uclaA?.score || 0) / 9) * 100}%` }}
+                />
+              </div>
+              <div className="w-24 text-right flex items-baseline gap-1">
+                <span className="text-base font-bold" style={{ color: getUCLAColor(uclaA?.score || 0) }}>
+                  {uclaA?.score ?? '-'}
+                </span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400">{uclaA?.label || ''}</span>
+              </div>
+            </div>
+            {/* Profile B bar */}
+            <div className="flex items-center gap-3">
+              <div className="w-16 flex items-center gap-2">
+                <div className="w-2.5 h-2.5 bg-teal-500 rounded-full flex-shrink-0" />
+                <span className="text-xs font-medium text-slate-600 dark:text-slate-400 truncate">{profileB.name}</span>
+              </div>
+              <div className="flex-1 h-5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-teal-500 rounded-full transition-all"
+                  style={{ width: `${((uclaB?.score || 0) / 9) * 100}%` }}
+                />
+              </div>
+              <div className="w-24 text-right flex items-baseline gap-1">
+                <span className="text-base font-bold" style={{ color: getUCLAColor(uclaB?.score || 0) }}>
+                  {uclaB?.score ?? '-'}
+                </span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400">{uclaB?.label || ''}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Interpretation note */}
+      <div className="bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-lg p-3 text-xs text-slate-600 dark:text-slate-400">
+        <strong>Note:</strong> Higher life satisfaction is better. Lower loneliness scores indicate less loneliness.
+      </div>
+    </div>
+  );
+}
 ```
-
-Update list items:
-```tsx
-// OLD
-li: ({ children }) => (
-  <li className="font-serif text-[16px] text-slate-600 dark:text-slate-400">
-
-// NEW
-li: ({ children }) => (
-  <li className="text-[18px] text-slate-700 dark:text-slate-300 leading-relaxed">
-```
-
----
-
-## Implementation Order
-
-1. **Fix data key mismatch** in UnderstandMeCards.tsx (critical bug)
-2. **Update typography** in globals.css and Dashboard.tsx MarkdownComponents
-3. **Redesign card component** with baseball card layout
-4. **Move cards location** in Dashboard.tsx to under AI section
 
 ---
 
 ## Files to Modify
 
-| File | Changes |
-|------|---------|
-| `app/api/generate-card/route.ts` | **NEW** - Haiku API endpoint for card content |
-| `components/UnderstandMeCards.tsx` | Fix data keys, redesign as baseball cards, add API calls |
-| `components/Dashboard.tsx` | Move cards location, update MarkdownComponents typography |
-| `styles/globals.css` | Update `.prose-report` font family and size |
+| File | Lines | Change |
+|------|-------|--------|
+| `components/Visualizations.tsx` | 1700-1758 | Replace sparse card layout with horizontal bar comparison |
 
 ---
 
-## Content Generation: Claude Haiku API
+## Benefits
+1. **Visual consistency** with PERMA chart style
+2. **Easier comparison** at a glance via bar lengths
+3. **No empty space** - content fills the area naturally
+4. **Color-coded scores** maintained for interpretation
 
-### Why Haiku?
-- **Fast**: ~1-2 second response time
-- **Cheap**: ~$0.001 per card ($0.25/1M input, $1.25/1M output)
-- **Smart enough**: Structured content generation is well within Haiku's capabilities
+---
 
-### New API Endpoint
+## Task 3: Profile Storage & Auto-Load Feature (NEW)
 
-**File:** `app/api/generate-card/route.ts` (NEW)
+### Current State (Already Implemented!)
+- **Authentication**: Google OAuth, email/password, magic link via Supabase ✓
+- **Profile Storage**: `profiles` table saves assessments linked to `user_id` ✓
+- **Historical Profiles**: Dashboard loads `pastAssessments` for logged-in users ✓
+- **Profile Loading**: `/api/profiles` endpoint retrieves user's saved profiles ✓
+
+### What's Missing
+
+**1. Auto-Load Default Profile in Analysis Mode**
+When user is logged in, automatically load their most recent profile for AI analysis instead of requiring manual selection.
+
+**2. Store Comparison Profiles (Partners)**
+Save uploaded partner profiles so users don't have to re-upload them each time.
+
+### Implementation
+
+#### A. Auto-Load Profile (Dashboard.tsx)
+When user is authenticated and has saved profiles, automatically set the most recent as `selectedProfileA`:
 
 ```typescript
-import Anthropic from '@anthropic-ai/sdk';
+// In Dashboard.tsx auth state change handler (around line 490)
+if (session?.user) {
+  const res = await fetch('/api/profiles');
+  const data = await res.json();
+  setPastAssessments(data.profiles || []);
 
-const anthropic = new Anthropic();
-
-export async function POST(req: Request) {
-  const { profile, cardType } = await req.json();
-
-  // Extract relevant data based on card type
-  const bigFive = profile.assessments?.ipip_50?.domainScores;
-  const attachment = profile.assessments?.ecr_s;
-  const values = profile.assessments?.pvq_21;
-
-  const prompt = buildCardPrompt(profile.name, cardType, bigFive, attachment, values);
-
-  const response = await anthropic.messages.create({
-    model: 'claude-3-5-haiku-20241022',
-    max_tokens: 500,
-    messages: [{ role: 'user', content: prompt }]
-  });
-
-  return Response.json({ content: response.content[0].text });
+  // NEW: Auto-set most recent profile if none selected
+  if (data.profiles?.length > 0 && !selectedProfileA) {
+    setSelectedProfileA(data.profiles[0]);
+  }
 }
 ```
 
-### Prompt Templates
+#### B. Store Partner Profiles (New DB Table + API)
 
-**Work Card Prompt:**
-```
-Based on this person's personality data, generate a "How to Work With Me" card.
+**New Table: `saved_partners`**
+```sql
+CREATE TABLE saved_partners (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  profile_data JSONB NOT NULL,
+  name TEXT NOT NULL,
+  relationship_type TEXT, -- 'partner', 'friend', 'colleague'
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  last_used_at TIMESTAMPTZ,
+  UNIQUE(user_id, name)
+);
 
-Name: ${name}
-Big Five Traits:
-- Openness: ${O}th percentile
-- Conscientiousness: ${C}th percentile
-- Extraversion: ${E}th percentile
-- Agreeableness: ${A}th percentile
-- Neuroticism: ${N}th percentile
-
-Generate JSON with these fields:
-{
-  "role": "A fun 2-3 word title like 'The Creative Strategist'",
-  "communicationStyle": ["3-4 specific bullet points"],
-  "strengths": ["3-4 work strengths"],
-  "watchOutFor": ["2-3 potential friction areas"],
-  "bestTasks": ["3-4 tasks they'd excel at"]
-}
-
-Be specific and actionable. Use their actual percentiles to inform the content.
+-- RLS policy
+ALTER TABLE saved_partners ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can manage own partners" ON saved_partners
+  FOR ALL USING (auth.uid() = user_id);
 ```
 
-**Friendship Card Prompt:**
-```
-Based on this person's personality, generate a "How to Be My Friend" card.
-
-Name: ${name}
-Extraversion: ${E}th percentile
-Agreeableness: ${A}th percentile
-Openness: ${O}th percentile
-Top Values: ${topValues}
-
-Generate JSON:
-{
-  "socialStyle": "One line describing their social preferences",
-  "whatIValue": ["3-4 things they value in friendships"],
-  "howToSupportMe": ["3-4 specific actions"],
-  "letsDo": ["3-4 activity suggestions based on their traits"]
-}
-```
-
-**Romantic Card Prompt:**
-```
-Based on this person's attachment style and personality, generate a "How to Love Me" card.
-
-Name: ${name}
-Attachment: Anxiety=${anxiety}, Avoidance=${avoidance}
-Neuroticism: ${N}th percentile
-Agreeableness: ${A}th percentile
-Extraversion: ${E}th percentile
-
-Generate JSON:
-{
-  "attachmentStyle": "Secure/Anxious/Avoidant/Fearful-Avoidant",
-  "attachmentMeaning": "One sentence explaining what this means",
-  "whatINeed": ["3-4 emotional needs"],
-  "supportMeBy": ["3-4 specific loving actions"],
-  "avoid": ["2-3 things that trigger insecurity"]
-}
-```
-
-### Caching Strategy
-
-Cache generated cards in localStorage to avoid re-generating:
+**New API: `/api/partners`**
 ```typescript
-const cacheKey = `card_${cardType}_${profile.id}`;
-const cached = localStorage.getItem(cacheKey);
-if (cached) return JSON.parse(cached);
-
-// Generate new card...
-localStorage.setItem(cacheKey, JSON.stringify(cardContent));
+// GET - List user's saved partners
+// POST - Save a new partner profile
+// DELETE - Remove a saved partner
 ```
 
-### Cost Estimate
-- Input: ~300 tokens × $0.25/1M = $0.000075
-- Output: ~200 tokens × $1.25/1M = $0.00025
-- **Total: ~$0.0003 per card** (0.03 cents)
-- All 3 cards: ~$0.001 (0.1 cents)
+**Update Dashboard.tsx:**
+- When user uploads partner profile for comparison, offer to save it
+- Show dropdown of saved partners when selecting comparison profile
+- "Remember this person" checkbox when uploading
+
+### Files to Modify
+
+| File | Change |
+|------|--------|
+| `supabase/migrations/002_saved_partners.sql` | **NEW** - Create saved_partners table |
+| `app/api/partners/route.ts` | **NEW** - CRUD API for partner profiles |
+| `components/Dashboard.tsx` | Auto-load profile, saved partners dropdown |
 
 ---
 
----
+## Files to Modify (All Tasks)
 
-## Part 5: Fix Book/Podcast Recommendations
-
-### Issues
-1. Titles have unnecessary quotes: `"The War of Art"` → `The War of Art`
-2. No links to actually find/buy the books or podcasts
-
-### Solution
-
-Update the AI prompt in `app/api/analyze-parallel/route.ts` to:
-
-1. **Remove quotes** from titles in the markdown output
-2. **Add Amazon/Goodreads links** for books
-3. **Add Spotify/Apple Podcast links** for podcasts
-
-**Updated prompt section:**
-```
-## 📚 Books for You
-
-| Book | Author | Why It's Perfect for ${name} |
-|------|--------|------------------------------|
-| [The War of Art](https://www.amazon.com/s?k=The+War+of+Art+Steven+Pressfield) | Steven Pressfield | [Personal reason] |
-
-## 🎧 Podcasts for You
-
-| Podcast | Why ${name} Will Love It |
-|---------|--------------------------|
-| [The Tim Ferriss Show](https://open.spotify.com/show/5qSUyCrk9KR69lEiXbjwXM) | [Personal reason] |
-```
-
-**Link format:**
-- Books: Amazon search URL `https://www.amazon.com/s?k=${encodeURIComponent(title + ' ' + author)}`
-- Podcasts: Spotify search or direct show link if known
-
-**Implementation:**
-- Add instruction to AI prompt: "Format book titles as markdown links to Amazon search. Format podcast titles as links to Spotify. Do NOT use quotes around titles."
-
-### File to Modify
-| File | Changes |
-|------|---------|
-| `app/api/analyze-parallel/route.ts` | Update book/podcast prompt to include links, remove quotes |
-
----
-
-## Summary
-
-This plan fixes:
-1. **Critical bug**: Cards showing empty because of data key mismatch
-2. **UX request**: Move cards to more prominent location under AI section
-3. **Design request**: Baseball card aesthetic with detailed, actionable content
-4. **Typography request**: Larger, Claude-style sans-serif font for AI analysis
-5. **Book/Podcast links**: Remove quotes, add Amazon/Spotify links
+| File | Lines | Change |
+|------|-------|--------|
+| `components/Visualizations.tsx` | 1700-1758 | Task 1: Replace sparse cards with horizontal bar comparisons |
+| `app/api/analyze-parallel/route.ts` | 400, 790 | Task 2: Add relationshipType filter to getComparisonChunks() |
+| `supabase/migrations/002_saved_partners.sql` | NEW | Task 3: Create saved_partners table |
+| `app/api/partners/route.ts` | NEW | Task 3: CRUD API for partner profiles |
+| `components/Dashboard.tsx` | ~490 | Task 3: Auto-load profile, saved partners UI |
