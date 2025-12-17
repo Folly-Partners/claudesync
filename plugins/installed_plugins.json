@@ -1,4 +1,60 @@
 {
   "version": 2,
-  "plugins": {}
+  "plugins": {
+    "firebase@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/andrewwilkinson/.claude/plugins/cache/claude-plugins-official/firebase/unknown",
+        "version": "unknown",
+        "installedAt": "2025-12-17T20:10:34.539Z",
+        "lastUpdated": "2025-12-17T20:10:34.539Z",
+        "gitCommitSha": "d08486c69c7744eb72c582aef4a33cb68d772d8b",
+        "isLocal": true
+      }
+    ],
+    "github@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/andrewwilkinson/.claude/plugins/cache/claude-plugins-official/github/unknown",
+        "version": "unknown",
+        "installedAt": "2025-12-17T20:10:47.210Z",
+        "lastUpdated": "2025-12-17T20:10:47.210Z",
+        "gitCommitSha": "d08486c69c7744eb72c582aef4a33cb68d772d8b",
+        "isLocal": true
+      }
+    ],
+    "security-guidance@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/andrewwilkinson/.claude/plugins/cache/claude-plugins-official/security-guidance/unknown",
+        "version": "unknown",
+        "installedAt": "2025-12-17T20:11:08.810Z",
+        "lastUpdated": "2025-12-17T20:11:08.810Z",
+        "gitCommitSha": "d08486c69c7744eb72c582aef4a33cb68d772d8b",
+        "isLocal": true
+      }
+    ],
+    "supabase@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/andrewwilkinson/.claude/plugins/cache/claude-plugins-official/supabase/unknown",
+        "version": "unknown",
+        "installedAt": "2025-12-17T20:11:15.236Z",
+        "lastUpdated": "2025-12-17T20:11:15.236Z",
+        "gitCommitSha": "d08486c69c7744eb72c582aef4a33cb68d772d8b",
+        "isLocal": true
+      }
+    ],
+    "vercel@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/andrewwilkinson/.claude/plugins/cache/claude-plugins-official/vercel/unknown",
+        "version": "unknown",
+        "installedAt": "2025-12-17T20:11:21.799Z",
+        "lastUpdated": "2025-12-17T20:11:21.799Z",
+        "gitCommitSha": "d08486c69c7744eb72c582aef4a33cb68d772d8b",
+        "isLocal": true
+      }
+    ]
+  }
 }

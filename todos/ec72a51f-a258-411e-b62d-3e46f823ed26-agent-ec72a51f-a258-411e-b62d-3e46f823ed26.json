@@ -1,0 +1,27 @@
+[
+  {
+    "content": "Configure Firebase plugin (authenticate)",
+    "status": "pending",
+    "activeForm": "Configuring Firebase plugin"
+  },
+  {
+    "content": "Configure GitHub plugin (PAT token)",
+    "status": "completed",
+    "activeForm": "Configuring GitHub plugin"
+  },
+  {
+    "content": "Configure Vercel plugin (install CLI & auth)",
+    "status": "completed",
+    "activeForm": "Configuring Vercel plugin"
+  },
+  {
+    "content": "Configure Supabase plugin (install CLI & auth)",
+    "status": "completed",
+    "activeForm": "Configuring Supabase plugin"
+  },
+  {
+    "content": "Verify security-guidance plugin (hooks)",
+    "status": "completed",
+    "activeForm": "Verifying security-guidance plugin"
+  }
+]

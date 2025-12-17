@@ -1,5 +1,4 @@
 {
-  "model": "opus",
   "permissions": {
     "allow": [
       "Bash",
@@ -52,5 +51,13 @@
       "Bash(git push -f origin main:*)",
       "Bash(git push -f origin master:*)"
     ]
+  },
+  "model": "opus",
+  "enabledPlugins": {
+    "firebase@claude-plugins-official": true,
+    "github@claude-plugins-official": true,
+    "security-guidance@claude-plugins-official": true,
+    "supabase@claude-plugins-official": true,
+    "vercel@claude-plugins-official": true
   }
 }
