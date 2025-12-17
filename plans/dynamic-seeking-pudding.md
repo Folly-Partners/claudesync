@@ -1,4 +1,50 @@
-# Current Tasks
+# Current Task: Fix Share Profile Link Creation
+
+## Problem
+"Failed to create share link" error when user tries to share their profile.
+
+## Root Cause
+The `shared_profiles` database table **does not exist**. The API at `/api/share/route.ts` tries to insert into this table (line 127-139) but no migration ever created it.
+
+## Solution
+Create the missing database migration.
+
+### SQL to run in Supabase:
+```sql
+-- Create shared_profiles table for share link functionality
+CREATE TABLE IF NOT EXISTS shared_profiles (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  share_code TEXT UNIQUE NOT NULL,
+  profile_data JSONB NOT NULL,
+  password_hash TEXT,
+  password_salt TEXT,
+  visible_sections JSONB DEFAULT '[]',
+  expires_at TIMESTAMPTZ,
+  view_count INTEGER DEFAULT 0,
+  last_viewed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Index for fast share code lookup
+CREATE INDEX IF NOT EXISTS idx_shared_profiles_code ON shared_profiles(share_code);
+
+-- Index for finding expired links
+CREATE INDEX IF NOT EXISTS idx_shared_profiles_expires ON shared_profiles(expires_at);
+
+-- Note: No RLS needed - share links are public by design (protected by share code + optional password)
+```
+
+### Files
+| File | Action |
+|------|--------|
+| `supabase/migrations/003_shared_profiles.sql` | Create new migration file |
+
+### Alternative: Run SQL directly
+User can run the SQL above directly in Supabase SQL Editor to fix immediately.
+
+---
+
+# Previous Tasks (Completed)
 
 ## Task 1: Remove Test Save Button & Clean Test Data
 

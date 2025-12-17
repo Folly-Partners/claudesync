@@ -1,1 +1,62 @@
-[]
+[
+  {
+    "content": "Add comprehensive types to lib/types.ts for ultra-deep learning",
+    "status": "completed",
+    "activeForm": "Adding comprehensive types for ultra-deep learning"
+  },
+  {
+    "content": "Update database schema in lib/storage/db.ts with new tables",
+    "status": "completed",
+    "activeForm": "Updating database schema with new tables"
+  },
+  {
+    "content": "Create ultraDeepLearner.ts orchestrator (75-100 AI queries)",
+    "status": "in_progress",
+    "activeForm": "Creating ultra-deep learner orchestrator"
+  },
+  {
+    "content": "Create API endpoints for voice & style analysis",
+    "status": "pending",
+    "activeForm": "Creating voice & style API endpoints"
+  },
+  {
+    "content": "Create API endpoints for recipient profiles",
+    "status": "pending",
+    "activeForm": "Creating recipient profile API endpoints"
+  },
+  {
+    "content": "Create API endpoints for examples & CC/delegation",
+    "status": "pending",
+    "activeForm": "Creating examples & CC/delegation API endpoints"
+  },
+  {
+    "content": "Create sync page with detailed progress UI",
+    "status": "pending",
+    "activeForm": "Creating sync page with progress UI"
+  },
+  {
+    "content": "Create insights dashboard page",
+    "status": "pending",
+    "activeForm": "Creating insights dashboard page"
+  },
+  {
+    "content": "Create preference editor page",
+    "status": "pending",
+    "activeForm": "Creating preference editor page"
+  },
+  {
+    "content": "Update generate-replies API with all learned data + CC suggestions",
+    "status": "pending",
+    "activeForm": "Updating generate-replies API"
+  },
+  {
+    "content": "Update ActionPanel to show CC suggestions per reply",
+    "status": "pending",
+    "activeForm": "Updating ActionPanel with CC suggestions"
+  },
+  {
+    "content": "Resync user account with new system",
+    "status": "pending",
+    "activeForm": "Resyncing user account"
+  }
+]
