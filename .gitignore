@@ -6,9 +6,11 @@ debug/
 # Session-specific data
 shell-snapshots/
 session-env/
+file-history/
 
 # Statistics and analytics (may contain personal data)
 statsig/
+stats-cache.json
 
 # Downloads directory (may contain sensitive files)
 downloads/
@@ -21,3 +23,14 @@ auth_token
 
 # OAuth session tokens (machine-specific, would cause conflicts)
 .credentials.json
+
+# Large session files (sync issues)
+history.jsonl
+claude.json
+
+# Sync tracking (machine-specific)
+.last_sync_date
+sync-launchd.log
+
+# Plugin marketplaces (can be re-downloaded)
+plugins/marketplaces/
