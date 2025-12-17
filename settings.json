@@ -22,17 +22,35 @@
       "mcp__xero"
     ],
     "deny": [
+      "Bash(sudo:*)",
       "Bash(sudo :*)",
+      "Bash(su :*)",
+      "Bash(su -:*)",
+      "Bash(doas:*)",
       "Bash(rm -rf /:*)",
       "Bash(rm -rf ~:*)",
       "Bash(rm -rf /*:*)",
+      "Bash(rm -rf $HOME:*)",
+      "Bash(rm -rf --no-preserve-root:*)",
       "Bash(mkfs:*)",
       "Bash(dd if=/dev:*)",
+      "Bash(dd of=/dev:*)",
+      "Bash(fdisk:*)",
+      "Bash(parted:*)",
+      "Bash(shred:*)",
+      "Bash(wipefs:*)",
       "Bash(chmod -R 777 /:*)",
+      "Bash(chmod 777 /:*)",
       "Bash(chown -R :*)",
       "Bash(> /dev/sda:*)",
+      "Bash(> /dev/disk:*)",
       "Bash(mv ~ :*)",
-      "Bash(mv / :*)"
+      "Bash(mv / :*)",
+      "Bash(mv ~/ :*)",
+      "Bash(git push --force origin main:*)",
+      "Bash(git push --force origin master:*)",
+      "Bash(git push -f origin main:*)",
+      "Bash(git push -f origin master:*)"
     ]
   }
 }
