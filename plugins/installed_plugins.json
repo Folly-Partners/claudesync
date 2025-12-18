@@ -4,10 +4,10 @@
     "firebase@claude-plugins-official": [
       {
         "scope": "user",
-        "installPath": "/Users/andrewwilkinson/.claude/plugins/cache/claude-plugins-official/firebase/unknown",
-        "version": "unknown",
+        "installPath": "/Users/andrewwilkinson/.claude/plugins/cache/claude-plugins-official/firebase/ab2b6d0cad88",
+        "version": "ab2b6d0cad88",
         "installedAt": "2025-12-17T20:10:34.539Z",
-        "lastUpdated": "2025-12-17T20:10:34.539Z",
+        "lastUpdated": "2025-12-18T12:44:43.541Z",
         "gitCommitSha": "d08486c69c7744eb72c582aef4a33cb68d772d8b",
         "isLocal": true
       }
@@ -15,10 +15,10 @@
     "github@claude-plugins-official": [
       {
         "scope": "user",
-        "installPath": "/Users/andrewwilkinson/.claude/plugins/cache/claude-plugins-official/github/unknown",
-        "version": "unknown",
+        "installPath": "/Users/andrewwilkinson/.claude/plugins/cache/claude-plugins-official/github/ab2b6d0cad88",
+        "version": "ab2b6d0cad88",
         "installedAt": "2025-12-17T20:10:47.210Z",
-        "lastUpdated": "2025-12-17T20:10:47.210Z",
+        "lastUpdated": "2025-12-18T12:44:43.546Z",
         "gitCommitSha": "d08486c69c7744eb72c582aef4a33cb68d772d8b",
         "isLocal": true
       }
@@ -26,10 +26,10 @@
     "security-guidance@claude-plugins-official": [
       {
         "scope": "user",
-        "installPath": "/Users/andrewwilkinson/.claude/plugins/cache/claude-plugins-official/security-guidance/unknown",
-        "version": "unknown",
+        "installPath": "/Users/andrewwilkinson/.claude/plugins/cache/claude-plugins-official/security-guidance/ab2b6d0cad88",
+        "version": "ab2b6d0cad88",
         "installedAt": "2025-12-17T20:11:08.810Z",
-        "lastUpdated": "2025-12-17T20:11:08.810Z",
+        "lastUpdated": "2025-12-18T12:44:43.553Z",
         "gitCommitSha": "d08486c69c7744eb72c582aef4a33cb68d772d8b",
         "isLocal": true
       }
@@ -37,10 +37,10 @@
     "supabase@claude-plugins-official": [
       {
         "scope": "user",
-        "installPath": "/Users/andrewwilkinson/.claude/plugins/cache/claude-plugins-official/supabase/unknown",
-        "version": "unknown",
+        "installPath": "/Users/andrewwilkinson/.claude/plugins/cache/claude-plugins-official/supabase/ab2b6d0cad88",
+        "version": "ab2b6d0cad88",
         "installedAt": "2025-12-17T20:11:15.236Z",
-        "lastUpdated": "2025-12-17T20:11:15.236Z",
+        "lastUpdated": "2025-12-18T12:44:43.559Z",
         "gitCommitSha": "d08486c69c7744eb72c582aef4a33cb68d772d8b",
         "isLocal": true
       }
@@ -48,10 +48,10 @@
     "vercel@claude-plugins-official": [
       {
         "scope": "user",
-        "installPath": "/Users/andrewwilkinson/.claude/plugins/cache/claude-plugins-official/vercel/unknown",
-        "version": "unknown",
+        "installPath": "/Users/andrewwilkinson/.claude/plugins/cache/claude-plugins-official/vercel/ab2b6d0cad88",
+        "version": "ab2b6d0cad88",
         "installedAt": "2025-12-17T20:11:21.799Z",
-        "lastUpdated": "2025-12-17T20:11:21.799Z",
+        "lastUpdated": "2025-12-18T12:44:43.564Z",
         "gitCommitSha": "d08486c69c7744eb72c582aef4a33cb68d772d8b",
         "isLocal": true
       }
