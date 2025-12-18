@@ -83,7 +83,8 @@
       "WebFetch(domain:docs.anthropic.com)",
       "WebFetch(domain:docs.claude.com)",
       "mcp__firecrawl-mcp__firecrawl_search",
-      "mcp__firecrawl-mcp__firecrawl_scrape"
+      "mcp__firecrawl-mcp__firecrawl_scrape",
+      "Skill(deep-env)"
     ],
     "deny": [],
     "ask": []
