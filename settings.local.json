@@ -84,7 +84,8 @@
       "WebFetch(domain:docs.claude.com)",
       "mcp__firecrawl-mcp__firecrawl_search",
       "mcp__firecrawl-mcp__firecrawl_scrape",
-      "Skill(deep-env)"
+      "Skill(deep-env)",
+      "mcp__apify__call-actor"
     ],
     "deny": [],
     "ask": []
