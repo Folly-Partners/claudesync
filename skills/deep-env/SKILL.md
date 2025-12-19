@@ -11,16 +11,10 @@ Use this skill to manage environment variables securely across all of Andrew's M
 
 Automatically invoke this skill when:
 - You see a `.env.example`, `.env.template`, or `.env.sample` file without a corresponding `.env.local`
-- User provides an API key, secret, token, or credential (ALWAYS store it immediately)
-- User sets up a new account for any service (API provider, SaaS tool, database, etc.)
-- User signs up for or configures any service that provides credentials
-- User mentions they got/received/created an API key, token, or secret
+- User provides an API key, secret, or credential
 - Error messages mention missing environment variables (e.g., "ANTHROPIC_API_KEY is not defined")
 - Setting up or cloning a new project
 - User asks about credentials, secrets, or environment variables
-- User mentions connecting to a new service, integration, or third-party API
-
-**IMPORTANT**: Any time a credential, API key, token, or secret is shared or created, IMMEDIATELY store it with `deep-env store` and push to iCloud. Don't wait to be asked.
 
 ## Commands
 
@@ -59,15 +53,6 @@ deep-env get KEY_NAME
 1. Store it: `deep-env store KEY "value"`
 2. Push to iCloud: `deep-env push`
 3. If in a project, sync: `deep-env sync .`
-
-### When user sets up a new account or service:
-1. Proactively ask: "Do you have any API keys or credentials for this that I should store?"
-2. If they provide credentials, immediately store them:
-   ```bash
-   deep-env store SERVICE_API_KEY "value"
-   deep-env push
-   ```
-3. Use naming conventions: `SERVICE_API_KEY`, `SERVICE_SECRET`, `SERVICE_TOKEN`
 
 ### On a new Mac (if deep-env not installed):
 ```bash

@@ -32,5 +32,6 @@ claude.json
 .last_sync_date
 sync-launchd.log
 
-# Plugin marketplaces (can be re-downloaded)
+# Plugin data (can be re-downloaded)
 plugins/marketplaces/
+plugins/cache/
