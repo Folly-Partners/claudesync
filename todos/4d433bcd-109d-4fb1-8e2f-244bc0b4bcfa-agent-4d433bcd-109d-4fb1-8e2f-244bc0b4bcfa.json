@@ -1,1 +1,17 @@
-[]
+[
+  {
+    "content": "Add deep-insights chunk to comparison mode",
+    "status": "completed",
+    "activeForm": "Adding deep-insights chunk to comparison mode"
+  },
+  {
+    "content": "Filter chunk for romantic/everything only",
+    "status": "completed",
+    "activeForm": "Filtering chunk for romantic/everything only"
+  },
+  {
+    "content": "Test the new section",
+    "status": "in_progress",
+    "activeForm": "Testing the new section"
+  }
+]
