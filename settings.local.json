@@ -91,7 +91,10 @@
       "mcp__plugin_compound-engineering_pw__browser_navigate",
       "mcp__plugin_compound-engineering_pw__browser_fill_form",
       "mcp__plugin_compound-engineering_pw__browser_click",
-      "mcp__plugin_compound-engineering_pw__browser_wait_for"
+      "mcp__plugin_compound-engineering_pw__browser_wait_for",
+      "mcp__plugin_compound-engineering_pw__browser_snapshot",
+      "mcp__plugin_compound-engineering_pw__browser_take_screenshot",
+      "mcp__plugin_compound-engineering_pw__browser_close"
     ],
     "deny": [],
     "ask": []

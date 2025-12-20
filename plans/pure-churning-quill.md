@@ -1,142 +1,102 @@
-# Dealhunter UI/UX Improvements Plan
+# UI Polish Fixes for Model Assumptions & Document Upload
 
 ## Issues Identified
 
-### 1. Leadership Photos Missing
-- `photoUrl` field exists in `LeaderProfile` type but AI rarely provides URLs
-- Component already handles photo display with initials fallback
-- Need to improve photo sourcing
-
-### 2. Assumptions Editor Design Issues
-- Currently hidden/collapsible by default
-- Slider-based design is awkward
-- User wants it visible and better designed
-
-### 3. Financial Summary Needs Tables
-- Currently parsing markdown to text sections
-- Historical performance shown as bullet points
-- Need elegant tables for historical data and management forecasts
-
-### 4. CRITICAL BUG: 5-Year Projections Wrong EBITDA
-**Root Cause**: `ebitdaMargin` defaults to 15% instead of actual company margin (39%)
-- `generateProjectionYears()` line 69 calculates: `ebitda = currentRevenue * (assumptions.ebitdaMargin / 100)`
-- This ignores the actual `baseEbitda` and uses default 15% margin
-- Result: Year 1 shows $12.3M EBITDA instead of ~$28M (39% of $72M revenue)
+1. **"Modified" badge showing incorrectly** - Remove it from Model Assumptions header
+2. **Input fields too narrow** - Numbers like "20.0" and "4.3" are getting cut off
+3. **Yellow highlight looks awkward** - The `var(--accent-light)` background is too prominent
+4. **Document Upload Prompt not showing** - Props not being passed from app/page.tsx to AnalysisReport
 
 ---
 
-## Implementation Plan
+## File 1: `components/AssumptionsEditor.tsx`
 
-### Fix 1: Leadership Photos
+### Change 1: Remove "Modified" badge
+- Lines 90-94: Remove the `{hasModifications && (...)}` block that shows the "Modified" span
+- Also remove the `hasModifications` variable (lines 63-67) since it's no longer used
 
-**Files:** `lib/prompts.ts`
+### Change 2: Widen input fields to prevent text cutoff
+- Line 234: Change `w-14` to `w-20` for the number input fields
+- Line 136: Ensure the base financials inputs have enough width (currently using `flex-1`, should be fine)
 
-1. Update AI prompt to actively search for photo URLs during analysis:
-   - Instruct Claude to search LinkedIn profiles, company "About/Team" pages
-   - Use web search tools (Tavily/Firecrawl if needed) to find headshots
-   - If no photo found, return null and component uses initials fallback (already works)
+### Change 3: Make yellow highlight more subtle
+- For the "Base Year Financials" section (line 113): Change from yellow background to a subtle left border indicator
+- For modified rows (lines 205-210): Use a subtle left border instead of full row background
 
-2. No UI changes needed - existing fallback to initials is acceptable
-
----
-
-### Fix 2: Assumptions Editor Redesign
-
-**File:** `components/AssumptionsEditor.tsx`
-
-Changes:
-1. Remove collapsible behavior - always visible
-2. Replace awkward slider design with clean table layout:
-   ```
-   | Assumption          | Value  | Range      |
-   |---------------------|--------|------------|
-   | Revenue Growth      | 5%     | -10% - 30% |
-   | EBITDA Margin       | 39%    | 5% - 60%   |
-   | Tax Rate            | 25%    | 15% - 40%  |
-   ```
-3. Use inline editable inputs (click to edit)
-4. Keep category grouping but as horizontal sections, not tabs
-5. Show "AI Suggested" vs "Custom" badges inline
-6. Add subtle background color for modified values
-
----
-
-### Fix 3: Financial Summary Tables
-
-**File:** `components/FinancialSummary.tsx`
-
-1. Create elegant historical performance table:
-   ```
-   | Year  | Revenue  | EBITDA   | Margin | YoY Growth |
-   |-------|----------|----------|--------|------------|
-   | 2020A | $45.3M   | $22.5M   | 49.7%  | -          |
-   | 2021A | $53.2M   | $22.6M   | 42.5%  | +17.4%     |
-   | ...   |          |          |        |            |
-   ```
-
-2. Add Management Forecast section if estimate years exist:
-   - Separate table for "E" (estimate) years
-   - Clear "Management Forecast" header
-   - Visual distinction from historical (lighter background)
-
-3. Keep existing charts but move tables above them
-
----
-
-### Fix 4: CRITICAL - Fix Projection EBITDA Bug
-
-**Files:** `components/AnalysisReport.tsx`, `lib/calculations.ts`
-
-**Step 1:** Calculate actual base margin in AnalysisReport.tsx
-```typescript
-const baseMargin = (ebitda / revenue) * 100; // e.g., 39%
+**Before:**
+```tsx
+<div className="px-6 py-5" style={{ backgroundColor: 'var(--accent-light)', ... }}>
 ```
 
-**Step 2:** Initialize assumptions with actual company metrics
-```typescript
-const [assumptions, setAssumptions] = useState<EditableAssumptions>(() => ({
-  ...DEFAULT_ASSUMPTIONS,
-  ebitdaMargin: baseMargin, // Use actual margin, not default 15%
-}));
+**After:**
+```tsx
+<div className="px-6 py-5" style={{ borderLeft: '3px solid var(--accent)', backgroundColor: 'var(--background-alt)', ... }}>
 ```
 
-**Step 3:** Update useEffect to recalculate when financials change
-```typescript
-useEffect(() => {
-  const actualMargin = (ebitda / revenue) * 100;
-  setAssumptions(prev => ({
-    ...prev,
-    ebitdaMargin: actualMargin,
-  }));
-}, [ebitda, revenue]);
+**Before (modified rows):**
+```tsx
+style={{
+  backgroundColor: modified ? 'var(--accent-light)' : 'transparent',
+}}
 ```
 
-**Step 4:** Update scenario config in calculations.ts
-- Instead of adding fixed margin deltas (+2%, 0%, -3%, -8%)
-- Apply percentage changes to the BASE margin
-- Good: baseMargin * 1.05 (5% improvement)
-- Mediocre: baseMargin (no change)
-- Bad: baseMargin * 0.92 (8% decline)
-- Worst: baseMargin * 0.80 (20% decline)
+**After:**
+```tsx
+style={{
+  borderLeft: modified ? '3px solid var(--accent)' : '3px solid transparent',
+  paddingLeft: '8px',
+}}
+```
 
 ---
 
-## File Summary
+## File 2: `app/page.tsx`
 
-| File | Changes |
-|------|---------|
-| `lib/prompts.ts` | Improve photo URL instructions |
-| `components/LeadershipSection.tsx` | Add photo URL edit capability |
-| `components/AssumptionsEditor.tsx` | Complete redesign - table layout, always visible |
-| `components/FinancialSummary.tsx` | Add historical/forecast tables |
-| `components/AnalysisReport.tsx` | Initialize assumptions with actual margin |
-| `lib/calculations.ts` | Fix scenario margin calculations |
+### Change: Pass document upload props to AnalysisReport
+
+**Before (line 520):**
+```tsx
+<AnalysisReport result={result} onReset={handleReset} />
+```
+
+**After:**
+```tsx
+<AnalysisReport
+  result={result}
+  onReset={handleReset}
+  uploadedDocuments={files}
+  onDocumentsUpload={(docs) => setFiles(docs)}
+  onReanalyze={handleReanalyze}
+  isAnalyzing={analyzing}
+/>
+```
+
+### Add `handleReanalyze` function (after `handleReset`):
+```typescript
+const handleReanalyze = async () => {
+  // Re-run analysis with current files
+  setStep('analyzing');
+  setAnalyzing(true);
+  // ... same logic as handleAnalyze but skipping the file upload step
+  await handleAnalyze();
+};
+```
+
+Actually simpler - just call `handleAnalyze()` directly since it uses the current `files` state.
 
 ---
 
-## Priority Order
+## Summary of Changes
 
-1. **Fix 4** - CRITICAL bug causing wrong projections
-2. **Fix 2** - Assumptions always visible with better design
-3. **Fix 3** - Financial tables
-4. **Fix 1** - Leadership photos (enhancement)
+| File | Change |
+|------|--------|
+| `components/AssumptionsEditor.tsx` | Remove "Modified" badge, widen inputs (w-14 → w-20), use left border instead of yellow background |
+| `app/page.tsx` | Pass uploadedDocuments, onDocumentsUpload, onReanalyze, isAnalyzing props to AnalysisReport |
+
+---
+
+## Implementation Notes
+
+- The "Reset All" button should still appear when assumptions are modified (keep that logic)
+- The left border indicator is more subtle than a full background highlight
+- Input width of `w-20` (80px) should comfortably fit numbers like "21.3"

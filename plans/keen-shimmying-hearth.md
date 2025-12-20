@@ -157,92 +157,184 @@ Based on analysis of successful local newsletters:
 
 ---
 
-## Ad Unit #5: Classified Text Ads
+## Ad Unit #5: The Bulletin Board (Classifieds Reimagined)
 
-**Position:** Dedicated section before footer OR within relevant sections
-**Format:** Simple text, 2 lines max, single link
-**Visual:** Minimal styling, grouped together
+**The Concept:** A visual community corkboard that feels like the one at the Oak Bay Ave coffee shop. Thumbtacks, handwritten notes, torn edges, polaroid-style photos. Mix FREE organic posts scraped from the Facebook group with PAID premium placements ($49).
 
-```
-┌─────────────────────────────────────────────────┐
-│  📋 COMMUNITY CLASSIFIEDS                       │
-│                                                 │
-│  • Experienced gardener available for spring    │
-│    cleanup. Oak Bay references. 250-555-1234    │
-│                                                 │
-│  • Estate sale: antique furniture, art, books.  │
-│    2341 Beach Dr, Sat 9am-2pm                   │
-│                                                 │
-│  • Piano lessons for all ages. RCM certified.   │
-│    First lesson free. janesmith@email.com       │
-│                                                 │
-│  [Submit a classified →]                        │
-└─────────────────────────────────────────────────┘
-```
+**Position:** Dedicated section, highly visual, before footer
+**Format:** Visual grid of "pinned notes" with different styles
+**Visual:** Corkboard texture background, tilted cards, thumbtack icons, handwritten fonts
 
-**Pricing:**
-- $15 per listing (1 edition)
-- $50 for 4 editions
-
-**Annual Revenue Potential:** $780-1,500 (1-2 per week)
-
----
-
-## Ad Unit #6: Poll Sponsor
-
-**Position:** Alongside weekly poll
-**Format:** Logo + "This week's poll sponsored by"
-**Visual:** Small logo badge
+### The Design
 
 ```
-┌─────────────────────────────────────────────────┐
-│  📊 THIS WEEK'S POLL                            │
-│  Sponsored by Vis-à-Vis Wine Bar               │
-│                                                 │
-│  Best coffee shop in Oak Bay Village?           │
-│                                                 │
-│  ○ Discovery Coffee                             │
-│  ○ Ottavio                                      │
-│  ○ White Heather Tea Room                       │
-│  ○ Other (tell us!)                             │
-│                                                 │
-│  [Vote now →]                                   │
-└─────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│  📌 THE BULLETIN BOARD                                                      │
+│  ═══════════════════════════════════════════════════════════════════════   │
+│  Your neighbours are looking for stuff. Got stuff? We should talk.          │
+│                                                                             │
+│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐          │
+│  │ 📍 LOOKING FOR   │  │ 🏷️ FOR SALE     │  │ ⭐ FEATURED      │          │
+│  │                  │  │                  │  │    [$49 PAID]    │          │
+│  │ ISO: Someone to  │  │ Mid-century      │  │ ┌────────────┐  │          │
+│  │ walk my golden   │  │ teak sideboard,  │  │ │  [PHOTO]   │  │          │
+│  │ retriever 2x/wk  │  │ great condition. │  │ └────────────┘  │          │
+│  │ while I recover  │  │ $400 OBO.        │  │                  │          │
+│  │ from knee        │  │                  │  │ ESTATE SALE     │          │
+│  │ surgery. Oak Bay │  │ 📷 See photo     │  │ Sat & Sun 9-3   │          │
+│  │ only please!     │  │                  │  │ 2847 Beach Dr   │          │
+│  │                  │  │ - Margaret T.    │  │                  │          │
+│  │ - Susan K.       │  │   Estevan        │  │ 50 years of     │          │
+│  │   Willows        │  │                  │  │ treasures.      │          │
+│  │                  │  │ [Reply →]        │  │ Furniture, art, │          │
+│  │ [Reply →]        │  │                  │  │ vintage kitsch. │          │
+│  │                  │  │                  │  │                  │          │
+│  │ 💬 3 neighbours  │  │ 💬 2 interested  │  │ [See details →] │          │
+│  │    responded     │  │                  │  │                  │          │
+│  └──────────────────┘  └──────────────────┘  └──────────────────┘          │
+│                                                                             │
+│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐          │
+│  │ 🔧 SERVICES      │  │ 🐕 LOST & FOUND  │  │ 💡 RECS WANTED   │          │
+│  │                  │  │                  │  │                  │          │
+│  │ Retired          │  │ FOUND: Grey      │  │ Looking for a    │          │
+│  │ carpenter.       │  │ tabby cat near   │  │ good plumber     │          │
+│  │ Small jobs only. │  │ Henderson Rd.    │  │ who won't charge │          │
+│  │ Decks, fences,   │  │ Very friendly,   │  │ $200 just to     │          │
+│  │ that shelf you   │  │ no collar.       │  │ look at my       │          │
+│  │ keep meaning to  │  │                  │  │ toilet.          │          │
+│  │ build.           │  │ 📷 Photo         │  │                  │          │
+│  │                  │  │                  │  │ - Dave M.        │          │
+│  │ - Bob H.         │  │ - The Hendersons │  │   Oak Bay Ave    │          │
+│  │   Uplands        │  │                  │  │                  │          │
+│  │                  │  │ [Is this yours?] │  │ 💬 7 suggestions │          │
+│  │ [Get in touch →] │  │                  │  │                  │          │
+│  └──────────────────┘  └──────────────────┘  └──────────────────┘          │
+│                                                                             │
+│  ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │
+│                                                                             │
+│  📌 PIN YOUR OWN NOTE                                                       │
+│                                                                             │
+│  Got something to sell? Need something? Want the whole                      │
+│  neighbourhood to see it? $49 gets you a featured spot                      │
+│  with a photo on the board.                                                 │
+│                                                                             │
+│  [Pin it to the board →]                                                    │
+│                                                                             │
+│  (Or just post in the Oak Bay Local Facebook group - we                     │
+│   check it every week and feature the best posts for free!)                 │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-**Pricing:**
-- $50 per poll sponsorship
-- $175/month (4 polls)
+### Content Sources
 
-**Annual Revenue Potential:** $2,100-2,600
+**FREE (from Facebook Group):**
+- ISO / Looking For posts
+- For Sale posts (organic, no photo featured)
+- Lost & Found
+- Recommendations Asked
+- Services Offered
+- Garage Sale announcements
 
----
+**PAID ($49 via Beehiiv):**
+- Featured placement (top-right, larger)
+- Includes photo
+- Full description (not truncated)
+- Direct link/CTA button
+- "⭐ FEATURED" badge
 
-## Ad Unit #7: Job Listing
+### Category Icons & Styling
 
-**Position:** Dedicated section OR within classifieds
-**Format:** Company + role + brief description + link
-**Visual:** Job icon, company name prominent
+| Category | Icon | Card Style | Note Style |
+|----------|------|------------|------------|
+| Looking For / ISO | 📍 | Yellow sticky note, slightly tilted | Handwritten feel |
+| For Sale | 🏷️ | White index card, price tag corner | Clean, minimal |
+| Featured (Paid) | ⭐ | Polaroid-style with photo slot | Premium, centered |
+| Services | 🔧 | Blue sticky note | Professional but casual |
+| Lost & Found | 🐕 or 🐱 | Torn paper edge, urgent feel | LOST in red, FOUND in green |
+| Recs Wanted | 💡 | Green sticky note | Question mark doodle |
+| Garage/Estate Sale | 🏠 | Newsprint texture | Weekend warrior vibe |
+| Jobs / Hiring | 💼 | White card with bold header | Professional, clear salary |
+
+### Visual Details (HTML/CSS)
 
 ```
-┌─────────────────────────────────────────────────┐
-│  💼 OAK BAY JOBS                                │
-│                                                 │
-│  Oak Bay Beach Hotel is hiring:                 │
-│  • Front Desk Agent (FT) - $22-25/hr            │
-│  • Server, The Fern (PT) - $18/hr + tips        │
-│                                                 │
-│  [Apply now →]                                  │
-│                                                 │
-│  [Post a job - $35 →]                           │
-└─────────────────────────────────────────────────┘
+DESIGN ELEMENTS:
+├── Background: Cork texture (#C4A574 with noise)
+├── Cards: Slightly rotated (-2° to +2°)
+├── Thumbtacks: Red, blue, green, yellow circles with shadow
+├── Shadows: Soft drop shadow on each "pinned" note
+├── Fonts:
+│   ├── Headers: "Permanent Marker" or "Patrick Hand"
+│   └── Body: System sans-serif for readability
+├── Borders: Slightly torn/rough edges on some cards
+└── Engagement: "💬 X neighbours responded" shows FB comment count
 ```
 
-**Pricing:**
-- $35 per job listing (1 edition)
-- $99 for 4 editions
+### Facebook Scraping Logic
 
-**Annual Revenue Potential:** $910-1,800 (0.5-1 per week)
+Each week during `/research`:
+
+1. **Scrape Oak Bay Local Facebook group** (last 7 days)
+2. **Classify posts by category:**
+   - Keywords: "ISO", "looking for", "anyone know" → Looking For
+   - Keywords: "for sale", "selling", "$", "OBO" → For Sale
+   - Keywords: "lost", "found", "missing" → Lost & Found
+   - Keywords: "recommend", "suggestion", "good [service]" → Recs Wanted
+   - Keywords: "garage sale", "estate sale", "moving sale" → Sales
+   - Keywords: "hiring", "job", "position", "looking for staff" → Jobs
+3. **Filter for high engagement:**
+   - Prioritize posts with 3+ comments/likes
+   - Skip posts older than 7 days
+   - Skip posts that are just complaints/rants
+4. **Extract for bulletin board:**
+   - Author first name + last initial + neighbourhood
+   - Truncated text (50-75 words max)
+   - Comment count for "💬 X responded"
+   - Original post URL for "Reply →" link
+
+### Pricing Model
+
+| Placement | Price | What They Get |
+|-----------|-------|---------------|
+| Featured Bulletin Spot | $49 | Photo, full description, top placement, 1 week |
+| Service Provider Listing | $49 | Recurring weekly spot, professional card |
+| Garage/Estate Sale Boost | $29 | Featured for 1 week, includes map link |
+
+**How it works (Beehiiv behind the scenes):**
+1. User clicks "Pin it to the board" → goes to Beehiiv storefront
+2. Pays $49 via Beehiiv checkout
+3. Submits photo + description via Beehiiv's ad creation flow
+4. Claude checks Beehiiv for paid placements during `/write`
+5. Paid placements get ⭐ FEATURED spot with photo
+
+### Revenue Projection
+
+| Scenario | Paid Spots/Week | Annual |
+|----------|-----------------|--------|
+| Conservative | 0.5 | $1,274 |
+| Moderate | 1 | $2,548 |
+| Optimistic | 2 | $5,096 |
+
+*Plus organic engagement value: Readers come back for the bulletin board content*
+
+### Sample Copy Options
+
+**Section Header:**
+> "Your neighbours are looking for stuff. Got stuff? We should talk."
+
+> "The digital corkboard. No thumbtacks required."
+
+> "What Oak Bay is buying, selling, and searching for this week."
+
+**CTA for Paid:**
+> "Pin it to the board ($49) - includes photo, full description, and 2,000 pairs of Oak Bay eyes."
+
+> "Want the spotlight? $49 gets you featured with a photo. Or just post in the Facebook group and we might feature you for free."
+
+**Bottom Note:**
+> "Posts sourced from Oak Bay Local Facebook group. Want to be featured? Post there or pay $49 for guaranteed placement with a photo."
 
 ---
 
@@ -276,19 +368,20 @@ Based on analysis of successful local newsletters:
 │  [Event 4]                                      │
 ├─────────────────────────────────────────────────┤
 │  📊 THIS WEEK'S POLL                            │
-│  Sponsored by [Poll Sponsor]                    │
 │  [Poll question + options]                      │
 ├─────────────────────────────────────────────────┤
 │  🏪 OPEN & CLOSED IN OAK BAY                    │
 │  ✨ [BUSINESS SPOTLIGHT - paid]                 │
 │  [Organic business listing]                     │
 ├─────────────────────────────────────────────────┤
-│  💼 OAK BAY JOBS                                │
-│  [Job listing - paid]                           │
-├─────────────────────────────────────────────────┤
-│  📋 COMMUNITY CLASSIFIEDS                       │
-│  [Classified 1 - paid]                          │
-│  [Classified 2 - paid]                          │
+│  📌 THE BULLETIN BOARD                          │
+│  ┌────────┐ ┌────────┐ ┌────────┐              │
+│  │ISO:Dog │ │FOR SALE│ │⭐FEATD │              │
+│  │walker  │ │Teak    │ │[PHOTO] │              │
+│  │-Susan  │ │$400    │ │Estate  │              │
+│  │Willows │ │-Marg   │ │Sale    │              │
+│  └────────┘ └────────┘ └────────┘              │
+│  [Pin to the board - $49 →]                     │
 ├─────────────────────────────────────────────────┤
 │  👋 PARTING SHOT                                │
 │  [Closing message]                              │
@@ -313,13 +406,11 @@ Based on analysis of successful local newsletters:
 | Featured Event | 50% | $25 | $1,300 |
 | Business Spotlight | 25% | $25 | $1,300 |
 | Mid-Newsletter Native | 50% | $38 | $1,950 |
-| Poll Sponsor | 50% | $25 | $1,300 |
-| Job Listings | 25% | $9 | $455 |
-| Classifieds | 50% | $15 | $780 |
-| **Subtotal (Direct Sales)** | | **$199** | **$10,335** |
+| Bulletin Board Featured | 50% | $25 | $1,274 |
+| **Subtotal (Direct Sales)** | | **$175** | **$9,074** |
 | Beehiiv Ad Network | Auto | $25 | $1,300 |
 | Beehiiv Boosts | Auto | $15 | $780 |
-| **TOTAL** | | **$239** | **$12,415** |
+| **TOTAL** | | **$215** | **$11,154** |
 
 ### Optimistic Scenario (80% fill rate)
 
@@ -329,13 +420,11 @@ Based on analysis of successful local newsletters:
 | Featured Event | 80% | $40 | $2,080 |
 | Business Spotlight | 50% | $50 | $2,600 |
 | Mid-Newsletter Native | 80% | $60 | $3,120 |
-| Poll Sponsor | 80% | $40 | $2,080 |
-| Job Listings | 50% | $18 | $910 |
-| Classifieds | 80% | $24 | $1,248 |
-| **Subtotal (Direct Sales)** | | **$332** | **$17,238** |
+| Bulletin Board Featured | 80% | $39 | $2,038 |
+| **Subtotal (Direct Sales)** | | **$289** | **$15,038** |
 | Beehiiv Ad Network | Auto | $40 | $2,080 |
 | Beehiiv Boosts | Auto | $25 | $1,300 |
-| **TOTAL** | | **$397** | **$20,618** |
+| **TOTAL** | | **$354** | **$18,418** |
 
 ### Growth Scenario (4,000 subscribers)
 
@@ -408,24 +497,44 @@ A rotating list of local businesses you want to promote for free when slots are 
 {
   "partners": [
     {
-      "name": "Ottavio Italian Bakery",
-      "category": "restaurant",
-      "tagline": "Oak Bay's favourite bakery since 1991",
-      "description": "Fresh bread, pastries, and the best cappuccino on the Avenue.",
-      "cta": "Visit them at 2272 Oak Bay Ave",
-      "url": "https://ottavio.ca",
+      "name": "Ottavio Italian Bakery & Delicatessen",
+      "category": "food",
+      "tagline": "Where Oak Bay gets its bread, cheese & espresso. Since 1997.",
+      "description": "Andrew and Monica built this place with their own hands—bread racks, tiled floors, the works. Nearly three decades later, it's still where the neighbourhood comes for fresh-baked loaves, imported Italian goods, and the kind of espresso that ruins all other espresso for you.",
+      "cta": "Oak Bay Ave · Mon-Sat 9-5",
+      "url": "https://www.ottaviovictoria.com",
       "last_featured": null,
       "priority": 1
     },
     {
-      "name": "Oak Bay Bikes",
-      "category": "retail",
-      "tagline": "Your neighbourhood bike shop",
-      "description": "Sales, service, and rentals. Family-owned since 2005.",
-      "cta": "Drop by for a tune-up",
-      "url": "https://oakbaybikes.com",
+      "name": "PressurePros",
+      "category": "home_services",
+      "tagline": "Your driveway called. It's embarrassed.",
+      "description": "Pressure washing, gutter cleaning, window washing—the stuff you keep meaning to do. $5M insured, WorkSafeBC certified, and they actually answer the phone. Currently booking holiday lights installation if you want to be *that* house on the street.",
+      "cta": "Free quotes: (236) 237-5551",
+      "url": "https://www.pressurepros.ca",
       "last_featured": null,
       "priority": 2
+    },
+    {
+      "name": "Shawnigan Retreats",
+      "category": "travel",
+      "tagline": "Your inbox can't find you here.",
+      "description": "Lakefront luxury 45 minutes from Oak Bay. Private dock, Finnish sauna, pickleball court, chef's kitchen, and enough beds for the whole extended family. Perfect for the retreat where you actually want to show up—or the wedding where everyone stays together.",
+      "cta": "Sleeps 2-16 on Shawnigan Lake",
+      "url": "https://www.shawniganretreats.com",
+      "last_featured": null,
+      "priority": 3
+    },
+    {
+      "name": "Liv Cafe & Bistro",
+      "category": "food",
+      "tagline": "Farm-to-table. Literally. They own the farm.",
+      "description": "Chef-owners Louise and Milton grow their own produce in Saanich and turn it into the kind of brunch that makes you rethink your own cooking. The shakshuka is absurd. The dinner menu goes from peri-peri chicken to duck breast. Tiny room, huge flavours.",
+      "cta": "713 St. Patrick St · Brunch Wed-Sun, Dinner Thu-Sat",
+      "url": "https://www.livcafeandbistro.ca",
+      "last_featured": null,
+      "priority": 4
     }
   ],
   "rotation_rules": {
@@ -442,16 +551,64 @@ A rotating list of local businesses you want to promote for free when slots are 
 3. Balance categories (don't show 3 restaurants in a row)
 4. Mark `last_featured` after use
 
-**Goodwill Partner Ad Format:**
+**Goodwill Partner Ad Formats:**
+
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │  ❤️ NEIGHBOUR SPOTLIGHT                                        │
 │                                                                 │
-│  Ottavio Italian Bakery                                         │
-│  Oak Bay's favourite bakery since 1991                          │
+│  Ottavio Italian Bakery & Delicatessen                          │
+│  Where Oak Bay gets its bread, cheese & espresso. Since 1997.   │
 │                                                                 │
-│  Fresh bread, pastries, and the best cappuccino on the Avenue.  │
-│  Visit them at 2272 Oak Bay Ave                                 │
+│  Andrew and Monica built this place with their own hands—bread  │
+│  racks, tiled floors, the works. Nearly three decades later,    │
+│  it's still where the neighbourhood comes for fresh-baked       │
+│  loaves, imported Italian goods, and the kind of espresso that  │
+│  ruins all other espresso for you.                              │
+│                                                                 │
+│  Oak Bay Ave · Mon-Sat 9-5                                      │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│  ❤️ NEIGHBOUR SPOTLIGHT                                        │
+│                                                                 │
+│  PressurePros                                                   │
+│  Your driveway called. It's embarrassed.                        │
+│                                                                 │
+│  Pressure washing, gutter cleaning, window washing—the stuff    │
+│  you keep meaning to do. $5M insured, WorkSafeBC certified,     │
+│  and they actually answer the phone. Currently booking holiday  │
+│  lights installation if you want to be *that* house.            │
+│                                                                 │
+│  Free quotes: (236) 237-5551                                    │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│  ❤️ NEIGHBOUR SPOTLIGHT                                        │
+│                                                                 │
+│  Shawnigan Retreats                                             │
+│  Your inbox can't find you here.                                │
+│                                                                 │
+│  Lakefront luxury 45 minutes from Oak Bay. Private dock,        │
+│  Finnish sauna, pickleball court, chef's kitchen, and enough    │
+│  beds for the whole extended family. Perfect for the retreat    │
+│  where you actually want to show up.                            │
+│                                                                 │
+│  Sleeps 2-16 on Shawnigan Lake                                  │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│  ❤️ NEIGHBOUR SPOTLIGHT                                        │
+│                                                                 │
+│  Liv Cafe & Bistro                                              │
+│  Farm-to-table. Literally. They own the farm.                   │
+│                                                                 │
+│  Chef-owners Louise and Milton grow their own produce in        │
+│  Saanich and turn it into the kind of brunch that makes you     │
+│  rethink your own cooking. The shakshuka is absurd. Tiny room,  │
+│  huge flavours.                                                 │
+│                                                                 │
+│  713 St. Patrick St · Brunch Wed-Sun, Dinner Thu-Sat            │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -572,9 +729,7 @@ When no paid or goodwill content available, promote:
 | Featured Event | Paid event | Community event highlight | Sister pub event |
 | Business Spotlight | Paid spotlight | Goodwill partner | Referral program |
 | Mid-Newsletter | Paid native ad | Goodwill partner | Cross-promo |
-| Poll Sponsor | Paid sponsor | None (just unsponsored) | Tip line CTA |
-| Job Listing | Paid job | Municipality job (free) | "Hiring? Post here" |
-| Classifieds | Paid classified | None (skip section) | Community CTA |
+| Bulletin Board | Paid featured ($49) | Facebook group posts (free, incl. jobs) | "Pin to the board" CTA |
 
 ---
 
@@ -661,9 +816,11 @@ For each ad slot in the newsletter:
 |------|---------|
 | `publications/oak-bay-local/template.html` | Add new ad unit HTML blocks |
 | `publications/oak-bay-local/ad-units.html` | Standalone ad unit designs |
+| `publications/oak-bay-local/bulletin-board.html` | Corkboard classifieds with CSS styling |
 | `data/goodwill-partners.json` | Fallback inventory of local businesses |
 | `data/house-ads.json` | Self-promotion ads with rotation tracking |
 | `.claude/commands/write.md` | Add slot-filling logic with fallbacks |
+| `.claude/commands/research.md` | Add bulletin board post classification |
 | `.claude/skills/monetization.md` | Update with new pricing/products |
 | `docs/advertiser-guide.md` | Public-facing ad info |
 | `output/oak-bay-local/newsletter-with-ads.html` | Preview with all units |
