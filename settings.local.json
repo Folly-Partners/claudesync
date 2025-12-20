@@ -86,7 +86,12 @@
       "mcp__firecrawl-mcp__firecrawl_scrape",
       "Skill(deep-env)",
       "mcp__apify__call-actor",
-      "mcp__apify__apify-slash-rag-web-browser"
+      "mcp__apify__apify-slash-rag-web-browser",
+      "Skill(compound-engineering:*)",
+      "mcp__plugin_compound-engineering_pw__browser_navigate",
+      "mcp__plugin_compound-engineering_pw__browser_fill_form",
+      "mcp__plugin_compound-engineering_pw__browser_click",
+      "mcp__plugin_compound-engineering_pw__browser_wait_for"
     ],
     "deny": [],
     "ask": []

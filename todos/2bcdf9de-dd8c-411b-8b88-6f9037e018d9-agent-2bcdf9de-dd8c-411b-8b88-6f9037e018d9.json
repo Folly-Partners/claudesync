@@ -1,37 +1,22 @@
 [
   {
-    "content": "Phase 1: Typography - Change body font to serif",
+    "content": "Fix CRITICAL projection bug - use actual company margin instead of default 15%",
     "status": "completed",
-    "activeForm": "Updating typography to serif font"
+    "activeForm": "Fixing projection EBITDA calculation bug"
   },
   {
-    "content": "Phase 2: Editable Assumptions System - Types and component",
+    "content": "Redesign Assumptions Editor - always visible, table layout",
     "status": "completed",
-    "activeForm": "Building editable assumptions system"
+    "activeForm": "Redesigning assumptions editor"
   },
   {
-    "content": "Phase 3: 5-Year Projection Table with 4 scenarios",
+    "content": "Add elegant spreadsheet-style tables to Financial Summary",
     "status": "completed",
-    "activeForm": "Creating 5-year projection tables"
+    "activeForm": "Adding financial tables"
   },
   {
-    "content": "Phase 4: Debt Capacity Analysis section",
-    "status": "completed",
-    "activeForm": "Building debt capacity analysis"
-  },
-  {
-    "content": "Phase 5: Cash-on-Cash Return Analysis",
-    "status": "completed",
-    "activeForm": "Creating cash-on-cash return analysis"
-  },
-  {
-    "content": "Phase 6: Bank-Specific PowerPoint Export",
-    "status": "in_progress",
-    "activeForm": "Implementing PowerPoint export"
-  },
-  {
-    "content": "Phase 7: Lender Recommendation Engine",
+    "content": "Improve AI photo search for leadership",
     "status": "pending",
-    "activeForm": "Building lender recommendation engine"
+    "activeForm": "Improving leadership photo search"
   }
 ]
