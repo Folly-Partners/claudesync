@@ -1,1 +1,32 @@
-[]
+[
+  {
+    "content": "Analyze current dashboard chart/graph sections",
+    "status": "completed",
+    "activeForm": "Analyzing current dashboard"
+  },
+  {
+    "content": "Identify all assessments and what's currently displayed",
+    "status": "completed",
+    "activeForm": "Identifying assessments displayed"
+  },
+  {
+    "content": "Add asrs_18 to Wellbeing section header condition",
+    "status": "in_progress",
+    "activeForm": "Adding asrs_18 to section header"
+  },
+  {
+    "content": "Check ShareProfileModal for missing assessments",
+    "status": "pending",
+    "activeForm": "Checking shared profile data"
+  },
+  {
+    "content": "Update AI prompt for shared profiles to include all tests",
+    "status": "pending",
+    "activeForm": "Updating AI prompt"
+  },
+  {
+    "content": "Test and commit changes",
+    "status": "pending",
+    "activeForm": "Testing and committing"
+  }
+]
