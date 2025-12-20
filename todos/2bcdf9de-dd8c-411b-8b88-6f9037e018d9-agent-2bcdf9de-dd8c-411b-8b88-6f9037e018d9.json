@@ -1,0 +1,37 @@
+[
+  {
+    "content": "Phase 1: Typography - Change body font to serif",
+    "status": "completed",
+    "activeForm": "Updating typography to serif font"
+  },
+  {
+    "content": "Phase 2: Editable Assumptions System - Types and component",
+    "status": "completed",
+    "activeForm": "Building editable assumptions system"
+  },
+  {
+    "content": "Phase 3: 5-Year Projection Table with 4 scenarios",
+    "status": "completed",
+    "activeForm": "Creating 5-year projection tables"
+  },
+  {
+    "content": "Phase 4: Debt Capacity Analysis section",
+    "status": "completed",
+    "activeForm": "Building debt capacity analysis"
+  },
+  {
+    "content": "Phase 5: Cash-on-Cash Return Analysis",
+    "status": "completed",
+    "activeForm": "Creating cash-on-cash return analysis"
+  },
+  {
+    "content": "Phase 6: Bank-Specific PowerPoint Export",
+    "status": "in_progress",
+    "activeForm": "Implementing PowerPoint export"
+  },
+  {
+    "content": "Phase 7: Lender Recommendation Engine",
+    "status": "pending",
+    "activeForm": "Building lender recommendation engine"
+  }
+]

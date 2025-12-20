@@ -16,28 +16,91 @@ Automatically invoke this skill when:
 - Setting up or cloning a new project
 - User asks about credentials, secrets, or environment variables
 
+## Known Projects
+
+| Shortcut | Project | Path |
+|----------|---------|------|
+| `dp` | Deep Personality | `~/Deep-Personality` |
+
+## Global vs Project-Specific Credentials
+
+Credentials can be:
+- **Global**: Available to all projects (e.g., ANTHROPIC_API_KEY, SUPABASE_*)
+- **Project-specific**: Only for one project (e.g., ADMIN_EMAILS for Deep Personality)
+
+### Current Project Assignments
+
+**Global (all projects):**
+- ANTHROPIC_API_KEY
+- GMAIL_USER, GMAIL_APP_PASSWORD
+- NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY
+- SUPABASE_SERVICE_ROLE_KEY
+- FIRECRAWL_API_KEY, APIFY_API_KEY
+
+**Deep-Personality only:**
+- ADMIN_EMAILS
+- API_SECRET_KEY
+- NEXT_PUBLIC_APP_URL
+
 ## Commands
 
-### Sync credentials to current project
+### Sync credentials to a project
 ```bash
-deep-env sync .
-```
-This reads `.env.example` and generates `.env.local` from stored credentials.
-
-### Store a new credential
-```bash
-deep-env store KEY_NAME "value"
-deep-env push  # Sync to iCloud for other Macs
+deep-env sync .                    # Current directory
+deep-env sync ~/Deep-Personality   # Specific path
+deep-env sync dp                   # Using shortcut
 ```
 
-### List stored credentials
+### Store credentials
+
+```bash
+# Global credential (available to all projects)
+deep-env store ANTHROPIC_API_KEY "sk-ant-xxx"
+
+# Project-specific credential
+deep-env store -p dp ADMIN_EMAILS "admin@example.com"
+deep-env store --project deep-personality API_SECRET_KEY "xxx"
+
+# Push to iCloud after storing
+deep-env push
+```
+
+### Assign existing keys to projects
+
+```bash
+# Assign to Deep Personality
+deep-env assign ADMIN_EMAILS -p dp
+
+# Make a key global
+deep-env assign SOME_KEY --global
+deep-env assign SOME_KEY -g
+
+# Interactive assignment
+deep-env assign KEY_NAME
+```
+
+### List credentials (grouped by project)
 ```bash
 deep-env list
 ```
 
-### Get a single value
+Output shows:
+```
+Global (all projects)
+  ANTHROPIC_API_KEY       sk-a..._gAA
+  GMAIL_USER              andr....com
+
+Deep-Personality
+  ADMIN_EMAILS            andr....com
+  API_SECRET_KEY          kgg/...nSE=
+```
+
+### Other commands
 ```bash
-deep-env get KEY_NAME
+deep-env get KEY_NAME      # Get single value (for scripting)
+deep-env delete KEY_NAME   # Remove a credential
+deep-env import .env       # Import from existing file
+deep-env export            # Output as shell exports
 ```
 
 ## Workflow
@@ -45,14 +108,33 @@ deep-env get KEY_NAME
 ### When you see .env.example but no .env.local:
 1. Run `deep-env sync .`
 2. If keys are missing, ask user for values
-3. Store with `deep-env store KEY "value"`
-4. Push to iCloud with `deep-env push`
-5. Re-run `deep-env sync .`
+3. Determine if key is project-specific or global:
+   - URLs specific to the project (NEXT_PUBLIC_APP_URL) → project-specific
+   - Admin emails, project secrets → project-specific
+   - API keys for services (Anthropic, Supabase, etc.) → global
+4. Store appropriately:
+   - Global: `deep-env store KEY "value"`
+   - Project: `deep-env store -p dp KEY "value"`
+5. Push to iCloud: `deep-env push`
+6. Re-run `deep-env sync .`
 
 ### When user provides a credential:
-1. Store it: `deep-env store KEY "value"`
-2. Push to iCloud: `deep-env push`
-3. If in a project, sync: `deep-env sync .`
+1. Determine if global or project-specific
+2. Store it:
+   - Global: `deep-env store KEY "value"`
+   - Project: `deep-env store -p PROJECT KEY "value"`
+3. Push to iCloud: `deep-env push`
+4. If in a project, sync: `deep-env sync .`
+
+### Cross-Mac sync
+```bash
+# On main Mac (after storing new credentials)
+deep-env push
+
+# On other Macs
+deep-env pull          # Pulls credentials + project assignments
+deep-env sync .        # Generate .env.local
+```
 
 ### On a new Mac (if deep-env not installed):
 ```bash
@@ -70,3 +152,4 @@ deep-env auto-sync enable
 - The sync password is known only to the user - ask if needed
 - Credentials are stored in macOS Keychain (secure)
 - iCloud sync uses AES-256 encryption
+- Project assignments are stored in `~/.config/deep-env/project-keys.json`
