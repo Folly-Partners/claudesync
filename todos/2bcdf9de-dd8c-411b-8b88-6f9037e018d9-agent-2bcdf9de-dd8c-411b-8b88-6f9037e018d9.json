@@ -1,1 +1,82 @@
-[]
+[
+  {
+    "content": "Fix missing useEffect dependency in app/page.tsx",
+    "status": "completed",
+    "activeForm": "Fixing useEffect dependency"
+  },
+  {
+    "content": "Fix unsafe non-null assertions in analysisStorage.ts",
+    "status": "in_progress",
+    "activeForm": "Fixing non-null assertions"
+  },
+  {
+    "content": "Add accessibility (ARIA labels, keyboard focus)",
+    "status": "pending",
+    "activeForm": "Adding accessibility support"
+  },
+  {
+    "content": "Simplify storage layer - remove unused methods",
+    "status": "pending",
+    "activeForm": "Simplifying storage layer"
+  },
+  {
+    "content": "Simplify SaveButton - remove complex time display",
+    "status": "pending",
+    "activeForm": "Simplifying SaveButton"
+  },
+  {
+    "content": "Fix dashboard filtering - use useMemo",
+    "status": "pending",
+    "activeForm": "Fixing dashboard filtering"
+  },
+  {
+    "content": "Add index caching to storage",
+    "status": "pending",
+    "activeForm": "Adding index caching"
+  },
+  {
+    "content": "Debounce dashboard search (150ms)",
+    "status": "pending",
+    "activeForm": "Adding search debounce"
+  },
+  {
+    "content": "Increase auto-save debounce to 2s",
+    "status": "pending",
+    "activeForm": "Increasing auto-save debounce"
+  },
+  {
+    "content": "Add React.memo to AnalysisCard",
+    "status": "pending",
+    "activeForm": "Adding React.memo"
+  },
+  {
+    "content": "Add useMemo for calculations in AnalysisReport",
+    "status": "pending",
+    "activeForm": "Adding useMemo for calculations"
+  },
+  {
+    "content": "Add Snapshots feature",
+    "status": "pending",
+    "activeForm": "Implementing snapshots"
+  },
+  {
+    "content": "Add Deal Notes feature",
+    "status": "pending",
+    "activeForm": "Implementing deal notes"
+  },
+  {
+    "content": "Add Tags feature",
+    "status": "pending",
+    "activeForm": "Implementing tags"
+  },
+  {
+    "content": "Add Compare Matrix feature",
+    "status": "pending",
+    "activeForm": "Implementing compare matrix"
+  },
+  {
+    "content": "Add Export/Import backup feature",
+    "status": "pending",
+    "activeForm": "Implementing backup feature"
+  }
+]

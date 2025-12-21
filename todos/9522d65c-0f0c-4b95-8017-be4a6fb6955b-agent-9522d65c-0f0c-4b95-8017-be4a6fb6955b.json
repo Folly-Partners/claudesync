@@ -1,0 +1,52 @@
+[
+  {
+    "content": "Scaffold Next.js 15 app in ~/overstory/web/",
+    "status": "completed",
+    "activeForm": "Scaffolding Next.js app"
+  },
+  {
+    "content": "Set up local SQLite database with schema",
+    "status": "completed",
+    "activeForm": "Setting up local database"
+  },
+  {
+    "content": "Build read-only dashboard (reads JSON files)",
+    "status": "completed",
+    "activeForm": "Building dashboard"
+  },
+  {
+    "content": "Build publication pipeline view",
+    "status": "completed",
+    "activeForm": "Building pipeline view"
+  },
+  {
+    "content": "Build public advertise storefront",
+    "status": "completed",
+    "activeForm": "Building storefront"
+  },
+  {
+    "content": "Set up Stripe checkout flow",
+    "status": "completed",
+    "activeForm": "Setting up Stripe"
+  },
+  {
+    "content": "Implement AI moderation with Claude Haiku",
+    "status": "in_progress",
+    "activeForm": "Implementing AI moderation"
+  },
+  {
+    "content": "Build moderation queue UI",
+    "status": "pending",
+    "activeForm": "Building moderation queue"
+  },
+  {
+    "content": "Add bulletin board classifieds page",
+    "status": "pending",
+    "activeForm": "Adding classifieds"
+  },
+  {
+    "content": "Build revenue dashboard",
+    "status": "pending",
+    "activeForm": "Building revenue dashboard"
+  }
+]

@@ -1,1 +1,27 @@
-[]
+[
+  {
+    "content": "Fix Stripe - delete .next/ and restart dev server",
+    "status": "completed",
+    "activeForm": "Fixing Stripe payment"
+  },
+  {
+    "content": "Fix dark mode in Dashboard.tsx",
+    "status": "completed",
+    "activeForm": "Fixing Dashboard dark mode"
+  },
+  {
+    "content": "Configure Stripe on Vercel for production",
+    "status": "completed",
+    "activeForm": "Configuring Stripe on Vercel"
+  },
+  {
+    "content": "Fix dark mode in Visualizations.tsx",
+    "status": "completed",
+    "activeForm": "Fixing Visualizations dark mode"
+  },
+  {
+    "content": "Push changes and redeploy",
+    "status": "in_progress",
+    "activeForm": "Pushing changes"
+  }
+]

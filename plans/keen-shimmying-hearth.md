@@ -1,837 +1,520 @@
-# Oak Bay Local Ad Unit Strategy & Revenue Plan
+# Add Pre-Publish Preview with Ads
 
-## Research Summary
-
-Based on analysis of successful local newsletters:
-
-| Newsletter | Model | Key Insight |
-|------------|-------|-------------|
-| [6AM City](https://6amcity.com/advertiser-portal) | Experience articles, giveaways, native ads | "We don't do anything unless it pays for itself" |
-| [Charlotte Agenda](https://digiday.com/media/charlotte-agenda-profitable/) | Category-exclusive annual sponsors, $10K campaign minimums | Fewer advertisers, deeper partnerships |
-| [Morning Brew](https://medium.com/@thenewsletternewsletter/a-deep-dive-into-sponsored-content-in-morning-brew-4f068ca93eb6) | Native ads written in-house, ~$50 CPM | Ads match editorial voice exactly |
-
-**Key Pricing Benchmarks:**
-- Local newsletter CPM: $25-75 ([Beehiiv](https://www.beehiiv.com/blog/newsletter-sponsorship-cost))
-- Hyper-local/niche premium: $50-100 CPM
-- Featured events: $50-300 flat fee
-- Annual partnerships: $3,000-10,000/month ([Charlotte Agenda](https://localmedia.org/2020/09/5-revenue-streams-that-have-local-news-startup-charlotte-agenda-running-strong-5-years-after-launching/))
+**Goal:** See the final newsletter with all ads/fallbacks filled BEFORE publishing to Beehiiv.
 
 ---
 
-## Oak Bay Local: Ad Unit Design
+## Current Workflow (Problem)
 
-### Assumptions
-- **Subscribers:** 2,000 (growing)
-- **Open rate:** 45% (900 opens per edition)
-- **Editions:** 1 per week (52/year)
-- **Geography:** Oak Bay only (~18,000 residents)
+```
+/research → /write → /preview → /publish --html
+                        ↓              ↓
+                  HTML without     Checks sponsorships,
+                  ads filled       fills ads, publishes
+                                   (no preview of final result)
+```
+
+**Problem:** User can't see which ads will be inserted until after publishing.
 
 ---
 
-## Ad Unit #1: Primary Sponsor ("Together With")
-
-**Position:** Top of newsletter, after header
-**Format:** Native advertorial, 100-130 words
-**Visual:** Logo + branded box with light background
+## Proposed Workflow
 
 ```
-┌─────────────────────────────────────────────────┐
-│  TOGETHER WITH  [Sponsor Logo]                  │
-│                                                 │
-│  Oak Bay Beach Hotel                            │
-│                                                 │
-│  The Fern is serving a special holiday tasting  │
-│  menu through January 5th. Six courses of       │
-│  locally-sourced Vancouver Island ingredients,  │
-│  paired with BC wines. Perfect for that         │
-│  post-holiday treat-yourself dinner.            │
-│                                                 │
-│  [Book your table →]                            │
-└─────────────────────────────────────────────────┘
-```
-
-**Pricing:**
-| Package | Price | Editions | Effective CPM |
-|---------|-------|----------|---------------|
-| Single | $125 | 1 | $139 |
-| Monthly (4x) | $400 | 4 | $111 |
-| Quarterly (12x) | $1,000 | 12 | $93 |
-| Annual (52x) | $3,500 | 52 | $75 |
-
-**Annual Revenue Potential:** $3,500-6,500 (if sold 52 weeks)
-
----
-
-## Ad Unit #2: Featured Event
-
-**Position:** Top of Events section (premium placement)
-**Format:** Enhanced event listing with description + image
-**Visual:** Highlighted box with "FEATURED" badge
-
-```
-┌─────────────────────────────────────────────────┐
-│  ⭐ FEATURED EVENT                              │
-│                                                 │
-│  🎭 A Wonderheads Christmas Carol               │
-│  Fri-Sun, Dec 19-21 | Metro Studio | $35        │
-│                                                 │
-│  Victoria's beloved mask theatre returns with   │
-│  their wordless, magical take on Dickens.       │
-│  Perfect for the whole family.                  │
-│                                                 │
-│  [Get tickets →]                                │
-└─────────────────────────────────────────────────┘
-```
-
-**Pricing:**
-| Package | Price | What They Get |
-|---------|-------|---------------|
-| Single Featured | $50 | 1 edition, top of events |
-| 4-Pack | $175 | 4 editions (save $25) |
-
-**Annual Revenue Potential:** $2,600 (1 per week)
-
----
-
-## Ad Unit #3: Business Spotlight
-
-**Position:** Within "Open & Closed" section
-**Format:** Enhanced business listing with description
-**Visual:** Highlighted with "SPOTLIGHT" badge
-
-```
-┌─────────────────────────────────────────────────┐
-│  ✨ BUSINESS SPOTLIGHT                          │
-│                                                 │
-│  🟢 NOW OPEN: Little Fox Bakehouse              │
-│  2187 Oak Bay Ave (formerly Crust location)     │
-│                                                 │
-│  The team behind Crust Bakery has opened their  │
-│  new concept - sourdough everything, plus the   │
-│  best cinnamon buns in Oak Bay. Open 7am-3pm    │
-│  Tuesday through Sunday.                        │
-│                                                 │
-│  [View menu →]                                  │
-└─────────────────────────────────────────────────┘
-```
-
-**Pricing:**
-| Package | Price | Duration |
-|---------|-------|----------|
-| Now Open Spotlight | $99 | 1 edition |
-| Coming Soon Teaser | $75 | 1 edition |
-| Grand Opening Bundle | $199 | 3 editions (teaser + 2 spotlights) |
-
-**Annual Revenue Potential:** $2,500-5,000 (25-50 businesses/year)
-
----
-
-## Ad Unit #4: Mid-Newsletter Native Ad
-
-**Position:** Between major sections (after News or before Events)
-**Format:** Native content block, matches editorial style
-**Visual:** Subtle "Sponsored" label, same typography as content
-
-```
-┌─────────────────────────────────────────────────┐
-│  SPONSORED                                       │
-│                                                 │
-│  🏠 Thinking of selling in 2025?                │
-│                                                 │
-│  The Oak Bay market is heating up. Sarah Chen   │
-│  at Oak Bay Realty has helped 47 families find  │
-│  their perfect home this year. Free home        │
-│  valuation for Oak Bay Local readers.           │
-│                                                 │
-│  [Book a consultation →]                        │
-└─────────────────────────────────────────────────┘
-```
-
-**Pricing:**
-| Package | Price | Editions |
-|---------|-------|----------|
-| Single | $75 | 1 |
-| Monthly (4x) | $250 | 4 |
-
-**Annual Revenue Potential:** $3,000-3,900 (1 per week)
-
----
-
-## Ad Unit #5: The Bulletin Board (Classifieds Reimagined)
-
-**The Concept:** A visual community corkboard that feels like the one at the Oak Bay Ave coffee shop. Thumbtacks, handwritten notes, torn edges, polaroid-style photos. Mix FREE organic posts scraped from the Facebook group with PAID premium placements ($49).
-
-**Position:** Dedicated section, highly visual, before footer
-**Format:** Visual grid of "pinned notes" with different styles
-**Visual:** Corkboard texture background, tilted cards, thumbtack icons, handwritten fonts
-
-### The Design
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                                                                             │
-│  📌 THE BULLETIN BOARD                                                      │
-│  ═══════════════════════════════════════════════════════════════════════   │
-│  Your neighbours are looking for stuff. Got stuff? We should talk.          │
-│                                                                             │
-│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐          │
-│  │ 📍 LOOKING FOR   │  │ 🏷️ FOR SALE     │  │ ⭐ FEATURED      │          │
-│  │                  │  │                  │  │    [$49 PAID]    │          │
-│  │ ISO: Someone to  │  │ Mid-century      │  │ ┌────────────┐  │          │
-│  │ walk my golden   │  │ teak sideboard,  │  │ │  [PHOTO]   │  │          │
-│  │ retriever 2x/wk  │  │ great condition. │  │ └────────────┘  │          │
-│  │ while I recover  │  │ $400 OBO.        │  │                  │          │
-│  │ from knee        │  │                  │  │ ESTATE SALE     │          │
-│  │ surgery. Oak Bay │  │ 📷 See photo     │  │ Sat & Sun 9-3   │          │
-│  │ only please!     │  │                  │  │ 2847 Beach Dr   │          │
-│  │                  │  │ - Margaret T.    │  │                  │          │
-│  │ - Susan K.       │  │   Estevan        │  │ 50 years of     │          │
-│  │   Willows        │  │                  │  │ treasures.      │          │
-│  │                  │  │ [Reply →]        │  │ Furniture, art, │          │
-│  │ [Reply →]        │  │                  │  │ vintage kitsch. │          │
-│  │                  │  │                  │  │                  │          │
-│  │ 💬 3 neighbours  │  │ 💬 2 interested  │  │ [See details →] │          │
-│  │    responded     │  │                  │  │                  │          │
-│  └──────────────────┘  └──────────────────┘  └──────────────────┘          │
-│                                                                             │
-│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐          │
-│  │ 🔧 SERVICES      │  │ 🐕 LOST & FOUND  │  │ 💡 RECS WANTED   │          │
-│  │                  │  │                  │  │                  │          │
-│  │ Retired          │  │ FOUND: Grey      │  │ Looking for a    │          │
-│  │ carpenter.       │  │ tabby cat near   │  │ good plumber     │          │
-│  │ Small jobs only. │  │ Henderson Rd.    │  │ who won't charge │          │
-│  │ Decks, fences,   │  │ Very friendly,   │  │ $200 just to     │          │
-│  │ that shelf you   │  │ no collar.       │  │ look at my       │          │
-│  │ keep meaning to  │  │                  │  │ toilet.          │          │
-│  │ build.           │  │ 📷 Photo         │  │                  │          │
-│  │                  │  │                  │  │ - Dave M.        │          │
-│  │ - Bob H.         │  │ - The Hendersons │  │   Oak Bay Ave    │          │
-│  │   Uplands        │  │                  │  │                  │          │
-│  │                  │  │ [Is this yours?] │  │ 💬 7 suggestions │          │
-│  │ [Get in touch →] │  │                  │  │                  │          │
-│  └──────────────────┘  └──────────────────┘  └──────────────────┘          │
-│                                                                             │
-│  ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │
-│                                                                             │
-│  📌 PIN YOUR OWN NOTE                                                       │
-│                                                                             │
-│  Got something to sell? Need something? Want the whole                      │
-│  neighbourhood to see it? $49 gets you a featured spot                      │
-│  with a photo on the board.                                                 │
-│                                                                             │
-│  [Pin it to the board →]                                                    │
-│                                                                             │
-│  (Or just post in the Oak Bay Local Facebook group - we                     │
-│   check it every week and feature the best posts for free!)                 │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
-### Content Sources
-
-**FREE (from Facebook Group):**
-- ISO / Looking For posts
-- For Sale posts (organic, no photo featured)
-- Lost & Found
-- Recommendations Asked
-- Services Offered
-- Garage Sale announcements
-
-**PAID ($49 via Beehiiv):**
-- Featured placement (top-right, larger)
-- Includes photo
-- Full description (not truncated)
-- Direct link/CTA button
-- "⭐ FEATURED" badge
-
-### Category Icons & Styling
-
-| Category | Icon | Card Style | Note Style |
-|----------|------|------------|------------|
-| Looking For / ISO | 📍 | Yellow sticky note, slightly tilted | Handwritten feel |
-| For Sale | 🏷️ | White index card, price tag corner | Clean, minimal |
-| Featured (Paid) | ⭐ | Polaroid-style with photo slot | Premium, centered |
-| Services | 🔧 | Blue sticky note | Professional but casual |
-| Lost & Found | 🐕 or 🐱 | Torn paper edge, urgent feel | LOST in red, FOUND in green |
-| Recs Wanted | 💡 | Green sticky note | Question mark doodle |
-| Garage/Estate Sale | 🏠 | Newsprint texture | Weekend warrior vibe |
-| Jobs / Hiring | 💼 | White card with bold header | Professional, clear salary |
-
-### Visual Details (HTML/CSS)
-
-```
-DESIGN ELEMENTS:
-├── Background: Cork texture (#C4A574 with noise)
-├── Cards: Slightly rotated (-2° to +2°)
-├── Thumbtacks: Red, blue, green, yellow circles with shadow
-├── Shadows: Soft drop shadow on each "pinned" note
-├── Fonts:
-│   ├── Headers: "Permanent Marker" or "Patrick Hand"
-│   └── Body: System sans-serif for readability
-├── Borders: Slightly torn/rough edges on some cards
-└── Engagement: "💬 X neighbours responded" shows FB comment count
-```
-
-### Facebook Scraping Logic
-
-Each week during `/research`:
-
-1. **Scrape Oak Bay Local Facebook group** (last 7 days)
-2. **Classify posts by category:**
-   - Keywords: "ISO", "looking for", "anyone know" → Looking For
-   - Keywords: "for sale", "selling", "$", "OBO" → For Sale
-   - Keywords: "lost", "found", "missing" → Lost & Found
-   - Keywords: "recommend", "suggestion", "good [service]" → Recs Wanted
-   - Keywords: "garage sale", "estate sale", "moving sale" → Sales
-   - Keywords: "hiring", "job", "position", "looking for staff" → Jobs
-3. **Filter for high engagement:**
-   - Prioritize posts with 3+ comments/likes
-   - Skip posts older than 7 days
-   - Skip posts that are just complaints/rants
-4. **Extract for bulletin board:**
-   - Author first name + last initial + neighbourhood
-   - Truncated text (50-75 words max)
-   - Comment count for "💬 X responded"
-   - Original post URL for "Reply →" link
-
-### Pricing Model
-
-| Placement | Price | What They Get |
-|-----------|-------|---------------|
-| Featured Bulletin Spot | $49 | Photo, full description, top placement, 1 week |
-| Service Provider Listing | $49 | Recurring weekly spot, professional card |
-| Garage/Estate Sale Boost | $29 | Featured for 1 week, includes map link |
-
-**How it works (Beehiiv behind the scenes):**
-1. User clicks "Pin it to the board" → goes to Beehiiv storefront
-2. Pays $49 via Beehiiv checkout
-3. Submits photo + description via Beehiiv's ad creation flow
-4. Claude checks Beehiiv for paid placements during `/write`
-5. Paid placements get ⭐ FEATURED spot with photo
-
-### Revenue Projection
-
-| Scenario | Paid Spots/Week | Annual |
-|----------|-----------------|--------|
-| Conservative | 0.5 | $1,274 |
-| Moderate | 1 | $2,548 |
-| Optimistic | 2 | $5,096 |
-
-*Plus organic engagement value: Readers come back for the bulletin board content*
-
-### Sample Copy Options
-
-**Section Header:**
-> "Your neighbours are looking for stuff. Got stuff? We should talk."
-
-> "The digital corkboard. No thumbtacks required."
-
-> "What Oak Bay is buying, selling, and searching for this week."
-
-**CTA for Paid:**
-> "Pin it to the board ($49) - includes photo, full description, and 2,000 pairs of Oak Bay eyes."
-
-> "Want the spotlight? $49 gets you featured with a photo. Or just post in the Facebook group and we might feature you for free."
-
-**Bottom Note:**
-> "Posts sourced from Oak Bay Local Facebook group. Want to be featured? Post there or pay $49 for guaranteed placement with a photo."
-
----
-
-## Newsletter Layout with All Ad Units
-
-```
-┌─────────────────────────────────────────────────┐
-│  [HEADER: Logo, Date, Weather]                  │
-├─────────────────────────────────────────────────┤
-│  Good morning, neighbours!                      │
-│  [Opening paragraph...]                         │
-├─────────────────────────────────────────────────┤
-│  💰 TOGETHER WITH [Primary Sponsor]             │
-│  [100-130 word native ad]                       │
-├─────────────────────────────────────────────────┤
-│  📰 IN THE NEWS                                 │
-│  [News item 1]                                  │
-│  [News item 2]                                  │
-│  [News item 3]                                  │
-├─────────────────────────────────────────────────┤
-│  💬 PEOPLE ARE TALKING ABOUT                    │
-│  [Facebook group highlights]                    │
-├─────────────────────────────────────────────────┤
-│  📅 SPONSORED [Mid-Newsletter Native Ad]        │
-│  [Native ad content]                            │
-├─────────────────────────────────────────────────┤
-│  📅 COMMUNITY EVENTS                            │
-│  ⭐ [FEATURED EVENT - paid]                     │
-│  [Event 2]                                      │
-│  [Event 3]                                      │
-│  [Event 4]                                      │
-├─────────────────────────────────────────────────┤
-│  📊 THIS WEEK'S POLL                            │
-│  [Poll question + options]                      │
-├─────────────────────────────────────────────────┤
-│  🏪 OPEN & CLOSED IN OAK BAY                    │
-│  ✨ [BUSINESS SPOTLIGHT - paid]                 │
-│  [Organic business listing]                     │
-├─────────────────────────────────────────────────┤
-│  📌 THE BULLETIN BOARD                          │
-│  ┌────────┐ ┌────────┐ ┌────────┐              │
-│  │ISO:Dog │ │FOR SALE│ │⭐FEATD │              │
-│  │walker  │ │Teak    │ │[PHOTO] │              │
-│  │-Susan  │ │$400    │ │Estate  │              │
-│  │Willows │ │-Marg   │ │Sale    │              │
-│  └────────┘ └────────┘ └────────┘              │
-│  [Pin to the board - $49 →]                     │
-├─────────────────────────────────────────────────┤
-│  👋 PARTING SHOT                                │
-│  [Closing message]                              │
-├─────────────────────────────────────────────────┤
-│  [Sister publication promos]                    │
-├─────────────────────────────────────────────────┤
-│  [FOOTER]                                       │
-│  Want to reach 2,000 Oak Bay residents?         │
-│  [Advertise with us →]                          │
-└─────────────────────────────────────────────────┘
+/research → /write → /preview → /prepare → /publish
+                        ↓           ↓           ↓
+                  Basic HTML   Check sponsors,  Just sends the
+                  preview      fill ads,        prepared HTML
+                               show final       to Beehiiv
+                               preview
 ```
 
 ---
 
-## Revenue Model: 1 Edition Per Week
+## Implementation Options
 
-### Conservative Scenario (50% fill rate)
+### Option A: New `/prepare` Command
 
-| Ad Unit | Fill Rate | Weekly | Annual |
-|---------|-----------|--------|--------|
-| Primary Sponsor | 50% | $62 | $3,250 |
-| Featured Event | 50% | $25 | $1,300 |
-| Business Spotlight | 25% | $25 | $1,300 |
-| Mid-Newsletter Native | 50% | $38 | $1,950 |
-| Bulletin Board Featured | 50% | $25 | $1,274 |
-| **Subtotal (Direct Sales)** | | **$175** | **$9,074** |
-| Beehiiv Ad Network | Auto | $25 | $1,300 |
-| Beehiiv Boosts | Auto | $15 | $780 |
-| **TOTAL** | | **$215** | **$11,154** |
+Create a new command that:
+1. Runs sponsorship checker (browser agent)
+2. Fills ad slots with 3-tier fallback
+3. Saves prepared HTML to `output/{pub}/{date}-prepared.html`
+4. Opens in browser for review
+5. Logs decisions to revenue-log.json (but doesn't mark partners as "used" yet)
 
-### Optimistic Scenario (80% fill rate)
+Then `/publish` just sends the prepared file.
 
-| Ad Unit | Fill Rate | Weekly | Annual |
-|---------|-----------|--------|--------|
-| Primary Sponsor | 80% | $100 | $5,200 |
-| Featured Event | 80% | $40 | $2,080 |
-| Business Spotlight | 50% | $50 | $2,600 |
-| Mid-Newsletter Native | 80% | $60 | $3,120 |
-| Bulletin Board Featured | 80% | $39 | $2,038 |
-| **Subtotal (Direct Sales)** | | **$289** | **$15,038** |
-| Beehiiv Ad Network | Auto | $40 | $2,080 |
-| Beehiiv Boosts | Auto | $25 | $1,300 |
-| **TOTAL** | | **$354** | **$18,418** |
+### Option B: Modify `/preview` to Include Ads
 
-### Growth Scenario (4,000 subscribers)
+Add `--with-ads` flag to existing preview command:
+- `/preview` - Basic preview (current behavior)
+- `/preview --with-ads` - Runs sponsorship check, fills slots, shows final preview
 
-At 4,000 subscribers with 80% fill:
-- Double all CPM-based pricing
-- **Annual potential: $35,000-40,000**
+### Option C: Add `--prepare` flag to `/publish`
+
+- `/publish --prepare` - Check sponsors, fill ads, show preview, DON'T send
+- `/publish --send` - Send previously prepared HTML
+- `/publish` (no flags) - Current behavior (prepare + send in one step)
 
 ---
 
-## Premium Products (Future)
+## Recommendation: Option A (New `/prepare` Command)
 
-### Annual Partnership Program
-Like Charlotte Agenda's model - category-exclusive annual sponsors:
-
-| Category | Annual Price | What They Get |
-|----------|--------------|---------------|
-| Real Estate | $5,000 | 12 primary sponsors + exclusive category |
-| Restaurant/Dining | $3,500 | 12 mid-newsletter + monthly featured |
-| Home Services | $2,500 | 12 classifieds + 4 spotlights |
-
-### Experience Articles (6AM City Model)
-First-person "I tried X" articles written by Oak Bay Local:
-- $500 per article
-- Includes social promotion
-- Authentic voice, not ad copy
-
-### Giveaway Campaigns
-2-week multimedia campaigns:
-- $750 per campaign
-- Email + social media exposure
-- Lead generation for advertiser
-
----
-
-## Fallback System: Never Empty Ad Slots
-
-### The Problem
-Empty ad slots look unprofessional and waste valuable real estate.
-
-### The Solution: 3-Tier Fallback System
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│  TIER 1: Paid Advertiser                                        │
-│  ↓ (if no paid ad booked)                                       │
-│  TIER 2: Goodwill Partners (local businesses you want to help)  │
-│  ↓ (if no partners available)                                   │
-│  TIER 3: House Ads (self-promotion)                             │
-└─────────────────────────────────────────────────────────────────┘
-```
-
----
-
-### Tier 1: Paid Advertisers
-Check Beehiiv for booked placements. If filled, use paid ad.
-
----
-
-### Tier 2: Goodwill Partners (Fallback Inventory)
-
-**File:** `data/goodwill-partners.json`
-
-A rotating list of local businesses you want to promote for free when slots are unfilled. Benefits:
-- Builds relationships with potential future advertisers
-- Keeps newsletter looking full and professional
-- Supports community businesses
-- Creates social proof ("Look who advertises with us")
-
-```json
-{
-  "partners": [
-    {
-      "name": "Ottavio Italian Bakery & Delicatessen",
-      "category": "food",
-      "tagline": "Where Oak Bay gets its bread, cheese & espresso. Since 1997.",
-      "description": "Andrew and Monica built this place with their own hands—bread racks, tiled floors, the works. Nearly three decades later, it's still where the neighbourhood comes for fresh-baked loaves, imported Italian goods, and the kind of espresso that ruins all other espresso for you.",
-      "cta": "Oak Bay Ave · Mon-Sat 9-5",
-      "url": "https://www.ottaviovictoria.com",
-      "last_featured": null,
-      "priority": 1
-    },
-    {
-      "name": "PressurePros",
-      "category": "home_services",
-      "tagline": "Your driveway called. It's embarrassed.",
-      "description": "Pressure washing, gutter cleaning, window washing—the stuff you keep meaning to do. $5M insured, WorkSafeBC certified, and they actually answer the phone. Currently booking holiday lights installation if you want to be *that* house on the street.",
-      "cta": "Free quotes: (236) 237-5551",
-      "url": "https://www.pressurepros.ca",
-      "last_featured": null,
-      "priority": 2
-    },
-    {
-      "name": "Shawnigan Retreats",
-      "category": "travel",
-      "tagline": "Your inbox can't find you here.",
-      "description": "Lakefront luxury 45 minutes from Oak Bay. Private dock, Finnish sauna, pickleball court, chef's kitchen, and enough beds for the whole extended family. Perfect for the retreat where you actually want to show up—or the wedding where everyone stays together.",
-      "cta": "Sleeps 2-16 on Shawnigan Lake",
-      "url": "https://www.shawniganretreats.com",
-      "last_featured": null,
-      "priority": 3
-    },
-    {
-      "name": "Liv Cafe & Bistro",
-      "category": "food",
-      "tagline": "Farm-to-table. Literally. They own the farm.",
-      "description": "Chef-owners Louise and Milton grow their own produce in Saanich and turn it into the kind of brunch that makes you rethink your own cooking. The shakshuka is absurd. The dinner menu goes from peri-peri chicken to duck breast. Tiny room, huge flavours.",
-      "cta": "713 St. Patrick St · Brunch Wed-Sun, Dinner Thu-Sat",
-      "url": "https://www.livcafeandbistro.ca",
-      "last_featured": null,
-      "priority": 4
-    }
-  ],
-  "rotation_rules": {
-    "min_gap_days": 14,
-    "prioritize_never_featured": true,
-    "category_balance": true
-  }
-}
-```
-
-**Rotation Logic:**
-1. Pick partner not featured in last 14 days
-2. Prioritize those never featured
-3. Balance categories (don't show 3 restaurants in a row)
-4. Mark `last_featured` after use
-
-**Goodwill Partner Ad Formats:**
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│  ❤️ NEIGHBOUR SPOTLIGHT                                        │
-│                                                                 │
-│  Ottavio Italian Bakery & Delicatessen                          │
-│  Where Oak Bay gets its bread, cheese & espresso. Since 1997.   │
-│                                                                 │
-│  Andrew and Monica built this place with their own hands—bread  │
-│  racks, tiled floors, the works. Nearly three decades later,    │
-│  it's still where the neighbourhood comes for fresh-baked       │
-│  loaves, imported Italian goods, and the kind of espresso that  │
-│  ruins all other espresso for you.                              │
-│                                                                 │
-│  Oak Bay Ave · Mon-Sat 9-5                                      │
-└─────────────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────────────┐
-│  ❤️ NEIGHBOUR SPOTLIGHT                                        │
-│                                                                 │
-│  PressurePros                                                   │
-│  Your driveway called. It's embarrassed.                        │
-│                                                                 │
-│  Pressure washing, gutter cleaning, window washing—the stuff    │
-│  you keep meaning to do. $5M insured, WorkSafeBC certified,     │
-│  and they actually answer the phone. Currently booking holiday  │
-│  lights installation if you want to be *that* house.            │
-│                                                                 │
-│  Free quotes: (236) 237-5551                                    │
-└─────────────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────────────┐
-│  ❤️ NEIGHBOUR SPOTLIGHT                                        │
-│                                                                 │
-│  Shawnigan Retreats                                             │
-│  Your inbox can't find you here.                                │
-│                                                                 │
-│  Lakefront luxury 45 minutes from Oak Bay. Private dock,        │
-│  Finnish sauna, pickleball court, chef's kitchen, and enough    │
-│  beds for the whole extended family. Perfect for the retreat    │
-│  where you actually want to show up.                            │
-│                                                                 │
-│  Sleeps 2-16 on Shawnigan Lake                                  │
-└─────────────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────────────┐
-│  ❤️ NEIGHBOUR SPOTLIGHT                                        │
-│                                                                 │
-│  Liv Cafe & Bistro                                              │
-│  Farm-to-table. Literally. They own the farm.                   │
-│                                                                 │
-│  Chef-owners Louise and Milton grow their own produce in        │
-│  Saanich and turn it into the kind of brunch that makes you     │
-│  rethink your own cooking. The shakshuka is absurd. Tiny room,  │
-│  huge flavours.                                                 │
-│                                                                 │
-│  713 St. Patrick St · Brunch Wed-Sun, Dinner Thu-Sat            │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-*Note: Labeled "Neighbour Spotlight" not "Sponsored" since it's free*
-
----
-
-### Tier 3: House Ads (Self-Promotion)
-
-When no paid or goodwill content available, promote:
-
-**Option A: Sell the Ad Slot**
-```
-┌─────────────────────────────────────────────────────────────────┐
-│  📣 THIS COULD BE YOUR BUSINESS                                 │
-│                                                                 │
-│  2,000 Oak Bay residents read this newsletter every week.       │
-│  Exposed hedge? Leaky faucet? Looking for a new dentist?        │
-│  They're your neighbours - and they're looking for you.         │
-│                                                                 │
-│  Ads start at $50. [See our packages →]                         │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-**Option B: Promote Sister Publications**
-```
-┌─────────────────────────────────────────────────────────────────┐
-│  📰 FROM OUR FRIENDS AT CAPITAL DAILY                           │
-│                                                                 │
-│  Want the bigger picture? Capital Daily covers all of           │
-│  Greater Victoria - politics, culture, and the stories          │
-│  that matter. Free daily newsletter.                            │
-│                                                                 │
-│  [Subscribe free →]                                             │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-**Option C: Referral Program**
-```
-┌─────────────────────────────────────────────────────────────────┐
-│  🎁 SHARE THE LOCAL LOVE                                        │
-│                                                                 │
-│  Know someone who'd love Oak Bay Local?                         │
-│  Forward this email and help us grow the neighbourhood.         │
-│                                                                 │
-│  [Share with a friend →]                                        │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-**Option D: Community CTA**
-```
-┌─────────────────────────────────────────────────────────────────┐
-│  💬 GOT A TIP?                                                  │
-│                                                                 │
-│  Spotted something newsworthy? New business opening?            │
-│  Hedge drama? Deer doing something weird?                       │
-│                                                                 │
-│  Reply to this email - we read everything.                      │
-└─────────────────────────────────────────────────────────────────┘
-```
-
----
-
-### House Ad Rotation Logic
-
-**File:** `data/house-ads.json`
-
-```json
-{
-  "house_ads": [
-    {
-      "id": "sell-ad-slot",
-      "type": "acquisition",
-      "priority": 1,
-      "content": {...},
-      "last_used": null,
-      "use_count": 0
-    },
-    {
-      "id": "sister-pub-capital",
-      "type": "cross-promo",
-      "priority": 2,
-      "content": {...}
-    },
-    {
-      "id": "referral",
-      "type": "growth",
-      "priority": 3,
-      "content": {...}
-    },
-    {
-      "id": "tip-line",
-      "type": "engagement",
-      "priority": 4,
-      "content": {...}
-    }
-  ],
-  "rotation_rules": {
-    "prioritize_acquisition": true,
-    "max_same_ad_per_month": 2,
-    "balance_types": true
-  }
-}
-```
-
-**Rotation Logic:**
-1. Prioritize "sell the slot" ads (acquisition)
-2. Don't show same house ad more than 2x/month
-3. Rotate through types for variety
-
----
-
-### Slot-Specific Fallback Rules
-
-| Slot | Tier 1 | Tier 2 Fallback | Tier 3 Fallback |
-|------|--------|-----------------|-----------------|
-| Primary Sponsor | Paid sponsor | Goodwill partner (premium) | "This could be you" |
-| Featured Event | Paid event | Community event highlight | Sister pub event |
-| Business Spotlight | Paid spotlight | Goodwill partner | Referral program |
-| Mid-Newsletter | Paid native ad | Goodwill partner | Cross-promo |
-| Bulletin Board | Paid featured ($49) | Facebook group posts (free, incl. jobs) | "Pin to the board" CTA |
-
----
-
-### Implementation in /write Command
-
-Add to `.claude/commands/write.md`:
-
-```markdown
-## Ad Slot Filling Logic
-
-For each ad slot in the newsletter:
-
-1. **Check Beehiiv** for paid placements booked for today
-   - If found: Use paid ad content
-   - If not: Continue to fallback
-
-2. **Check Goodwill Partners** (`data/goodwill-partners.json`)
-   - Find partner not featured in last 14 days
-   - Match to appropriate slot type
-   - If found: Use as "Neighbour Spotlight"
-   - If not: Continue to fallback
-
-3. **Use House Ad** (`data/house-ads.json`)
-   - Select appropriate house ad for slot
-   - Rotate to avoid repetition
-   - Mark as used
-
-4. **Log the decision** for analytics:
-   - Which slot
-   - What was used (paid/goodwill/house)
-   - Why (no booking, rotation, etc.)
-```
-
----
-
-### Clever Self-Promotion Copy
-
-**For Primary Sponsor slot:**
-> "This prime spot could feature YOUR business. 2,000 neighbours are waiting to meet you. [Sponsor next week's edition →]"
-
-**For Featured Event slot:**
-> "Got an event coming up? Get it in front of every Oak Bay household. Featured events start at $50. [Promote your event →]"
-
-**For Business Spotlight:**
-> "New to Oak Bay? Just opened? Let your neighbours know you're here. [Get featured →]"
-
-**For Mid-Newsletter:**
-> "Real estate. Home services. Restaurants. Whatever you're selling, we've got neighbours buying. [Advertise with us →]"
+Clearest separation of concerns:
+- `/preview` = See your content layout
+- `/prepare` = Finalize ads and see what will actually be sent
+- `/publish` = Send to Beehiiv
 
 ---
 
 ## Implementation Plan
 
-### Phase 1: Template Updates
-1. Design HTML/CSS for each ad unit type
-2. Create placeholder system for easy insertion
-3. Add "Advertise with us" footer link
+### 1. Create `/prepare` Command
 
-### Phase 2: Beehiiv Storefront Setup
-1. Create 7 sponsorship products (one per ad unit)
-2. Set pricing and availability
-3. Customize storefront branding
-4. Write compelling product descriptions
+**File:** `.claude/commands/prepare.md`
 
-### Phase 3: Self-Serve Infrastructure
-1. Create submission forms for:
-   - Featured events
-   - Business spotlights
-   - Classifieds
-   - Job listings
-2. Set up payment collection (Beehiiv handles this)
+```markdown
+# Prepare Command
 
-### Phase 4: Launch & Promotion
-1. Announce in newsletter: "Now accepting sponsors"
-2. Direct outreach to Oak Bay businesses
-3. Add storefront link to email signature
-4. Social media promotion
+Finalize newsletter by checking for booked sponsorships and filling ad slots.
+Generates final preview for review BEFORE publishing.
+
+## What It Does
+
+1. Check Beehiiv for booked Direct Sponsorships (browser agent)
+2. Fill empty ad slots with goodwill partners or house ads
+3. Generate final HTML with all ads in place
+4. Save to `output/{pub}/{date}-prepared.html`
+5. Open in browser for review
+6. Show ad slot summary
+
+## Usage
+
+/prepare [publication] [date]
+/prepare                      # Active publication, today
+/prepare oak-bay-local        # Specific publication
+
+## Output
+
+- Prepared HTML file
+- Console summary of ad decisions
+- Browser preview opens automatically
+```
+
+### 2. Create `scripts/prepare.py`
+
+New script that:
+1. Loads the preview HTML from `/preview`
+2. Calls sponsorship checker agent (Browserbase)
+3. Loads sponsorship data from JSON
+4. Runs ad slot filling (without marking partners as used)
+5. Saves prepared HTML
+6. Opens in browser
+
+```python
+def prepare_newsletter(pub_slug: str, date_str: str):
+    # Load preview HTML
+    preview_html = load_preview_html(pub_slug, date_str)
+
+    # Check for sponsorships (triggers browser agent)
+    # Agent saves to data/sponsorships/{pub}/{date}-sponsorships.json
+    run_sponsorship_check(pub_slug, date_str)
+
+    # Load sponsorship data
+    sponsorships = load_sponsorships_from_file(pub_slug, date_str)
+
+    # Fill ad slots (preview mode - don't update partner tracking yet)
+    manager = AdSlotManager(preview_mode=True)
+    prepared_html, decisions = manager.fill_all_slots(preview_html, sponsorships)
+
+    # Save prepared HTML
+    output_path = save_prepared_html(pub_slug, date_str, prepared_html)
+
+    # Save decisions (for /publish to use)
+    save_ad_decisions(pub_slug, date_str, decisions)
+
+    # Open in browser
+    open_in_browser(output_path)
+
+    # Print summary
+    print_ad_summary(decisions)
+```
+
+### 3. Modify `scripts/ad_slots.py`
+
+Add `preview_mode` parameter:
+- `preview_mode=True` - Don't update `last_featured` or `use_count`
+- `preview_mode=False` - Update tracking (used by /publish)
+
+### 4. Modify `/publish` Command
+
+Change to use prepared HTML:
+1. Look for `{date}-prepared.html` first
+2. If not found, warn user to run `/prepare` first
+3. When publishing, THEN update partner/house-ad tracking
+4. Log to revenue-log.json
+
+### 5. Update Workflow Docs
+
+Update CLAUDE.md and command docs to reflect new flow.
 
 ---
 
 ## Files to Create/Modify
 
-| File | Purpose |
-|------|---------|
-| `publications/oak-bay-local/template.html` | Add new ad unit HTML blocks |
-| `publications/oak-bay-local/ad-units.html` | Standalone ad unit designs |
-| `publications/oak-bay-local/bulletin-board.html` | Corkboard classifieds with CSS styling |
-| `data/goodwill-partners.json` | Fallback inventory of local businesses |
-| `data/house-ads.json` | Self-promotion ads with rotation tracking |
-| `.claude/commands/write.md` | Add slot-filling logic with fallbacks |
-| `.claude/commands/research.md` | Add bulletin board post classification |
-| `.claude/skills/monetization.md` | Update with new pricing/products |
-| `docs/advertiser-guide.md` | Public-facing ad info |
-| `output/oak-bay-local/newsletter-with-ads.html` | Preview with all units |
+| File | Action | Purpose |
+|------|--------|---------|
+| `.claude/commands/prepare.md` | Create | New command documentation |
+| `scripts/prepare.py` | Create | Preparation script |
+| `scripts/ad_slots.py` | Modify | Add `preview_mode` parameter |
+| `scripts/publish.py` | Modify | Use prepared HTML, update tracking on publish |
+| `.claude/commands/publish.md` | Modify | Update docs for new workflow |
+| `CLAUDE.md` | Modify | Update quick start workflow |
 
 ---
 
-## Success Metrics
+## User Experience
 
-| Metric | Target (Year 1) |
-|--------|-----------------|
-| Annual ad revenue | $12,000-20,000 |
-| Primary sponsor fill rate | 60%+ |
-| Repeat advertiser rate | 40%+ |
-| Subscriber growth | +50% (to 3,000) |
+### Before (Current)
+
+```
+User: /publish oak-bay-local --html
+
+[Sponsorships checked, ads filled, published]
+✓ Published to Beehiiv!
+
+User: Wait, what ads did it use? Can I see it first?
+```
+
+### After (New)
+
+```
+User: /prepare oak-bay-local
+
+Checking for booked sponsorships...
+  → Navigating to Beehiiv dashboard...
+  → Found 1 booked sponsorship
+
+Filling ad slots...
+  primary_sponsor: PAID (Oak Bay Beach Hotel)
+  mid_newsletter: Neighbour Spotlight (Ottavio Italian Bakery)
+  featured_event: Empty
+  business_spotlight: House Ad (sell-business-spotlight)
+  bulletin_board: 3 Facebook posts + 1 paid
+
+✓ Prepared HTML saved to output/oak-bay-local/2024-12-20-prepared.html
+✓ Opening in browser...
+
+Review the newsletter. When ready, run /publish to send.
+
+---
+
+User: /publish oak-bay-local
+
+Publishing prepared newsletter...
+  → Using output/oak-bay-local/2024-12-20-prepared.html
+  → Pushing to Beehiiv...
+
+✓ Published to Beehiiv!
+  Post ID: post_abc123
+  Status: draft
+  Preview: https://...
+```
+
+---
+
+## Testing Checklist
+
+- [ ] `/prepare` runs sponsorship checker
+- [ ] `/prepare` fills ad slots correctly
+- [ ] `/prepare` opens browser preview
+- [ ] `/prepare` doesn't mark partners as used
+- [ ] `/publish` uses prepared HTML
+- [ ] `/publish` updates partner tracking
+- [ ] `/publish` warns if no prepared file exists
+- [ ] Full workflow works end-to-end
+
+---
+
+## Complete Newsletter Workflow (Step-by-Step)
+
+This is the full end-to-end workflow for generating and publishing a newsletter.
+
+### Phase 1: Set Publication Context
+
+**Command:** `/publication oak-bay-local`
+
+**What happens:**
+1. Validates publication against `publications/config.json`
+2. Writes slug to `.active-publication`
+3. Loads publication config (ID, brand color, geography, schedule)
+4. Confirms the switch with publication details
+
+**Files involved:**
+- `publications/config.json` - All publication IDs & settings
+- `.active-publication` - Current context file
+
+---
+
+### Phase 2: Research Content
+
+**Command:** `/research`
+
+**What happens:**
+1. **Load context**
+   - Read `.active-publication` for current publication
+   - Load `publications/{slug}/sources.md` for publication-specific sources
+   - Load `data/story-log.json` for deduplication (last 7 days, this pub only)
+   - Load `data/source-registry.json` for verification tiers
+
+2. **Gather content by type**
+   - **Weather:** Fetch for publication geography (Victoria/Oak Bay/Langford)
+   - **Events:** Check official sources, venue calendars, community calendars
+   - **Local News:** Tavily search, established media, official sources
+   - **Facebook Groups:** (if configured) Apify scraper for community posts
+   - **Special sections:** Ship tracker, restaurant news, etc.
+
+3. **Process each story**
+   - Generate fingerprint (entities, numbers, verbs, category)
+   - Check against URL index (skip duplicates)
+   - Calculate similarity score against recent stories
+   - Classify claim risk (HIGH/MEDIUM/LOW)
+   - Verify against source tier requirements
+   - Log fact-check to `data/fact-check-archive/`
+
+4. **Classify Facebook posts** (Oak Bay Local)
+   - Filter for bulletin board candidates (3+ engagements, last 7 days)
+   - Categorize: ISO, For Sale, Services, Lost, Found, Recs, Jobs
+   - Extract author, neighbourhood, truncated text
+
+5. **Save research output**
+   - `research/{publication}/{DATE}-research.json`
+   - Includes: weather, events, news, facebook_posts, bulletin_board_posts
+   - Verification summary and skipped duplicates
+
+**Files involved:**
+- `publications/{slug}/sources.md` - Source registry
+- `data/story-log.json` - Deduplication index
+- `data/source-registry.json` - Verification tiers
+- `data/fact-check-archive/` - Verification logs
+- `research/{publication}/{DATE}-research.json` - Output
+
+---
+
+### Phase 3: Write Newsletter
+
+**Command:** `/write`
+
+**What happens:**
+1. **Load required data**
+   - Read `.active-publication`
+   - Load `publications/{slug}/brand.md` (voice, tone, sections)
+   - Load research JSON from Phase 2
+   - Load `data/story-log.json` for context
+
+2. **Content selection (deduplication)**
+   - Check each story's `dedup_analysis` classification
+   - Skip duplicates, include updates with new info
+   - Frame updates as "Update:" or "As we reported..."
+
+3. **Fact-checking validation**
+   - Verify names, numbers, dates, locations, quotes
+   - Check confidence levels (HIGH/MEDIUM/LOW)
+   - Flag LOW confidence items for human review
+
+4. **Liability check**
+   - Avoid accusations without charges
+   - Use safe language ("Police are investigating...")
+   - No defamatory language
+
+5. **Write newsletter**
+   - Apply publication voice (greeting, tone, sign-off)
+   - Structure: Greeting → Briefing → Main Story → Events → Closing
+   - Include publication-specific sections
+
+6. **Save outputs**
+   - `output/{publication}/{DATE}-newsletter.md` - Main content
+   - `output/{publication}/{DATE}-fact-check.json` - Verification log
+   - Update `data/story-log.json` with stories used
+
+**Files involved:**
+- `publications/{slug}/brand.md` - Voice guidelines
+- `research/{publication}/{DATE}-research.json` - Input
+- `output/{publication}/{DATE}-newsletter.md` - Output
+- `output/{publication}/{DATE}-fact-check.json` - Verification log
+- `data/story-log.json` - Updated with new stories
+
+---
+
+### Phase 4: Generate HTML Preview
+
+**Command:** `/preview`
+
+**What happens:**
+1. Load newsletter markdown from `output/{publication}/{DATE}-newsletter.md`
+2. Load HTML template from `publications/{slug}/template.html`
+3. Parse content and populate placeholders:
+   - `{{WEATHER_SUMMARY}}` - Weather block
+   - `{{BRIEFING_ITEMS}}` - Bullet points
+   - `{{MAIN_STORY_HEADLINE}}` - Main story
+   - `{{EVENTS_SECTION}}` - Formatted events
+   - `{{DATE}}` - Today's date
+4. Save HTML to `output/{publication}/{DATE}-preview.html`
+5. Open in browser
+
+**Note:** At this stage, ad slot placeholders are still empty:
+- `{{SPONSOR_CONTENT}}`
+- `{{MID_NEWSLETTER_AD}}`
+- `{{FEATURED_EVENT}}`
+- `{{BUSINESS_SPOTLIGHT}}`
+- `{{BULLETIN_FEATURED}}`
+
+**Files involved:**
+- `output/{publication}/{DATE}-newsletter.md` - Input
+- `publications/{slug}/template.html` - Template
+- `output/{publication}/{DATE}-preview.html` - Output
+
+---
+
+### Phase 5: Prepare for Publishing (NEW)
+
+**Command:** `/prepare`
+
+**What happens:**
+1. **Load preview HTML**
+   - Read `output/{publication}/{DATE}-preview.html`
+
+2. **Check for booked sponsorships**
+   - Trigger browser agent (Browserbase + Playwright)
+   - Navigate to Beehiiv Direct Sponsorships dashboard
+   - Scrape any booked placements for today's date
+   - Save to `data/sponsorships/{publication}/{DATE}-sponsorships.json`
+
+3. **Load sponsorship data**
+   - Read sponsorship JSON file
+   - Parse slot → advertiser mappings
+
+4. **Fill ad slots (3-tier fallback)**
+   For each empty slot:
+   ```
+   Tier 1: Paid (from Beehiiv)
+   Tier 2: Goodwill partner (from data/goodwill-partners.json)
+   Tier 3: House ad (from data/house-ads.json)
+   ```
+
+   **Slot-specific behavior:**
+   | Slot | Paid | Goodwill | House |
+   |------|------|----------|-------|
+   | `primary_sponsor` | "Together With" | "Neighbour Spotlight" | "This could be you" |
+   | `mid_newsletter` | Native ad | Partner spotlight | Cross-promo |
+   | `featured_event` | Featured event | (leave empty) | Sister pub event |
+   | `business_spotlight` | Spotlight | Partner in Open & Closed | Referral program |
+   | `bulletin_board` | Featured pin ($49) | Facebook posts | "Pin to board" CTA |
+
+5. **Save prepared HTML** (without updating tracking)
+   - `output/{publication}/{DATE}-prepared.html`
+
+6. **Save ad decisions**
+   - `data/sponsorships/{publication}/{DATE}-decisions.json`
+
+7. **Open in browser for review**
+
+8. **Print summary to console**
+   ```
+   Filling ad slots...
+     primary_sponsor: PAID (Oak Bay Beach Hotel)
+     mid_newsletter: Neighbour Spotlight (Ottavio Italian Bakery)
+     featured_event: Empty
+     business_spotlight: House Ad (sell-business-spotlight)
+   ```
+
+**Files involved:**
+- `output/{publication}/{DATE}-preview.html` - Input
+- `data/sponsorships/{publication}/{DATE}-sponsorships.json` - Beehiiv data
+- `data/goodwill-partners.json` - Tier 2 fallback
+- `data/house-ads.json` - Tier 3 fallback
+- `output/{publication}/{DATE}-prepared.html` - Output
+- `data/sponsorships/{publication}/{DATE}-decisions.json` - Decision log
+
+---
+
+### Phase 6: Publish to Beehiiv
+
+**Command:** `/publish`
+
+**What happens:**
+1. **Load prepared HTML**
+   - Look for `output/{publication}/{DATE}-prepared.html`
+   - If not found, warn user to run `/prepare` first
+
+2. **Update tracking** (NOW, not before)
+   - Mark goodwill partners as used (`last_featured`, `feature_count`)
+   - Mark house ads as used (`last_used`, `use_count`)
+   - Save updated JSON files
+
+3. **Log revenue decisions**
+   - Append to `data/revenue-log.json`
+   - Record which slots got paid vs fallback
+
+4. **Prepare API payload**
+   - Extract title from content
+   - Calculate scheduled send time from publication config
+   - Build `content_html` payload
+
+5. **Push to Beehiiv API**
+   ```
+   POST /v2/publications/{pub_id}/posts
+   {
+     "title": "Oak Bay Local - December 21, 2024",
+     "content_html": "<full HTML>",
+     "status": "draft",
+     "scheduled_at": "2024-12-21T07:30:00"
+   }
+   ```
+
+6. **Confirm success**
+   - Print Post ID, status, preview URL
+   - Remind user to review draft in Beehiiv before scheduling
+
+**Files involved:**
+- `output/{publication}/{DATE}-prepared.html` - Input
+- `data/goodwill-partners.json` - Updated with tracking
+- `data/house-ads.json` - Updated with tracking
+- `data/revenue-log.json` - Append new entry
+- Beehiiv API - Create draft post
+
+---
+
+### Summary: Full Command Sequence
+
+```
+/publication oak-bay-local    # 1. Set context
+/research                     # 2. Gather content
+/write                        # 3. Generate newsletter markdown
+/preview                      # 4. Create HTML preview (no ads)
+/prepare                      # 5. Fill ads, show final preview
+/publish                      # 6. Push to Beehiiv
+```
+
+### Data Flow Diagram
+
+```
+                    publications/config.json
+                           ↓
+/publication  →  .active-publication
+                           ↓
+/research     →  research/{pub}/{date}-research.json
+                           ↓
+/write        →  output/{pub}/{date}-newsletter.md
+                           ↓
+/preview      →  output/{pub}/{date}-preview.html
+                           ↓
+/prepare      →  output/{pub}/{date}-prepared.html  ←  data/sponsorships/
+              ↓                                     ←  data/goodwill-partners.json
+              ↓                                     ←  data/house-ads.json
+              ↓
+/publish      →  Beehiiv API (draft)
+              →  data/revenue-log.json (updated)
+              →  data/goodwill-partners.json (tracking updated)
+              →  data/house-ads.json (tracking updated)
+```

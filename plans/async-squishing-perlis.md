@@ -1,161 +1,185 @@
-# Maximize Paywall Conversion - Strategic Content Split
+# Fix Stripe Payment & Dark Mode Styling
 
-## Problem
+## Problem 1: Stripe Payment Error
 
-The free content is too short. Users see ~7 short sections, then hit the paywall before getting hooked.
+**Error:** "Payment system not configured. Please contact support."
 
-**Current split:**
-- FREE: Header, Core Personality, Emotional World, What Drives You, Superpowers, Growth Opportunities, Summary
-- PREMIUM: Deeper Patterns, Ideal Life, Wellbeing, Inversions, Uncomfortable Truth, Predictions, etc.
+**Root Cause:** The `.next/` build cache was created BEFORE the Stripe environment variables were added to `.env.local`. Next.js baked the old (empty) env vars into the build artifacts. Even though `.env.local` now has valid credentials, the stale build doesn't see them.
 
-The cutoff happens at a bland summary sentence. No cliffhanger, no intrigue.
+**Solution:**
+```bash
+rm -rf .next/
+npm run dev
+```
+
+This forces Next.js to rebuild with the current environment variables.
 
 ---
 
-## Conversion Psychology
+## Problem 2: Dark Mode Styling Issues
 
-The **Open Loop** technique maximizes conversion:
-1. **Build value** — Give enough to prove the report is insightful
-2. **Create curiosity** — Tease something they desperately want to know
-3. **Cut at peak intrigue** — Stop right before the juicy reveal
+Multiple cards/sections have white/cream backgrounds that are jarring in dark mode. They use `bg-white`, `bg-amber-50`, `bg-slate-50`, etc. without corresponding `dark:` variants.
 
-The most intriguing section is **"Your Deeper Patterns"** which reveals:
-- Unconscious Operating System (core wound → defense → compensation)
-- Shadow Self (hidden parts of personality)
-- Core Paradox (central tension they live with)
+### Files to Modify
 
----
-
-## Strategic Cutoff Point
-
-**Move PREMIUM_SPLIT to INSIDE the "Deeper Patterns" section.**
-
-Show the section header + intro + first subsection title, then cut off BEFORE revealing their actual pattern.
-
-**What user sees (free):**
-```markdown
-## 🔮 Your Deeper Patterns
-
-This is where it gets interesting. These are the patterns operating
-beneath your awareness—the invisible forces shaping your choices,
-relationships, and recurring life themes.
-
-### Your Unconscious Operating System
-
-Here's the chain reaction that runs much of your life:
-```
-
-**Then paywall appears. They can SEE the framework but not THEIR answers.**
+| File | Locations |
+|------|-----------|
+| `components/Dashboard.tsx` | ~12 locations |
+| `components/Visualizations.tsx` | ~15 locations |
 
 ---
 
-## Implementation Plan
+## Dashboard.tsx Dark Mode Fixes
 
-### 1. Move PREMIUM_SPLIT in AI Prompt
-
-**File**: `app/api/analyze/route.ts` (~line 414)
-
-Find current marker location and move it deeper:
-
-**FROM** (after Core Summary):
-```
-...core personality summary sentence...
-<!-- PREMIUM_SPLIT -->
-## 🔮 Your Deeper Patterns
+### 1. Dark Triad Section Note Box (~line 3724)
+```diff
+- bg-amber-50 border border-amber-200
++ bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800
 ```
 
-**TO** (inside Deeper Patterns, after setup):
-```
-## 🔮 Your Deeper Patterns
+### 2. Dark Triad Cards (Machiavellianism, Narcissism, Psychopathy) (~lines 3769, 3787, 3805)
+```diff
+- bg-white border border-slate-200
++ bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700
 
-[Intro paragraph - FREE]
+- text-slate-800
++ text-slate-800 dark:text-slate-200
 
-### Your Unconscious Operating System
+- text-slate-600
++ text-slate-600 dark:text-slate-400
 
-[Setup paragraph explaining the framework - FREE]
-
-<!-- PREMIUM_SPLIT -->
-
-**Core Wound**: [LOCKED - actual content]
-```
-
-### 2. Redesign PremiumGate for Maximum Conversion
-
-**File**: `components/PremiumGate.tsx`
-
-Complete redesign with conversion-focused elements:
-
-**A. Headline (Personal + Specific)**
-```
-Your unconscious patterns are waiting.
+- text-slate-700
++ text-slate-700 dark:text-slate-300
 ```
 
-**B. Subhead (Open Loop)**
-```
-You've seen who you are on the surface.
-Here's what's really driving your life.
-```
-
-**C. What They'll Unlock (Specific Reveals)**
-- 🔮 **Your Core Wound** — The childhood pattern still running your relationships
-- 👤 **Your Shadow Self** — What others see that you can't
-- 💔 **Your Relationship Blueprint** — Why you're drawn to certain people
-- 🎯 **Your Ideal Life** — The job, partner, and environment that fit you
-- ⚠️ **What to Avoid** — The traps designed for your personality type
-- 🔮 **5 Specific Predictions** — What's likely ahead based on your patterns
-
-**D. Single Primary CTA**
-```
-Unlock My Full Report — $9
+### 3. Form Select Dropdowns (~lines 2656, 2700)
+```diff
+- bg-white
++ bg-white dark:bg-slate-800
 ```
 
-**E. Risk Reversal (Prominent)**
-```
-100% money-back guarantee. If this doesn't change how you see yourself,
-email us for a full refund. No questions asked.
-```
-
-**F. Secondary Option (De-emphasized)**
-```
-Or get the bundle ($12) — includes unlimited relationship comparisons
-```
-
-### 3. Improve Blur Preview
-
-Instead of showing random premium content blurred, show a **locked table of contents** effect:
-
-```tsx
-<div className="blur-sm opacity-40 select-none">
-  <div className="space-y-4">
-    <div>
-      <h4>Your Core Wound</h4>
-      <p>[Your specific childhood pattern...]</p>
-    </div>
-    <div>
-      <h4>Your Shadow Self</h4>
-      <p>[The parts you hide from yourself...]</p>
-    </div>
-    <div>
-      <h4>Your Ideal Partner Type</h4>
-      <p>[The personality that complements yours...]</p>
-    </div>
-  </div>
-</div>
+### 4. Button Elements (~lines 2811, 2818, 3067, 3074)
+```diff
+- bg-white
++ bg-white dark:bg-slate-800
 ```
 
 ---
 
-## Files to Modify
+## Visualizations.tsx Dark Mode Fixes
 
-| File | Changes |
-|------|---------|
-| `app/api/analyze/route.ts` | Move PREMIUM_SPLIT deeper into "Deeper Patterns" section (after intro, before actual insights) |
-| `components/PremiumGate.tsx` | Complete redesign with conversion-focused copy, single CTA, locked TOC preview |
+### 1. Attachment Style Quadrant Boxes (~lines 322-378, 436-475)
+
+**Secure box:**
+```diff
+- bg-green-50
++ bg-green-50 dark:bg-green-900/20
+```
+
+**Dismissive box:**
+```diff
+- bg-blue-50
++ bg-blue-50 dark:bg-blue-900/20
+```
+
+**Preoccupied box:**
+```diff
+- bg-amber-50
++ bg-amber-50 dark:bg-amber-900/20
+```
+
+**Fearful box:**
+```diff
+- bg-red-50
++ bg-red-50 dark:bg-red-900/20
+```
+
+**Note boxes:**
+```diff
+- bg-slate-50 border border-slate-200
++ bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700
+```
+
+### 2. Personality Style Clusters (~lines 1427, 1443, 1462)
+
+**Explanation box:**
+```diff
+- bg-slate-50 border-slate-200
++ bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700
+```
+
+**Cluster cards (A, B, C) - fix inline background colors or className:**
+```diff
+- bg-white
++ bg-white dark:bg-slate-800
+```
+
+### 3. ADHD Gauges (~lines 854, 873)
+
+**Warning/Result boxes:**
+```diff
+- bg-amber-50 border-amber-200
++ bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800
+
+- bg-green-50 border-green-200
++ bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800
+```
+
+### 4. ACE Display & Other Sections (~lines 1329, 1380, 1791, 1861)
+
+**Amber boxes:**
+```diff
+- bg-amber-50 border-amber-200
++ bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800
+```
+
+**Blue info boxes:**
+```diff
+- bg-blue-50 border-blue-200
++ bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800
+```
 
 ---
 
 ## Implementation Order
 
-1. Update AI prompt — move PREMIUM_SPLIT to optimal cutoff point
-2. Redesign PremiumGate with conversion copy
-3. Deploy and test with demo account
+### Phase 1: Fix Stripe (Critical - 1 min)
+1. Delete `.next/` directory
+2. Restart dev server with `npm run dev`
+3. Test checkout button
+
+### Phase 2: Fix Dark Mode in Dashboard.tsx
+1. Search for `bg-white` without `dark:` → add `dark:bg-slate-800`
+2. Search for `bg-amber-50` without `dark:` → add `dark:bg-amber-900/20`
+3. Search for `border-slate-200` without `dark:` → add `dark:border-slate-700`
+4. Fix text colors that need dark variants
+
+### Phase 3: Fix Dark Mode in Visualizations.tsx
+1. Fix AttachmentPlot quadrant boxes (green, blue, amber, red backgrounds)
+2. Fix PersonalityStyleClusters explanation and card backgrounds
+3. Fix ADHDGauges warning/result boxes
+4. Fix ACE Display and other info boxes
+5. Fix all `bg-slate-50` → add `dark:bg-slate-800`
+
+### Phase 4: Test
+1. Verify checkout works
+2. Verify all sections render properly in dark mode
+3. Check text readability on dark backgrounds
+
+---
+
+## Color Mapping Reference
+
+| Light Mode | Dark Mode |
+|------------|-----------|
+| `bg-white` | `dark:bg-slate-800` |
+| `bg-slate-50` | `dark:bg-slate-800` or `dark:bg-slate-900/50` |
+| `bg-amber-50` | `dark:bg-amber-900/20` |
+| `bg-green-50` | `dark:bg-green-900/20` |
+| `bg-blue-50` | `dark:bg-blue-900/20` |
+| `bg-red-50` | `dark:bg-red-900/20` |
+| `border-slate-200` | `dark:border-slate-700` |
+| `border-amber-200` | `dark:border-amber-800` |
+| `text-slate-600` | `dark:text-slate-400` |
+| `text-slate-700` | `dark:text-slate-300` |
+| `text-slate-800` | `dark:text-slate-200` |
