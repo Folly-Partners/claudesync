@@ -1,13 +1,75 @@
 # Overstory Dashboard Redesign Plan
 
-## Problem Summary
+## Status: Phase 1 Complete ✅
 
-The current UI is confusing because:
-1. **Too many steps** - 5 separate stages when users just want to create and send
-2. **Tabs duplicate the stepper** - both show the same workflow redundantly
-3. **"Stories" shows 0** - Bug: UI looks for `stories` field but data has `news`
-4. **Events show only dates** - No titles, venues, or useful details
-5. **No clear "what's next"** - User doesn't know what to do
+The 3-step workflow has been implemented. Now addressing follow-up issues.
+
+---
+
+## Current Issues (Phase 2)
+
+### Issue 1: False "Published" Status
+**Problem:** Oak Bay Local shows "Published" but the newsletter was never actually sent to Beehiiv.
+**Root Cause:** The `story-log.json` file has `"last_edition": "2025-12-22"` which was set during testing, not actual publication.
+**Fix:** Reset the story-log.json OR add actual Beehiiv API verification.
+
+### Issue 2: No Archive View
+**Problem:** Once "Published", users can't see past newsletters or create tomorrow's edition.
+**Request:** Show archive of past sent newsletters.
+
+### Issue 3: Can't Create New Draft
+**Problem:** When showing "Published" state, there's no way to start a fresh draft.
+**Request:** Add "Create Tomorrow's Newsletter" or "Start Fresh" button.
+
+---
+
+## Phase 2 Plan: Archive & Multi-Edition Support
+
+### Step 1: Reset Story Log (Quick Fix)
+Reset Oak Bay Local's `last_edition` in `data/story-log.json` to `null` so it no longer shows as "Published".
+
+**File:** `/Users/andrewwilkinson/Overstory/data/story-log.json`
+**Change:** Line 129: `"last_edition": "2025-12-22"` → `"last_edition": null`
+
+### Step 2: Calendar Picker for Edition Selection
+Add a calendar date picker in the header to switch between editions:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Oak Bay Local                    📅 Dec 22, 2025 ▼             │
+│  Oak Bay                          ┌─────────────────┐           │
+│                                   │ December 2025   │           │
+│                                   │ Su Mo Tu We Th Fr Sa        │
+│                                   │     16 17 18 19 20 21       │
+│                                   │  22●23 24 25 26 27 28       │
+│                                   │  29 30 31                   │
+│                                   │ ● = has edition             │
+│                                   │ ✓ = published               │
+│                                   └─────────────────┘           │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Step 3: Data Layer Changes
+1. Add `getAvailableEditions(pubSlug)` - scan output directory for existing editions
+2. Update URL to support `?date=2025-12-22` param for deep linking
+3. Pass selected date through to NewsletterFlow
+
+### Files to Modify
+- `data/story-log.json` - Reset oak-bay-local last_edition to null
+- `lib/data.ts` - Add `getAvailableEditions()` function
+- `app/[pub]/page.tsx` - Add date param support and calendar picker
+- `components/newsletter/newsletter-flow.tsx` - Accept editionDate as prop (already does)
+
+---
+
+## Original Problem Summary (COMPLETED ✅)
+
+The original issues have been fixed:
+1. ~~**Too many steps**~~ - Now 3 steps: Create → Preview → Send
+2. ~~**Tabs duplicate stepper**~~ - Removed, single flow
+3. ~~**"Stories" shows 0**~~ - Fixed `news` vs `stories` field
+4. ~~**Events show only dates**~~ - Now shows full event details
+5. ~~**No clear "what's next"**~~ - Clear CTA buttons at each step
 
 ## Solution: 3-Step Workflow
 
