@@ -15,6 +15,7 @@ Automatically invoke this skill when:
 - Error messages mention missing environment variables (e.g., "ANTHROPIC_API_KEY is not defined")
 - Setting up or cloning a new project
 - User asks about credentials, secrets, or environment variables
+- **At session start**: Run `deep-env diff .` to catch keys configured elsewhere (e.g., Vercel) but not stored in deep-env
 
 ## Known Projects
 
@@ -95,6 +96,20 @@ Deep-Personality
   API_SECRET_KEY          kgg/...nSE=
 ```
 
+### Diff - Find unstored keys
+```bash
+deep-env diff .                    # Check current directory
+deep-env diff ~/Deep-Personality   # Check specific project
+deep-env diff dp                   # Using shortcut
+```
+
+This compares `.env.local` against Keychain and shows:
+- ✓ Keys that are synced (in both)
+- ~ Keys with different values (file vs keychain)
+- ✗ Keys NOT in Keychain (configured elsewhere, e.g., Vercel)
+
+**Use this to catch keys that were configured in Vercel/production but never stored in deep-env!**
+
 ### Other commands
 ```bash
 deep-env get KEY_NAME      # Get single value (for scripting)
@@ -125,6 +140,17 @@ deep-env export            # Output as shell exports
    - Project: `deep-env store -p PROJECT KEY "value"`
 3. Push to iCloud: `deep-env push`
 4. If in a project, sync: `deep-env sync .`
+
+### Detecting unstored keys (IMPORTANT!)
+When working on a project that may have keys configured elsewhere (Vercel, production, etc.):
+1. Run `deep-env diff .` to check for unstored keys
+2. If keys are found in .env.local but NOT in Keychain:
+   - Ask user if they want to import them
+   - Run `deep-env import .env.local` to store all
+   - Or store individually: `deep-env store KEY "value"`
+3. Push to iCloud: `deep-env push`
+
+**Why this matters:** Keys configured directly in Vercel or copied from production won't sync to other Macs unless stored in deep-env!
 
 ### Cross-Mac sync
 ```bash

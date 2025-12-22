@@ -86,18 +86,8 @@
       "mcp__firecrawl-mcp__firecrawl_scrape",
       "Skill(deep-env)",
       "mcp__apify__call-actor",
-      "mcp__apify__apify-slash-rag-web-browser",
-      "Skill(compound-engineering:*)",
-      "mcp__plugin_compound-engineering_pw__browser_navigate",
-      "mcp__plugin_compound-engineering_pw__browser_fill_form",
-      "mcp__plugin_compound-engineering_pw__browser_click",
-      "mcp__plugin_compound-engineering_pw__browser_wait_for",
-      "mcp__plugin_compound-engineering_pw__browser_snapshot",
       "mcp__plugin_compound-engineering_pw__browser_take_screenshot",
-      "mcp__plugin_compound-engineering_pw__browser_close",
-      "mcp__plugin_compound-engineering_pw__browser_type",
-      "mcp__plugin_compound-engineering_pw__browser_evaluate",
-      "mcp__plugin_compound-engineering_pw__browser_install"
+      "mcp__plugin_compound-engineering_pw__browser_navigate"
     ],
     "deny": [],
     "ask": []
