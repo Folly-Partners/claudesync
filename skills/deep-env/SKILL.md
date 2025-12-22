@@ -110,6 +110,29 @@ This compares `.env.local` against Keychain and shows:
 
 **Use this to catch keys that were configured in Vercel/production but never stored in deep-env!**
 
+### Project Registry & Auto-Check
+```bash
+# Register projects to monitor
+deep-env projects add ~/Deep-Personality   # Register a project
+deep-env projects add .                    # Register current directory
+deep-env projects                          # List registered projects
+deep-env projects remove ~/old-project     # Remove a project
+
+# Check all registered projects at once
+deep-env check                             # Check ALL projects for unstored keys
+deep-env full-sync                         # Check + push to iCloud
+
+# Enable automatic checks (runs at 9 AM and 5 PM)
+deep-env auto-sync enable                  # Enable scheduled sync
+deep-env auto-sync status                  # Check if enabled
+deep-env auto-sync disable                 # Disable
+```
+
+When auto-sync runs, it:
+1. Checks all registered projects for unstored keys
+2. Sends a macOS notification if any are found
+3. Pushes credentials to iCloud
+
 ### Other commands
 ```bash
 deep-env get KEY_NAME      # Get single value (for scripting)
