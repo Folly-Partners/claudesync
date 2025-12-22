@@ -1,0 +1,37 @@
+[
+  {
+    "content": "Load and analyze Deep Personality homepage",
+    "status": "in_progress",
+    "activeForm": "Loading and analyzing homepage"
+  },
+  {
+    "content": "Test authentication flows",
+    "status": "pending",
+    "activeForm": "Testing authentication flows"
+  },
+  {
+    "content": "Test core personality test flow",
+    "status": "pending",
+    "activeForm": "Testing personality test flow"
+  },
+  {
+    "content": "Check for broken links and navigation",
+    "status": "pending",
+    "activeForm": "Checking for broken links"
+  },
+  {
+    "content": "Test responsive design and accessibility",
+    "status": "pending",
+    "activeForm": "Testing responsive design"
+  },
+  {
+    "content": "Review error handling and edge cases",
+    "status": "pending",
+    "activeForm": "Reviewing error handling"
+  },
+  {
+    "content": "Compile bug report",
+    "status": "pending",
+    "activeForm": "Compiling bug report"
+  }
+]
