@@ -4,73 +4,73 @@
     "firebase@claude-plugins-official": [
       {
         "scope": "project",
+        "projectPath": "/Users/andrewwilkinson",
         "installPath": "/Users/andrewwilkinson/.claude/plugins/cache/claude-plugins-official/firebase/6d3752c000e2",
         "version": "6d3752c000e2",
         "installedAt": "2025-12-17T20:10:34.539Z",
         "lastUpdated": "2025-12-19T22:54:01.174Z",
         "gitCommitSha": "d08486c69c7744eb72c582aef4a33cb68d772d8b",
-        "isLocal": true,
-        "projectPath": "/Users/andrewwilkinson"
+        "isLocal": true
       }
     ],
     "github@claude-plugins-official": [
       {
         "scope": "project",
+        "projectPath": "/Users/andrewwilkinson",
         "installPath": "/Users/andrewwilkinson/.claude/plugins/cache/claude-plugins-official/github/6d3752c000e2",
         "version": "6d3752c000e2",
         "installedAt": "2025-12-17T20:10:47.210Z",
         "lastUpdated": "2025-12-19T22:54:01.174Z",
         "gitCommitSha": "d08486c69c7744eb72c582aef4a33cb68d772d8b",
-        "isLocal": true,
-        "projectPath": "/Users/andrewwilkinson"
+        "isLocal": true
       }
     ],
     "security-guidance@claude-plugins-official": [
       {
         "scope": "project",
+        "projectPath": "/Users/andrewwilkinson",
         "installPath": "/Users/andrewwilkinson/.claude/plugins/cache/claude-plugins-official/security-guidance/6d3752c000e2",
         "version": "6d3752c000e2",
         "installedAt": "2025-12-17T20:11:08.810Z",
         "lastUpdated": "2025-12-19T22:54:01.174Z",
         "gitCommitSha": "d08486c69c7744eb72c582aef4a33cb68d772d8b",
-        "isLocal": true,
-        "projectPath": "/Users/andrewwilkinson"
+        "isLocal": true
       }
     ],
     "supabase@claude-plugins-official": [
       {
         "scope": "project",
+        "projectPath": "/Users/andrewwilkinson",
         "installPath": "/Users/andrewwilkinson/.claude/plugins/cache/claude-plugins-official/supabase/6d3752c000e2",
         "version": "6d3752c000e2",
         "installedAt": "2025-12-17T20:11:15.236Z",
         "lastUpdated": "2025-12-19T22:54:01.174Z",
         "gitCommitSha": "d08486c69c7744eb72c582aef4a33cb68d772d8b",
-        "isLocal": true,
-        "projectPath": "/Users/andrewwilkinson"
+        "isLocal": true
       }
     ],
     "vercel@claude-plugins-official": [
       {
         "scope": "project",
-        "installPath": "/Users/andrew/.claude/plugins/cache/claude-plugins-official/vercel/1.0.0",
-        "version": "1.0.0",
+        "projectPath": "/Users/andrewwilkinson",
+        "installPath": "/Users/andrewwilkinson/.claude/plugins/cache/claude-plugins-official/vercel/ae067751b4f4",
+        "version": "ae067751b4f4",
         "installedAt": "2025-12-17T20:11:21.799Z",
-        "lastUpdated": "2025-12-19T22:54:01.174Z",
+        "lastUpdated": "2025-12-23T16:01:56.634Z",
         "gitCommitSha": "d08486c69c7744eb72c582aef4a33cb68d772d8b",
-        "isLocal": true,
-        "projectPath": "/Users/andrewwilkinson"
+        "isLocal": true
       }
     ],
     "compound-engineering@every-marketplace": [
       {
         "scope": "project",
+        "projectPath": "/Users/andrewwilkinson",
         "installPath": "/Users/andrewwilkinson/.claude/plugins/cache/every-marketplace/compound-engineering/2.15.1",
         "version": "2.15.1",
         "installedAt": "2025-12-19T22:54:01.174Z",
         "lastUpdated": "2025-12-19T22:54:01.174Z",
         "gitCommitSha": "3fc2358e1f2a12b272c3250ca27ed928cafd0102",
-        "isLocal": true,
-        "projectPath": "/Users/andrewwilkinson"
+        "isLocal": true
       }
     ]
   }
