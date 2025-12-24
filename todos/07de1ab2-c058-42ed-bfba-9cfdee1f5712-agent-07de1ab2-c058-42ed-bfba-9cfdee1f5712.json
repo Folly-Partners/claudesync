@@ -1,0 +1,22 @@
+[
+  {
+    "content": "Write Oak Bay Local newsletter for December 24, 2025",
+    "status": "completed",
+    "activeForm": "Writing Oak Bay Local Christmas Eve edition"
+  },
+  {
+    "content": "Generate fact-check log for all claims",
+    "status": "completed",
+    "activeForm": "Generating fact-check log"
+  },
+  {
+    "content": "Save newsletter to output directory",
+    "status": "completed",
+    "activeForm": "Saving newsletter files"
+  },
+  {
+    "content": "Update story-log.json with published content",
+    "status": "in_progress",
+    "activeForm": "Updating story log"
+  }
+]
