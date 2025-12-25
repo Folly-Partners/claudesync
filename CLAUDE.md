@@ -30,3 +30,7 @@ See `~/.claude/skills/` for available skills:
 - **github-sync** - Git synchronization at session start (this document)
 - **history-pruner** - Prune old conversation history
 - **commit-milestones** - Auto-commit at milestones
+
+## Interaction Preferences
+
+- **Plans with options**: When presenting plans that have multiple approaches or options, use the `AskUserQuestion` tool with multiple choice format instead of writing out options in prose. This lets Andrew quickly tap to select rather than typing responses.
