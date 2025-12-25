@@ -1,0 +1,17 @@
+[
+  {
+    "content": "Stop stripping Dark Triad from AI analysis",
+    "status": "in_progress",
+    "activeForm": "Removing Dark Triad stripping from AI analysis"
+  },
+  {
+    "content": "Add 'Your Shadow Side' section to AI analysis prompts",
+    "status": "pending",
+    "activeForm": "Adding Shadow Side section to prompts"
+  },
+  {
+    "content": "Verify Dark Triad data flows to AI correctly",
+    "status": "pending",
+    "activeForm": "Verifying Dark Triad data flow"
+  }
+]

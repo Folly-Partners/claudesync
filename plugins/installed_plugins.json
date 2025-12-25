@@ -56,7 +56,7 @@
         "installPath": "/Users/andrewwilkinson/.claude/plugins/cache/claude-plugins-official/vercel/1.0.0",
         "version": "1.0.0",
         "installedAt": "2025-12-17T20:11:21.799Z",
-        "lastUpdated": "2025-12-24T16:01:58.639Z",
+        "lastUpdated": "2025-12-25T00:50:40.475Z",
         "gitCommitSha": "d08486c69c7744eb72c582aef4a33cb68d772d8b",
         "isLocal": true
       }
@@ -70,6 +70,17 @@
         "installedAt": "2025-12-19T22:54:01.174Z",
         "lastUpdated": "2025-12-19T22:54:01.174Z",
         "gitCommitSha": "3fc2358e1f2a12b272c3250ca27ed928cafd0102",
+        "isLocal": true
+      }
+    ],
+    "stripe@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/andrewwilkinson/.claude/plugins/cache/claude-plugins-official/stripe/0.1.0",
+        "version": "0.1.0",
+        "installedAt": "2025-12-25T00:50:30.900Z",
+        "lastUpdated": "2025-12-25T00:50:30.900Z",
+        "gitCommitSha": "a4969d56197be9580aef5ace73ac9064ffb04152",
         "isLocal": true
       }
     ]
