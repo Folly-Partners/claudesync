@@ -6,12 +6,12 @@
   },
   {
     "content": "Update /api/complete/route.ts to archive + insert",
-    "status": "in_progress",
+    "status": "completed",
     "activeForm": "Updating complete API"
   },
   {
     "content": "Update /api/profiles/route.ts to filter by is_current",
-    "status": "pending",
+    "status": "completed",
     "activeForm": "Updating profiles API"
   },
   {
