@@ -1,1 +1,22 @@
-[]
+[
+  {
+    "content": "Create SQL migration for Supabase",
+    "status": "completed",
+    "activeForm": "Creating SQL migration"
+  },
+  {
+    "content": "Update /api/complete/route.ts to archive + insert",
+    "status": "in_progress",
+    "activeForm": "Updating complete API"
+  },
+  {
+    "content": "Update /api/profiles/route.ts to filter by is_current",
+    "status": "pending",
+    "activeForm": "Updating profiles API"
+  },
+  {
+    "content": "Test the fix",
+    "status": "pending",
+    "activeForm": "Testing the fix"
+  }
+]

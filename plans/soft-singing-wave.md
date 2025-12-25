@@ -151,13 +151,37 @@ Progress bar (thin, h-1.5)
 </div>
 ```
 
-### Optional: Add emoji to section metadata
+### File: `config/wizard-sections.ts`
 
-In `config/wizard-sections.ts`, add `emoji?: string` to `SectionMeta` interface and set for key sections:
-- RSQ (Social Sensitivity): 🎭
-- PERMA (Wellbeing): ✨
-- Big Five: 🧠
-- etc.
+#### Change: Add emoji field to SectionMeta and set for all sections
+
+Add `emoji?: string` to `SectionMeta` interface (line 12), then add emoji to each section:
+
+```typescript
+// Add to each section in SECTION_META:
+'ipip_50':           { emoji: '🧠', ... }  // Brain - personality foundation
+'personality_styles': { emoji: '🎭', ... }  // Masks - behavioral patterns
+'ecr_s':             { emoji: '💞', ... }  // Hearts - attachment
+'csi_16':            { emoji: '💑', ... }  // Couple - relationship
+'ders_16':           { emoji: '⚡', ... }  // Zap - emotional regulation
+'onet_mini':         { emoji: '💼', ... }  // Briefcase - career
+'pvq_21':            { emoji: '⭐', ... }  // Star - values
+'weims':             { emoji: '🔥', ... }  // Fire - motivation
+'ace':               { emoji: '🛡️', ... }  // Shield - childhood experiences
+'gad_7':             { emoji: '😰', ... }  // Anxious - anxiety
+'phq_9':             { emoji: '💭', ... }  // Thought - mood
+'pcl_5':             { emoji: '🌊', ... }  // Wave - stress/trauma
+'dts':               { emoji: '💪', ... }  // Strength - distress tolerance
+'rsq':               { emoji: '👥', ... }  // People - social sensitivity
+'scs_sf':            { emoji: '🤗', ... }  // Hug - self-compassion
+'asrs_18':           { emoji: '🎯', ... }  // Target - focus/attention
+'aq_10':             { emoji: '🔮', ... }  // Crystal - social processing
+'cat_q':             { emoji: '🦎', ... }  // Chameleon - social adaptation
+'sensory_processing': { emoji: '👁️', ... }  // Eye - sensory
+'swls':              { emoji: '✨', ... }  // Sparkles - life satisfaction
+'ucla_3':            { emoji: '🤝', ... }  // Handshake - connection
+'perma':             { emoji: '🌈', ... }  // Rainbow - wellbeing
+```
 
 ---
 
@@ -169,20 +193,21 @@ In `config/wizard-sections.ts`, add `emoji?: string` to `SectionMeta` interface 
 | Sticky header | Add backdrop blur, gradient progress bar |
 | Counter format | `X/Y` → `X of Y` for readability |
 | Progress bar | `h-1.5` → `h-2`, add gradient fill |
-| (Optional) `wizard-sections.ts` | Add `emoji` field to SectionMeta |
+| `wizard-sections.ts` interface | Add `emoji?: string` to SectionMeta |
+| `wizard-sections.ts` sections | Add emoji to all 22 sections |
 
-**Total: ~30-40 lines changed in 1-2 files**
+**Total: ~50 lines changed in 2 files**
 
 ---
 
 ## Expected Result
 
-**Before scrolling:** Full header visible with title, description, timeframe, progress
+**Before scrolling:** Full header visible with emoji + title, description, timeframe, progress
 
 **After scrolling:** Clean sticky header with:
-- Section title (with emoji if configured)
+- 👥 Social Sensitivity (emoji + title)
 - "12 of 36" counter
 - Prominent gradient progress bar
-- Glass morphism blur effect
+- Glass morphism blur effect (semi-transparent with backdrop blur)
 
-The description and timeframe instructions scroll away since they only need to be read once. The sticky header provides constant progress context.
+The description and timeframe instructions scroll away since they only need to be read once. The sticky header provides constant progress context while feeling integrated with the design.
