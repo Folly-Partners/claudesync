@@ -1,0 +1,22 @@
+[
+  {
+    "content": "Extract individual mode prompts from analyze endpoint",
+    "status": "completed",
+    "activeForm": "Extracting individual mode prompts from analyze endpoint"
+  },
+  {
+    "content": "Create buildIndividualUserPrompt function in prompts.ts",
+    "status": "in_progress",
+    "activeForm": "Creating buildIndividualUserPrompt function in prompts.ts"
+  },
+  {
+    "content": "Export new function from services/analyze/index.ts",
+    "status": "pending",
+    "activeForm": "Exporting new function from services/analyze/index.ts"
+  },
+  {
+    "content": "Update regenerate endpoint to use shared prompts",
+    "status": "pending",
+    "activeForm": "Updating regenerate endpoint to use shared prompts"
+  }
+]
