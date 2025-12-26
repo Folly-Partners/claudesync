@@ -53,10 +53,10 @@
       {
         "scope": "project",
         "projectPath": "/Users/andrewwilkinson",
-        "installPath": "/Users/andrewwilkinson/.claude/plugins/cache/claude-plugins-official/vercel/ae067751b4f4",
-        "version": "ae067751b4f4",
+        "installPath": "/Users/andrewwilkinson/.claude/plugins/cache/claude-plugins-official/vercel/1.0.0",
+        "version": "1.0.0",
         "installedAt": "2025-12-17T20:11:21.799Z",
-        "lastUpdated": "2025-12-26T15:07:45.925Z",
+        "lastUpdated": "2025-12-26T15:33:32.873Z",
         "gitCommitSha": "d08486c69c7744eb72c582aef4a33cb68d772d8b",
         "isLocal": true
       }
