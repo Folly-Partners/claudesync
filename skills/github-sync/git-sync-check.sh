@@ -105,6 +105,54 @@ for REPO in "${REPOS[@]}"; do
 done
 
 echo "========================================"
+
+# Check for plugin updates
+echo ""
+echo "========================================"
+echo "Plugin Update Check"
+echo "========================================"
+echo ""
+
+# Check compound-engineering version
+INSTALLED_PLUGIN="$HOME/.claude/plugins/marketplaces/every-marketplace/plugins/compound-engineering/.claude-plugin/plugin.json"
+if [ -f "$INSTALLED_PLUGIN" ]; then
+    INSTALLED_VERSION=$(grep '"version"' "$INSTALLED_PLUGIN" | head -1 | sed 's/.*: *"\([^"]*\)".*/\1/')
+    echo -e "${BLUE}[compound-engineering]${NC}"
+    echo "  Installed: $INSTALLED_VERSION"
+
+    # Fetch latest version from GitHub (cached for 24 hours)
+    CACHE_FILE="/tmp/compound-engineering-latest-version"
+    CACHE_AGE=86400  # 24 hours
+
+    if [ -f "$CACHE_FILE" ] && [ $(($(date +%s) - $(stat -f %m "$CACHE_FILE" 2>/dev/null || stat -c %Y "$CACHE_FILE" 2>/dev/null || echo 0))) -lt $CACHE_AGE ]; then
+        LATEST_VERSION=$(cat "$CACHE_FILE")
+    else
+        # Fetch from GitHub raw file
+        LATEST_VERSION=$(curl -s --max-time 5 "https://raw.githubusercontent.com/EveryInc/compound-engineering-plugin/main/plugins/compound-engineering/.claude-plugin/plugin.json" 2>/dev/null | \
+            grep '"version"' | head -1 | \
+            sed 's/.*: *"\([^"]*\)".*/\1/' || echo "")
+
+        if [ -n "$LATEST_VERSION" ]; then
+            echo "$LATEST_VERSION" > "$CACHE_FILE"
+        fi
+    fi
+
+    if [ -n "$LATEST_VERSION" ] && [ "$LATEST_VERSION" != "$INSTALLED_VERSION" ]; then
+        echo -e "  Latest:    ${GREEN}$LATEST_VERSION${NC}"
+        echo -e "  ${YELLOW}! Update available. Run: /plugin update compound-engineering${NC}"
+        ISSUES_FOUND=true
+    elif [ -n "$LATEST_VERSION" ]; then
+        echo -e "  ${GREEN}✓ Up to date${NC}"
+    else
+        echo "  Latest: (unable to check)"
+    fi
+else
+    echo -e "${YELLOW}compound-engineering not installed${NC}"
+    echo "  Install with: /plugin install compound-engineering"
+fi
+
+echo ""
+echo "========================================"
 if [ "$ISSUES_FOUND" = true ]; then
     echo -e "${YELLOW}Action may be needed. Review above.${NC}"
     exit 1
