@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"]
+    },
+    "hunter": {
+      "type": "sse",
+      "url": "https://mcp.hunter.io/sse",
+      "headers": {
+        "X-API-KEY": "***REMOVED***"
+      }
+    }
+  }
+}

@@ -18,7 +18,8 @@
       "mcp__browserbase",
       "mcp__zapier",
       "mcp__ahrefs",
-      "mcp__xero"
+      "mcp__xero",
+      "mcp__hunter"
     ],
     "deny": [
       "Bash(sudo:*)",
