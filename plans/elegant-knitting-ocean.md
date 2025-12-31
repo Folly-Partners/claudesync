@@ -41,19 +41,64 @@ Add `data/research-cache.json` to store research results:
 3. Display summarized findings (not full text) to user
 4. User can say "show full details for #3" to load from cache
 
-**Batched Display (reduces tokens):**
+**Batched Display (TLDR bullets, as many as needed):**
 ```
 Research Complete: 32 tasks processed
 
-Summary:
-1. Competitor pricing → Found 5 competitors, pricing $10-50/mo [Keep]
-2. AI trends 2025 → 12 key trends identified [Complete]
-3. Market size data → $4.2B market, 15% CAGR [Keep]
-...
-
-Full details cached. Say "details 1,3,5" to expand specific items.
-Say "all complete" or specify: "complete: 1-5, keep: 6-10"
+┌─ 1 ─────────────────────────────────────────────────────────
+│  Research competitor pricing
+│
+│  • Found 5 direct competitors: Acme ($15/mo), Beta ($25/mo),
+│    Gamma ($10/mo), Delta ($50/mo), Echo (freemium)
+│  • Most offer annual discounts (15-25% off)
+│  • Acme and Beta have enterprise tiers ($100+/seat)
+│  • Key differentiator: Gamma is only one with API access at base tier
+│  • Sources: G2, Capterra, competitor pricing pages
+│
+├─ 2 ─────────────────────────────────────────────────────────
+│  https://youtu.be/abc123 (AI trends video)
+│
+│  • 45-min talk by Sam Altman on GPT-5 roadmap
+│  • Key points: multimodal by default, 10x context window
+│  • Prediction: AGI capabilities within 2 years
+│  • Discusses compute scaling laws plateau concerns
+│  • Source: YouTube (visited link, summarized content)
+│
+├─ 3 ─────────────────────────────────────────────────────────
+│  Market size for productivity tools
+│
+│  • Global market: $4.2B (2024), projected $8.1B by 2028
+│  • CAGR: 15.2%
+│  • Fastest growing segment: AI-powered automation (32% CAGR)
+│  • North America leads (42% market share)
+│  • Sources: Statista, Grand View Research
 ```
+
+**Triage Commands:**
+
+| Command | Action | Example |
+|---------|--------|---------|
+| `C` | Complete task | `1: C` |
+| `C [note]` | Complete with note | `1: C already done last week` |
+| `D [person]` | Delegate - draft email via Zapier | `2: D Brianna` |
+| `D [person] [modifier]` | Delegate with context | `2: D Brianna within the next week` |
+| `DD` | Deep Dive - get more details | `3: DD` |
+| `DD [focus]` | Deep Dive with specific focus | `3: DD focus on enterprise pricing` |
+
+**Example triage response:**
+```
+1: C
+2: D Brianna please handle by Friday
+3: DD focus on North American competitors only
+4-6: C
+7: D John can you review this contract
+```
+
+**URL/Link Handling:**
+- If task contains a URL, research agent MUST visit the link first
+- Summarize actual content from the page (not just title)
+- Include key points, takeaways, and why it was saved
+- Mark source as "visited link" vs "web search"
 
 **After Session:**
 - Cache persists for 7 days (configurable)
@@ -143,10 +188,13 @@ Say "all complete" or specify: "complete: 1-5, keep: 6-10"
 2. Update `commands/gtd.md`:
    - Add session creation at start
    - Write results to cache during research
-   - Display summaries instead of full text
-   - Add "details N" command for expansion
+   - **URL handling**: If task has URL, visit and summarize actual content
+   - **Rich display**: TLDR bullets with as many points as needed
+   - **C/D/DD commands**: Complete, Delegate (via Zapier email), Deep Dive
+   - **Modifiers**: Support added context like "D Brianna within the next week"
    - Add "resume" capability for continuing sessions
 3. Add cache cleanup (7-day retention)
+4. Integrate Zapier MCP for delegation emails
 
 ### Phase 2: Documentation for Public Release
 1. Add LICENSE (MIT)
