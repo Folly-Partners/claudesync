@@ -80,25 +80,39 @@ const gaugeColors = {
 
 ## Phase 1: Quick Wins (High Impact, Low Effort)
 
-### 1.1 Rename Section Headers from Clinical to Human
+### 1.1 Add Human-Readable Headers (Keep Clinical Names)
 
 **Files:** All visualization components
 **Effort:** 1 hour
 
-| Current | Enhanced |
-|---------|----------|
-| GAD-7 | Anxiety Level |
-| PHQ-9 | Depression Screening |
-| PCL-5 | Trauma Symptoms |
-| ASRS-18 | ADHD Screening |
-| AQ-10 | Autism Traits |
-| CAT-Q | Social Masking |
-| ECR-S | Relationship Attachment |
-| PERMA | Wellbeing Pillars |
-| DERS-16 | Emotional Regulation |
-| IPIP-50 | Personality Traits |
+Add human-readable labels as primary headers while **preserving clinical instrument names** as secondary labels. This maintains clinical accuracy for users who want to research their scores or share with professionals.
 
-**Dark mode note:** Section headers should use `text-slate-900 dark:text-slate-100` for primary headers, `text-slate-600 dark:text-slate-400` for clinical abbreviations shown as subtitles.
+| Clinical Name | Human Label | Display Format |
+|---------------|-------------|----------------|
+| GAD-7 | Anxiety Level | "Anxiety Level" (h3) + "GAD-7 · 14/21" (subtitle) |
+| PHQ-9 | Depression Screening | "Depression Screening" (h3) + "PHQ-9 · 8/27" (subtitle) |
+| PCL-5 | Trauma Symptoms | "Trauma Symptoms" (h3) + "PCL-5 · 24/80" (subtitle) |
+| ASRS-18 | ADHD Screening | "ADHD Screening" (h3) + "ASRS-18" (subtitle) |
+| AQ-10 | Autism Traits | "Autism Traits" (h3) + "AQ-10 · 6/10" (subtitle) |
+| CAT-Q | Social Masking | "Social Masking" (h3) + "CAT-Q" (subtitle) |
+| ECR-S | Attachment Style | "Attachment Style" (h3) + "ECR-S" (subtitle) |
+| PERMA | Wellbeing Pillars | "Wellbeing Pillars" (h3) + "PERMA Profiler" (subtitle) |
+| DERS-16 | Emotional Regulation | "Emotional Regulation" (h3) + "DERS-16" (subtitle) |
+| IPIP-50 | Personality Traits | "Personality Traits" (h3) + "Big Five / IPIP-50" (subtitle) |
+
+**Example layout:**
+```tsx
+<div>
+  <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+    Anxiety Level
+  </h3>
+  <p className="text-sm text-slate-500 dark:text-slate-400">
+    GAD-7 · 14/21 · Moderate
+  </p>
+</div>
+```
+
+**Dark mode note:** Primary headers use `text-slate-900 dark:text-slate-100`, clinical subtitles use `text-slate-500 dark:text-slate-400`.
 
 ### 1.2 Make Interpretive Labels Larger Than Raw Scores
 

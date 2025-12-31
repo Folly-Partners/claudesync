@@ -95,10 +95,8 @@
   },
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
-    "things-mcp",
-    "browserbase",
     "tavily",
-    "zapier",
-    "ahrefs"
+    "firecrawl-mcp",
+    "things-mcp"
   ]
 }

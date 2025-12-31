@@ -13,18 +13,6 @@
         "isLocal": true
       }
     ],
-    "github@claude-plugins-official": [
-      {
-        "scope": "project",
-        "projectPath": "/Users/andrewwilkinson",
-        "installPath": "/Users/andrewwilkinson/.claude/plugins/cache/claude-plugins-official/github/6d3752c000e2",
-        "version": "6d3752c000e2",
-        "installedAt": "2025-12-17T20:10:47.210Z",
-        "lastUpdated": "2025-12-19T22:54:01.174Z",
-        "gitCommitSha": "d08486c69c7744eb72c582aef4a33cb68d772d8b",
-        "isLocal": true
-      }
-    ],
     "security-guidance@claude-plugins-official": [
       {
         "scope": "project",
@@ -81,6 +69,17 @@
         "installedAt": "2025-12-25T00:50:30.900Z",
         "lastUpdated": "2025-12-25T00:50:30.900Z",
         "gitCommitSha": "a4969d56197be9580aef5ace73ac9064ffb04152",
+        "isLocal": true
+      }
+    ],
+    "github@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/andrewwilkinson/.claude/plugins/cache/claude-plugins-official/github/ab2b6d0cad88",
+        "version": "ab2b6d0cad88",
+        "installedAt": "2025-12-30T16:13:01.413Z",
+        "lastUpdated": "2025-12-30T16:13:25.311Z",
+        "gitCommitSha": "5bd5b678995fba275d50fe93a71efd7428868e68",
         "isLocal": true
       }
     ]

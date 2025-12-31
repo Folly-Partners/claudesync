@@ -55,11 +55,11 @@
   "model": "opus",
   "enabledPlugins": {
     "firebase@claude-plugins-official": true,
-    "github@claude-plugins-official": true,
     "security-guidance@claude-plugins-official": true,
     "supabase@claude-plugins-official": true,
     "vercel@claude-plugins-official": true,
     "compound-engineering@every-marketplace": true,
-    "stripe@claude-plugins-official": true
+    "stripe@claude-plugins-official": true,
+    "github@claude-plugins-official": true
   }
 }

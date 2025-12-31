@@ -2,13 +2,15 @@
 
 This directory contains Claude Code configuration that syncs across all of Andrew's Macs.
 
-## Session Start: Git Sync Check
+## Session Start: Git Sync Check (Daily)
 
-**At the START of every session** (first message, or resuming after a break), run the git sync check:
+**Once per day**, run the git sync check at session start:
 
 ```bash
 ~/.claude/skills/github-sync/git-sync-check.sh
 ```
+
+The script self-limits to once every 24 hours. To force a check: `git-sync-check.sh --force`
 
 This checks `~/.claude` and `~/Deep-Personality` for:
 - Uncommitted changes (from previous sessions)
@@ -19,9 +21,7 @@ This checks `~/.claude` and `~/Deep-Personality` for:
 - If behind remote: `git pull origin main` and tell user
 - If uncommitted changes: Ask user if they want to commit or review
 - If unpushed commits: Ask user if they want to push
-- If clean: Proceed silently (don't mention git unless asked)
-
-**While working:** Proactively suggest committing after completing significant work (features, bug fixes, new skills/commands). Before ending a session, remind about uncommitted/unpushed changes.
+- If clean or already checked today: Proceed silently
 
 ## Skills Available
 

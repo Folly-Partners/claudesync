@@ -1,0 +1,1 @@
+/Users/andrewwilkinson/.claude/plugins/cache/every-marketplace/compound-engineering/2.15.1/commands/heal-skill.md

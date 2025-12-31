@@ -4,6 +4,31 @@
 
 set -e
 
+# Daily rate limiting - only run once per 24 hours unless forced
+LAST_RUN_FILE="$HOME/.claude/.git-sync-last-run"
+COOLDOWN_SECONDS=86400  # 24 hours
+
+# Check if --force flag is passed
+FORCE=false
+if [ "$1" = "--force" ] || [ "$1" = "-f" ]; then
+    FORCE=true
+fi
+
+if [ "$FORCE" = false ] && [ -f "$LAST_RUN_FILE" ]; then
+    LAST_RUN=$(cat "$LAST_RUN_FILE" 2>/dev/null || echo 0)
+    NOW=$(date +%s)
+    ELAPSED=$((NOW - LAST_RUN))
+
+    if [ "$ELAPSED" -lt "$COOLDOWN_SECONDS" ]; then
+        HOURS_LEFT=$(( (COOLDOWN_SECONDS - ELAPSED) / 3600 ))
+        # Silently skip - don't output anything
+        exit 0
+    fi
+fi
+
+# Record this run
+date +%s > "$LAST_RUN_FILE"
+
 # ANSI colors
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
@@ -101,6 +126,66 @@ for REPO in "${REPOS[@]}"; do
         echo -e "  ${GREEN}✓ Clean and up to date${NC}"
     fi
 
+    echo ""
+done
+
+echo "========================================"
+
+# Check CI status for repos with GitHub Actions
+echo ""
+echo "========================================"
+echo "CI Status Check"
+echo "========================================"
+echo ""
+
+for REPO in "${REPOS[@]}"; do
+    if [ ! -d "$REPO/.git" ]; then
+        continue
+    fi
+
+    cd "$REPO"
+
+    # Check if this repo has a GitHub remote
+    GITHUB_URL=$(git remote get-url origin 2>/dev/null | grep -i github || echo "")
+    if [ -z "$GITHUB_URL" ]; then
+        continue
+    fi
+
+    # Extract owner/repo from URL
+    REPO_SLUG=$(echo "$GITHUB_URL" | sed -E 's/.*github\.com[:/]([^/]+\/[^/.]+)(\.git)?$/\1/')
+    REPO_NAME=$(basename "$REPO")
+
+    if [ -z "$REPO_SLUG" ]; then
+        continue
+    fi
+
+    echo -e "${BLUE}[$REPO_NAME]${NC}"
+
+    # Get the last workflow run status using gh CLI
+    CI_STATUS=$(gh run list --repo "$REPO_SLUG" --limit 1 --json conclusion,status,name,headBranch,createdAt 2>/dev/null || echo "")
+
+    if [ -z "$CI_STATUS" ] || [ "$CI_STATUS" = "[]" ]; then
+        echo "  No CI workflows found"
+    else
+        CONCLUSION=$(echo "$CI_STATUS" | grep -o '"conclusion":"[^"]*"' | head -1 | cut -d'"' -f4)
+        STATUS=$(echo "$CI_STATUS" | grep -o '"status":"[^"]*"' | head -1 | cut -d'"' -f4)
+        WORKFLOW_NAME=$(echo "$CI_STATUS" | grep -o '"name":"[^"]*"' | head -1 | cut -d'"' -f4)
+        BRANCH=$(echo "$CI_STATUS" | grep -o '"headBranch":"[^"]*"' | head -1 | cut -d'"' -f4)
+
+        if [ "$STATUS" = "in_progress" ] || [ "$STATUS" = "queued" ]; then
+            echo -e "  ${YELLOW}⏳ $WORKFLOW_NAME is running on $BRANCH${NC}"
+        elif [ "$CONCLUSION" = "success" ]; then
+            echo -e "  ${GREEN}✓ $WORKFLOW_NAME passed on $BRANCH${NC}"
+        elif [ "$CONCLUSION" = "failure" ]; then
+            echo -e "  ${RED}✗ $WORKFLOW_NAME FAILED on $BRANCH${NC}"
+            echo -e "  ${YELLOW}  Run 'gh run view --repo $REPO_SLUG' for details${NC}"
+            ISSUES_FOUND=true
+        elif [ "$CONCLUSION" = "cancelled" ]; then
+            echo -e "  ${YELLOW}⊘ $WORKFLOW_NAME was cancelled on $BRANCH${NC}"
+        else
+            echo "  Last run: $CONCLUSION ($STATUS)"
+        fi
+    fi
     echo ""
 done
 

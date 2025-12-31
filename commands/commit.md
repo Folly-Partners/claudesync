@@ -34,11 +34,9 @@ git diff --cached --stat
 git diff --cached
 ```
 
-6. Auto-generate a concise commit message based on all the changes. Present it to the user using AskUserQuestion with options:
-   - "Use this message" (the generated message)
-   - "Edit message" (let them provide their own)
+6. Auto-generate a concise commit message based on all the changes. Do NOT ask the user - just use the generated message.
 
-7. Create the commit with the final message. Always append the Claude Code footer:
+7. Create the commit with the generated message. Always append the Claude Code footer:
 ```bash
 git commit -m "$(cat <<'EOF'
 <commit message here>

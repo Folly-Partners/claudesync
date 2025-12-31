@@ -34,4 +34,4 @@ sync-launchd.log
 
 # Plugin data (can be re-downloaded)
 plugins/marketplaces/
-plugins/cache/
+plugins/cache/.git-sync-last-run

@@ -9,16 +9,14 @@ Ensures Claude Code sessions stay synchronized with GitHub, preventing lost work
 
 ## When to Use This Skill
 
-**AUTOMATICALLY TRIGGER** at the start of every session or when resuming work:
-- Session just started (first message of a conversation)
-- Session reactivated after inactivity (>30 min gap)
-- Working in any git repository
-- Before making significant changes to a codebase
-- After completing a significant milestone
+**AUTOMATICALLY TRIGGER** once per day at session start:
+- The script self-limits to once every 24 hours
+- Use `--force` flag to bypass the daily limit
+- After completing a significant milestone (use --force)
 
 ## Session Start Routine
 
-**At the beginning of EVERY session**, run this check:
+**At session start**, run this check (auto-skips if already run today):
 
 ```bash
 # Quick git health check for common directories
