@@ -1,5 +1,13 @@
 {
   "mcpServers": {
+    "SuperThings": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["/Users/andrewwilkinson/Documents/things-mcp/dist/index.js"],
+      "env": {
+        "THINGS_AUTH_TOKEN": "***REMOVED***"
+      }
+    },
     "playwright": {
       "type": "stdio",
       "command": "npx",
@@ -11,6 +19,10 @@
       "headers": {
         "X-API-KEY": "***REMOVED***"
       }
+    },
+    "zapier": {
+      "type": "sse",
+      "url": "https://mcp.zapier.com/api/mcp/s/***REMOVED***/mcp"
     }
   }
 }
