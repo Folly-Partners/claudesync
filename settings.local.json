@@ -71,7 +71,7 @@
       "Bash(killall:*)",
       "Bash(swift create_icon.swift:*)",
       "Bash(iconutil:*)",
-      "mcp__things-mcp__things_add_todo",
+      "mcp__SuperThings",
       "WebFetch(domain:club.macstories.net)",
       "Bash(git pull:*)",
       "Bash(bash /tmp/add_icon_to_app.sh:*)",
@@ -97,6 +97,6 @@
   "enabledMcpjsonServers": [
     "tavily",
     "firecrawl-mcp",
-    "things-mcp"
+    "SuperThings"
   ]
 }

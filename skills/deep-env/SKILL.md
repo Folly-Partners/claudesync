@@ -199,6 +199,14 @@ deep-env auto-sync enable
 - Never commit `.env.local` to git
 - Always `deep-env push` after storing new credentials
 - The sync password is known only to the user - ask if needed
-- Credentials are stored in macOS Keychain (secure)
+- Credentials are stored in macOS Keychain (hardware-backed on Apple Silicon)
+- Sync password stored in Keychain (not plaintext file)
 - iCloud sync uses AES-256 encryption
 - Project assignments are stored in `~/.config/deep-env/project-keys.json`
+
+## Security Features
+
+- **Access logging**: All credential access logged to `~/.config/deep-env/access.log`
+- **Secure password handling**: OpenSSL uses stdin (hidden from `ps aux`)
+- **Secure temp files**: Plaintext temp files overwritten before deletion
+- **Keychain-backed**: Sync password in Keychain, not plaintext file
