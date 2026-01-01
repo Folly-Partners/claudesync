@@ -1,0 +1,62 @@
+[
+  {
+    "content": "Draft email to Jake Miller (Fellow kettle)",
+    "status": "completed",
+    "activeForm": "Drafting Jake Miller email"
+  },
+  {
+    "content": "Draft email to Wesley Farnell (Eight Ounce acquisition)",
+    "status": "completed",
+    "activeForm": "Drafting Wesley email"
+  },
+  {
+    "content": "Draft email to Jordan Taub cc Karen (Prenuvo)",
+    "status": "completed",
+    "activeForm": "Drafting Jordan email"
+  },
+  {
+    "content": "Draft email to Kurtis (kidnap insurance)",
+    "status": "completed",
+    "activeForm": "Drafting Kurtis email"
+  },
+  {
+    "content": "Draft email to Karen (DEXA scan downtown)",
+    "status": "completed",
+    "activeForm": "Drafting Karen email"
+  },
+  {
+    "content": "Draft email to Tina (cancel Impact Kitchen)",
+    "status": "completed",
+    "activeForm": "Drafting Tina email"
+  },
+  {
+    "content": "Draft email to Pacific Voice Clinic (R-CPD inquiry)",
+    "status": "in_progress",
+    "activeForm": "Drafting Pacific Voice Clinic email"
+  },
+  {
+    "content": "Draft acquisition email to Michael Rak (Artona)",
+    "status": "pending",
+    "activeForm": "Drafting Artona email"
+  },
+  {
+    "content": "Draft investment email to Viion Systems",
+    "status": "pending",
+    "activeForm": "Drafting Viion email"
+  },
+  {
+    "content": "Draft email to Lina Alvarez (Cocktail Party book)",
+    "status": "pending",
+    "activeForm": "Drafting Lina email"
+  },
+  {
+    "content": "Draft email to Shiraz (Civilized to Death book)",
+    "status": "pending",
+    "activeForm": "Drafting Shiraz email"
+  },
+  {
+    "content": "Summarize MotherToBaby key takeaways",
+    "status": "pending",
+    "activeForm": "Summarizing MotherToBaby"
+  }
+]

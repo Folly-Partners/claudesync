@@ -1,0 +1,12 @@
+[
+  {
+    "content": "Investigate why SuperThings MCP tools aren't exposed",
+    "status": "completed",
+    "activeForm": "Investigating MCP tool exposure issue"
+  },
+  {
+    "content": "Document findings and fix",
+    "status": "in_progress",
+    "activeForm": "Documenting findings and fix"
+  }
+]
