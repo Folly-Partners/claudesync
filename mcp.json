@@ -3,7 +3,7 @@
     "SuperThings": {
       "type": "stdio",
       "command": "node",
-      "args": ["/Users/andrewwilkinson/Projects/SuperThings/dist/index.js"],
+      "args": ["/Users/andrewwilkinson/SuperThings/dist/index.js"],
       "env": {
         "THINGS_AUTH_TOKEN": "***REMOVED***"
       }
