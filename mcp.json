@@ -23,6 +23,13 @@
     "zapier": {
       "type": "sse",
       "url": "https://mcp.zapier.com/api/mcp/s/***REMOVED***/mcp"
+    },
+    "github": {
+      "type": "sse",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer ***REMOVED***"
+      }
     }
   }
 }
