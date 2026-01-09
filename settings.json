@@ -53,7 +53,7 @@
       "Bash(git push -f origin master:*)"
     ]
   },
-  "model": "opusplan",
+  "model": "opus",
   "hooks": {
     "Notification": [
       {
@@ -126,6 +126,10 @@
           {
             "type": "command",
             "command": "python3 /Users/andrewwilkinson/.claude/hooks/claude-island-state.py"
+          },
+          {
+            "type": "command",
+            "command": "/Users/andrewwilkinson/.claude/skills/github-sync/sync-mcp-oauth.sh push --quiet"
           }
         ]
       }

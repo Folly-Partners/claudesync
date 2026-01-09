@@ -258,6 +258,20 @@ if [[ -d "$HOME/Journal/web" ]]; then
   fi
 fi
 
+# MCP OAuth Sync (auto-pull)
+echo ""
+echo "========================================"
+echo "MCP OAuth Sync"
+echo "========================================"
+echo ""
+if [ -f "$HOME/.claude/skills/github-sync/sync-mcp-oauth.sh" ]; then
+    "$HOME/.claude/skills/github-sync/sync-mcp-oauth.sh" pull --quiet
+else
+    echo "sync-mcp-oauth.sh not found"
+fi
+echo ""
+echo "========================================"
+
 if [ "$ISSUES_FOUND" = true ]; then
     echo -e "${YELLOW}Action may be needed. Review above.${NC}"
     exit 1
