@@ -1,0 +1,12 @@
+# Environment variables with actual credentials
+.env.local
+
+# Python cache and build artifacts
+__pycache__/
+*.pyc
+*.egg-info/
+dist/
+build/
+
+# Virtual environment
+venv/

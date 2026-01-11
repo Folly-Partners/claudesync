@@ -30,6 +30,11 @@
       "headers": {
         "Authorization": "Bearer ***REMOVED***"
       }
+    },
+    "unifi": {
+      "type": "stdio",
+      "command": "/Users/andrewwilkinson/.claude/mcp-servers/unifi/venv/bin/python",
+      "args": ["/Users/andrewwilkinson/.claude/mcp-servers/unifi/server.py"]
     }
   }
 }

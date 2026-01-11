@@ -95,7 +95,7 @@
   },
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
-    "things-mcp",
+    "SuperThings",
     "browserbase",
     "tavily",
     "zapier",
