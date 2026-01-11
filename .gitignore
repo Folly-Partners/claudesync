@@ -35,3 +35,10 @@ sync-launchd.log
 # Plugin data (can be re-downloaded)
 plugins/marketplaces/
 plugins/cache/.git-sync-last-run
+
+# Session-specific data (machine-local, too large to sync)
+projects/
+todos/
+paste-cache/
+plans/
+security_warnings_state_*.json

@@ -41,7 +41,7 @@
         "installPath": "/Users/andrewwilkinson/.claude/plugins/cache/claude-plugins-official/vercel/1.0.0",
         "version": "1.0.0",
         "installedAt": "2025-12-17T20:11:21.799Z",
-        "lastUpdated": "2025-12-26T15:33:32.873Z",
+        "lastUpdated": "2026-01-11T06:48:34.044Z",
         "gitCommitSha": "d08486c69c7744eb72c582aef4a33cb68d772d8b"
       }
     ],
@@ -49,11 +49,11 @@
       {
         "scope": "project",
         "projectPath": "/Users/andrewwilkinson",
-        "installPath": "/Users/andrewwilkinson/.claude/plugins/cache/every-marketplace/compound-engineering/2.15.1",
-        "version": "2.15.1",
+        "installPath": "/Users/andrewwilkinson/.claude/plugins/cache/every-marketplace/compound-engineering/2.23.1",
+        "version": "2.23.1",
         "installedAt": "2025-12-19T22:54:01.174Z",
-        "lastUpdated": "2025-12-19T22:54:01.174Z",
-        "gitCommitSha": "3fc2358e1f2a12b272c3250ca27ed928cafd0102"
+        "lastUpdated": "2026-01-10T22:30:00.000Z",
+        "gitCommitSha": "c06f7e889f61818556eb5cd7db64cfad55052115"
       }
     ],
     "stripe@claude-plugins-official": [

@@ -88,7 +88,9 @@
       "mcp__apify__call-actor",
       "mcp__plugin_compound-engineering_pw__browser_take_screenshot",
       "mcp__plugin_compound-engineering_pw__browser_navigate",
-      "Skill(vercel:deploy)"
+      "Skill(vercel:deploy)",
+      "Skill(plan_review)",
+      "Skill(work)"
     ],
     "deny": [],
     "ask": []
