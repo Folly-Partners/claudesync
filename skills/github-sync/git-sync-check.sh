@@ -238,10 +238,44 @@ fi
 
 echo ""
 echo "========================================"
+
+# Sync Journal environment if needed
+if [[ -d "$HOME/Journal/web" ]]; then
+  if [[ ! -f "$HOME/Journal/web/.env.local" ]] || ! grep -q "WEBAUTHN_RP_ID" "$HOME/Journal/web/.env.local" 2>/dev/null; then
+    echo ""
+    echo "========================================"
+    echo "Journal Environment Sync"
+    echo "========================================"
+    echo ""
+    echo "Syncing Journal environment configuration..."
+    if deep-env sync "$HOME/Journal/web" 2>&1; then
+      echo -e "${GREEN}✓ Journal environment synced${NC}"
+    else
+      echo -e "${YELLOW}! Warning: Failed to sync Journal environment${NC}"
+    fi
+    echo ""
+    echo "========================================"
+  fi
+fi
+
+# MCP OAuth Sync (auto-pull)
+echo ""
+echo "========================================"
+echo "MCP OAuth Sync"
+echo "========================================"
+echo ""
+if [ -f "$HOME/.claude/skills/github-sync/sync-mcp-oauth.sh" ]; then
+    "$HOME/.claude/skills/github-sync/sync-mcp-oauth.sh" pull --quiet
+else
+    echo "sync-mcp-oauth.sh not found"
+fi
+echo ""
+echo "========================================"
+
 if [ "$ISSUES_FOUND" = true ]; then
     echo -e "${YELLOW}Action may be needed. Review above.${NC}"
     exit 1
 else
-    echo -e "${GREEN}All repositories are in sync.${NC}"
+    echo -e "${GREEN}All checks complete.${NC}"
     exit 0
 fi

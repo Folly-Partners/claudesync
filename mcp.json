@@ -3,7 +3,7 @@
     "SuperThings": {
       "type": "stdio",
       "command": "node",
-      "args": ["/Users/andrewwilkinson/Projects/SuperThings/dist/index.js"],
+      "args": ["/Users/andrewwilkinson/SuperThings/dist/index.js"],
       "env": {
         "THINGS_AUTH_TOKEN": "***REMOVED***"
       }
@@ -23,6 +23,18 @@
     "zapier": {
       "type": "sse",
       "url": "https://mcp.zapier.com/api/mcp/s/***REMOVED***/mcp"
+    },
+    "github": {
+      "type": "sse",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer ***REMOVED***"
+      }
+    },
+    "unifi": {
+      "type": "stdio",
+      "command": "/Users/andrewwilkinson/.claude/mcp-servers/unifi/venv/bin/python",
+      "args": ["/Users/andrewwilkinson/.claude/mcp-servers/unifi/server.py"]
     }
   }
 }

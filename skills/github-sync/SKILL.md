@@ -109,10 +109,50 @@ git add -A && git commit -m "message" && git push origin main
 - `~/Deep-Personality` - Deep Personality project
 - Any directory where user is actively working
 
+## MCP OAuth Credential Sync
+
+The github-sync skill also handles **automatic syncing of MCP OAuth tokens** across Macs via iCloud.
+
+### How It Works
+
+- **Session start:** Automatically pulls latest OAuth tokens from iCloud (merges with local)
+- **Session end:** Automatically pushes updated OAuth tokens to iCloud
+- Uses deep-env's encryption (AES-256-CBC) and password
+- Tokens are merged intelligently: fresher tokens (later `expiresAt`) are kept
+
+### First-Time Setup
+
+After authenticating MCP servers (Zapier, Browserbase, etc.) for the first time:
+```bash
+~/.claude/skills/github-sync/sync-mcp-oauth.sh push
+```
+
+After that, everything is automatic. Your other Macs will automatically get the tokens.
+
+### Manual Commands
+
+```bash
+# Push credentials to iCloud
+~/.claude/skills/github-sync/sync-mcp-oauth.sh push
+
+# Pull credentials from iCloud (merges with local)
+~/.claude/skills/github-sync/sync-mcp-oauth.sh pull
+
+# Check sync status
+~/.claude/skills/github-sync/sync-mcp-oauth.sh status
+```
+
+### Technical Details
+
+- Credentials stored at: `~/.claude/.credentials.json`
+- Encrypted backup at: `~/Library/Mobile Documents/com~apple~CloudDocs/.deep-env/mcp-oauth.enc`
+- Uses same password as deep-env (`~/.config/deep-env/.sync_pass`)
+- Merge strategy: For each OAuth entry, keeps the one with later `expiresAt` timestamp
+
 ## Important Notes
 
 - Never force push without explicit user permission
 - Always pull before pushing to avoid conflicts
 - If merge conflicts occur, help user resolve them
 - The `~/.claude` repo has a daily auto-sync, but manual sync is still good practice
-- Credential files (`.env.local`, `.credentials.json`) should never be committed
+- Credential files (`.env.local`, `.credentials.json`) should never be committed to git (gitignored)

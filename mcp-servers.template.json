@@ -1,0 +1,60 @@
+{
+  "_metadata": {
+    "localOnly": ["browserbase", "xero"],
+    "requiresSetup": {
+      "github": "Requires GitHub Copilot - authenticate with 'gh auth login' on each Mac",
+      "browserbase": "Browserbase session is machine-specific",
+      "ahrefs": "Requires Ahrefs authentication via browser"
+    }
+  },
+
+  "mcpServers": {
+    "SuperThings": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["${HOME}/SuperThings/dist/index.js"],
+      "env": {
+        "THINGS_AUTH_TOKEN": "${ENV:THINGS_AUTH_TOKEN}"
+      }
+    },
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"]
+    },
+    "hunter": {
+      "type": "sse",
+      "url": "https://mcp.hunter.io/sse",
+      "headers": {
+        "X-API-KEY": "${ENV:HUNTER_API_KEY}"
+      }
+    },
+    "zapier": {
+      "type": "sse",
+      "url": "${ENV:ZAPIER_MCP_URL}"
+    },
+    "tavily": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["mcp-remote", "${ENV:TAVILY_MCP_URL}"]
+    },
+    "browserbase": {
+      "type": "http",
+      "url": "https://server.smithery.ai/@browserbasehq/mcp-browserbase/mcp",
+      "_localAuth": true
+    },
+    "ahrefs": {
+      "type": "http",
+      "url": "https://api.ahrefs.com/mcp/mcp",
+      "_localAuth": true
+    },
+    "github": {
+      "type": "sse",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "_localAuth": true,
+      "headers": {
+        "Authorization": "Bearer ${LOCAL:GITHUB_MCP_TOKEN}"
+      }
+    }
+  }
+}
