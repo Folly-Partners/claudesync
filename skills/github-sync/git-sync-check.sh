@@ -248,7 +248,7 @@ if [[ -d "$HOME/Journal/web" ]]; then
     echo "========================================"
     echo ""
     echo "Syncing Journal environment configuration..."
-    if deep-env sync "$HOME/Journal/web" 2>&1; then
+    if "$HOME/.local/bin/deep-env" sync "$HOME/Journal/web" 2>&1; then
       echo -e "${GREEN}✓ Journal environment synced${NC}"
     else
       echo -e "${YELLOW}! Warning: Failed to sync Journal environment${NC}"
