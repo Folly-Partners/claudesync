@@ -82,7 +82,7 @@
             "type": "command"
           },
           {
-            "command": "$HOME/.claude/skills/github-sync/sync-mcp-oauth.sh push --quiet",
+            "command": "/Users/andrewwilkinson/.claude/skills/github-sync/sync-mcp-oauth.sh push --quiet",
             "type": "command"
           }
         ]

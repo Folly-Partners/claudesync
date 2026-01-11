@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastComputedDate": "2026-01-08",
+  "lastComputedDate": "2026-01-10",
   "dailyActivity": [
     {
       "date": "2025-11-22",
@@ -145,6 +145,18 @@
       "messageCount": 5404,
       "sessionCount": 20,
       "toolCallCount": 1658
+    },
+    {
+      "date": "2026-01-09",
+      "messageCount": 1080,
+      "sessionCount": 20,
+      "toolCallCount": 304
+    },
+    {
+      "date": "2026-01-10",
+      "messageCount": 2,
+      "sessionCount": 1,
+      "toolCallCount": 0
     }
   ],
   "dailyModelTokens": [
@@ -297,26 +309,35 @@
         "claude-opus-4-5-20251101": 698474,
         "claude-haiku-4-5-20251001": 5087
       }
+    },
+    {
+      "date": "2026-01-09",
+      "tokensByModel": {
+        "claude-opus-4-5-20251101": 48189,
+        "claude-sonnet-4-5-20250929": 62770
+      }
     }
   ],
   "modelUsage": {
     "claude-sonnet-4-5-20250929": {
-      "inputTokens": 19322,
-      "outputTokens": 273107,
-      "cacheReadInputTokens": 173786859,
-      "cacheCreationInputTokens": 16487224,
+      "inputTokens": 35473,
+      "outputTokens": 319726,
+      "cacheReadInputTokens": 194824603,
+      "cacheCreationInputTokens": 18644337,
       "webSearchRequests": 0,
       "costUSD": 0,
-      "contextWindow": 0
+      "contextWindow": 0,
+      "maxOutputTokens": null
     },
     "claude-opus-4-5-20251101": {
-      "inputTokens": 1547353,
-      "outputTokens": 4710450,
-      "cacheReadInputTokens": 2824587806,
-      "cacheCreationInputTokens": 199411196,
+      "inputTokens": 1563275,
+      "outputTokens": 4742717,
+      "cacheReadInputTokens": 2842966977,
+      "cacheCreationInputTokens": 203095888,
       "webSearchRequests": 0,
       "costUSD": 0,
-      "contextWindow": 0
+      "contextWindow": 0,
+      "maxOutputTokens": null
     },
     "claude-opus-4-1-20250805": {
       "inputTokens": 331,
@@ -337,8 +358,8 @@
       "contextWindow": 0
     }
   },
-  "totalSessions": 239,
-  "totalMessages": 49299,
+  "totalSessions": 260,
+  "totalMessages": 50381,
   "longestSession": {
     "sessionId": "73f644ee-df4f-426b-85b4-5c182d839d9c",
     "duration": 296296128,
@@ -350,15 +371,15 @@
     "4": 7,
     "5": 12,
     "6": 25,
-    "7": 30,
-    "8": 37,
+    "7": 47,
+    "8": 38,
     "9": 21,
-    "10": 4,
+    "10": 6,
     "11": 18,
     "12": 14,
     "13": 12,
     "14": 6,
-    "15": 13,
+    "15": 14,
     "16": 11,
     "17": 10,
     "18": 2,
