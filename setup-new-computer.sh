@@ -22,7 +22,7 @@ fi
 
 # Clone the repo
 echo "📥 Cloning claude-code-sync repository..."
-git clone https://github.com/awilkinson/claude-code-sync.git "$HOME/.claude"
+git clone https://github.com/Folly-Partners/claude-code-sync.git "$HOME/.claude"
 
 # Create symlink for MCP config
 echo "🔗 Creating symlink for MCP config..."

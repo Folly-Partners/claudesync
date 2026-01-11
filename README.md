@@ -5,7 +5,7 @@ Syncs Claude Code configuration across all my computers automatically.
 ## Quick Setup (New Computer)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/awilkinson/claude-code-sync/main/setup-new-computer.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Folly-Partners/claude-code-sync/main/setup-new-computer.sh | bash
 ```
 
 That's it. Everything else is automatic.
@@ -39,7 +39,7 @@ That's it. Everything else is automatic.
 
 ```
 ~/.claude.json  →  symlink  →  ~/.claude/claude.json (in git repo)
-~/.claude/      →  git repo  →  github.com/awilkinson/claude-code-sync
+~/.claude/      →  git repo  →  github.com/Folly-Partners/claude-code-sync
 ```
 
 The key trick: `~/.claude.json` (where Claude Code looks for MCP config) is a symlink pointing to `~/.claude/claude.json` (inside the git repo). This lets us sync the MCP config without moving it.
@@ -152,7 +152,7 @@ launchctl load ~/Library/LaunchAgents/com.claude.config-sync.plist
 If a user asks you to set up Claude Code sync on a new computer, direct them to run:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/awilkinson/claude-code-sync/main/setup-new-computer.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Folly-Partners/claude-code-sync/main/setup-new-computer.sh | bash
 ```
 
 This will:
