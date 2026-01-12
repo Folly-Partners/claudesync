@@ -3,9 +3,9 @@
     "SuperThings": {
       "type": "stdio",
       "command": "node",
-      "args": ["/Users/andrewwilkinson/SuperThings/dist/index.js"],
+      "args": ["${HOME}/SuperThings/dist/index.js"],
       "env": {
-        "THINGS_AUTH_TOKEN": "***REMOVED***"
+        "THINGS_AUTH_TOKEN": "${THINGS_AUTH_TOKEN}"
       }
     },
     "playwright": {
@@ -17,24 +17,16 @@
       "type": "sse",
       "url": "https://mcp.hunter.io/sse",
       "headers": {
-        "X-API-KEY": "***REMOVED***"
+        "X-API-KEY": "${HUNTER_API_KEY}"
       }
     },
-    "zapier": {
-      "type": "sse",
-      "url": "https://mcp.zapier.com/api/mcp/s/***REMOVED***/mcp"
+    "ahrefs": {
+      "type": "http",
+      "url": "https://api.ahrefs.com/mcp/mcp"
     },
-    "github": {
-      "type": "sse",
-      "url": "https://api.githubcopilot.com/mcp/",
-      "headers": {
-        "Authorization": "Bearer ***REMOVED***"
-      }
-    },
-    "unifi": {
-      "type": "stdio",
-      "command": "/Users/andrewwilkinson/.claude/mcp-servers/unifi/venv/bin/python",
-      "args": ["/Users/andrewwilkinson/.claude/mcp-servers/unifi/server.py"]
+    "browserbase": {
+      "type": "http",
+      "url": "https://server.smithery.ai/@browserbasehq/mcp-browserbase/mcp"
     }
   }
 }
