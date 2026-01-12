@@ -1,56 +1,48 @@
 # MCP Server Sync
 
-Sync MCP server configurations across all your Macs. Stores server definitions in a template with variable substitution, and credentials securely via deep-env.
+Check and manage MCP server configuration across your Macs.
 
 ## How It Works
 
-1. **Template file** (`~/.claude/mcp-servers.template.json`) stores MCP server configs with variables
-2. **Credentials** are stored in deep-env (macOS Keychain + iCloud sync)
-3. **Sync script** expands variables and writes to `~/.claude.json`
+Claude Code natively supports `${VAR}` expansion in `mcp.json`:
+- `${HOME}` - expands to home directory (portable across machines)
+- `${VAR_NAME}` - expands to environment variable value
+
+Credentials are stored in deep-env (macOS Keychain) and synced via iCloud.
 
 ## Usage
 
 ```bash
-# Sync MCP servers (expand template → ~/.claude.json)
+# Check if required env vars are set (default)
 ~/.claude/skills/mcp-sync/mcp-sync.sh
 
-# Check for missing credentials
-~/.claude/skills/mcp-sync/mcp-sync.sh check
-
-# List servers in template
+# List servers in mcp.json
 ~/.claude/skills/mcp-sync/mcp-sync.sh list
 
-# Add a credential
-~/.claude/skills/mcp-sync/mcp-sync.sh add-credential HUNTER_API_KEY "your-key"
+# Reload env vars from deep-env and check
+~/.claude/skills/mcp-sync/mcp-sync.sh reload
 ```
-
-## Template Variables
-
-| Variable | Expands To |
-|----------|------------|
-| `${HOME}` | Home directory (`/Users/andrewwilkinson`) |
-| `${ENV:KEY_NAME}` | Credential from deep-env |
 
 ## Adding a New MCP Server
 
-1. Edit `~/.claude/mcp-servers.template.json`
+1. Edit `~/.claude/mcp.json`
 2. Use `${HOME}` for any paths
-3. Use `${ENV:KEY_NAME}` for any secrets
-4. Store the credential: `deep-env store KEY_NAME "value"`
-5. Push credentials: `deep-env push`
-6. Run sync: `~/.claude/skills/mcp-sync/mcp-sync.sh`
+3. Use `${VAR_NAME}` for credentials
+4. Store the credential: `deep-env store VAR_NAME "value"`
+5. Push to iCloud: `deep-env push`
+6. Reload shell: `source ~/.zshrc`
 
-### Example: Adding a new server
+### Example
 
 ```json
 {
   "mcpServers": {
-    "my-new-server": {
+    "my-server": {
       "type": "stdio",
       "command": "node",
       "args": ["${HOME}/Projects/my-server/dist/index.js"],
       "env": {
-        "API_KEY": "${ENV:MY_SERVER_API_KEY}"
+        "API_KEY": "${MY_SERVER_API_KEY}"
       }
     }
   }
@@ -61,59 +53,45 @@ Then:
 ```bash
 deep-env store MY_SERVER_API_KEY "secret123"
 deep-env push
-~/.claude/skills/mcp-sync/mcp-sync.sh
+source ~/.zshrc
 ```
 
 ## On a New Mac
 
-1. Pull credentials from iCloud:
-   ```bash
-   deep-env pull
-   ```
-
-2. Sync MCP servers:
-   ```bash
-   ~/.claude/skills/mcp-sync/mcp-sync.sh
-   ```
-
-That's it. All your MCP servers will be configured.
-
-## Integration with Session Start
-
-The github-sync skill runs at session start. Add mcp-sync to run automatically:
-
-In `~/.claude/skills/github-sync/git-sync-check.sh`, add after the git checks:
 ```bash
-# Sync MCP servers
-~/.claude/skills/mcp-sync/mcp-sync.sh
+# Pull credentials from iCloud
+deep-env pull
+
+# Reload shell to get env vars
+source ~/.zshrc
+
+# Verify all vars are set
+~/.claude/skills/mcp-sync/mcp-sync.sh check
 ```
 
 ## Files
 
 | File | Purpose |
 |------|---------|
-| `~/.claude/mcp-servers.template.json` | Server configs with variables (synced via git) |
-| `~/.claude.json` | Actual config Claude Code reads (generated) |
+| `~/.claude/mcp.json` | Server configs with `${VAR}` syntax (synced via git) |
 | Keychain via deep-env | Credentials (synced via iCloud) |
+| `~/.zshrc` | Loads credentials via `deep-env export` |
 
 ## Troubleshooting
 
-**"Credential not found" warnings:**
+**"Variable MISSING" in check:**
 ```bash
-# Check which credentials are missing
-~/.claude/skills/mcp-sync/mcp-sync.sh check
-
-# Add the missing credential
-deep-env store MISSING_KEY "value"
+# Store the missing credential
+deep-env store VAR_NAME "value"
+deep-env push
+source ~/.zshrc
 ```
 
-**MCP server not working after sync:**
+**MCP server not connecting:**
 ```bash
-# Restart Claude Code to pick up new config
-# Check the generated config
-cat ~/.claude.json | jq '.mcpServers'
-```
+# Check env vars are loaded
+echo $VAR_NAME
 
-**Path doesn't exist on this machine:**
-- The script uses `${HOME}` which works on any Mac
-- For project-specific servers, ensure the repo is cloned to the same relative path
+# If empty, reload from deep-env
+eval "$(deep-env export)"
+```

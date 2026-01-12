@@ -3,7 +3,7 @@
 # Claude Code Sync - New Computer Setup Script
 # Run this on any new Mac to set up Claude Code config sync
 #
-# Usage: curl -fsSL https://raw.githubusercontent.com/awilkinson/claude-code-sync/main/setup-new-computer.sh | bash
+# Usage: curl -fsSL https://raw.githubusercontent.com/Folly-Partners/claude-code-sync/main/setup-new-computer.sh | bash
 
 set -e
 
@@ -28,9 +28,40 @@ git clone https://github.com/Folly-Partners/claude-code-sync.git "$HOME/.claude"
 echo "🔗 Creating symlink for MCP config..."
 ln -sf "$HOME/.claude/claude.json" "$HOME/.claude.json"
 
-# Make sync script executable
-echo "🔐 Making sync script executable..."
+# Make scripts executable
+echo "🔐 Making scripts executable..."
 chmod +x "$HOME/.claude/sync-claude-config.sh"
+chmod +x "$HOME/.claude/skills/"*/*.sh 2>/dev/null || true
+
+# Set up deep-env for credential management
+echo "🔑 Setting up deep-env for credentials..."
+if [ ! -f "$HOME/.local/bin/deep-env" ]; then
+    mkdir -p "$HOME/.local/bin"
+    if [ -f "$HOME/Library/Mobile Documents/com~apple~CloudDocs/.deep-env/deep-env" ]; then
+        cp "$HOME/Library/Mobile Documents/com~apple~CloudDocs/.deep-env/deep-env" "$HOME/.local/bin/"
+        chmod +x "$HOME/.local/bin/deep-env"
+        echo "✅ deep-env installed from iCloud"
+    else
+        echo "⚠️  deep-env not found in iCloud. Install manually or copy from another Mac."
+    fi
+fi
+
+# Add deep-env to PATH and load credentials in shell
+if ! grep -q "deep-env export" "$HOME/.zshrc" 2>/dev/null; then
+    echo "" >> "$HOME/.zshrc"
+    echo "# deep-env: Load credentials as environment variables" >> "$HOME/.zshrc"
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.zshrc"
+    echo 'if command -v deep-env &> /dev/null; then' >> "$HOME/.zshrc"
+    echo '  eval "$(deep-env export 2>/dev/null)"' >> "$HOME/.zshrc"
+    echo 'fi' >> "$HOME/.zshrc"
+    echo "✅ Added deep-env to shell profile"
+fi
+
+# Pull credentials from iCloud
+if command -v deep-env &> /dev/null || [ -f "$HOME/.local/bin/deep-env" ]; then
+    echo "🔄 Pulling credentials from iCloud..."
+    "$HOME/.local/bin/deep-env" pull || echo "⚠️  Failed to pull credentials. Run 'deep-env pull' manually."
+fi
 
 # Get the current username for the plist
 USERNAME=$(whoami)
@@ -88,9 +119,14 @@ echo ""
 echo "✅ Setup complete!"
 echo ""
 echo "Your Claude Code is now synced with:"
-echo "  - 7 MCP servers (things-mcp, webflow, browserbase, tavily, zapier, ahrefs, xero)"
-echo "  - 3 custom agents (email-response-processor, inbox-task-manager, wardrobe-cataloger)"
-echo "  - All your settings, history, and todos"
+echo "  - MCP servers (SuperThings, playwright, hunter, ahrefs, browserbase)"
+echo "  - Custom agents and skills"
+echo "  - All your settings"
+echo ""
+echo "Credentials:"
+echo "  - Stored in macOS Keychain via deep-env"
+echo "  - Synced via iCloud (encrypted)"
+echo "  - mcp.json uses \${VAR} syntax for portability"
 echo ""
 echo "Sync schedule:"
 echo "  - On login"
@@ -98,5 +134,6 @@ echo "  - Daily at 9am"
 echo ""
 echo "Useful commands:"
 echo "  ~/.claude/sync-claude-config.sh     # Manual sync"
+echo "  deep-env list                        # View stored credentials"
+echo "  deep-env pull                        # Pull credentials from iCloud"
 echo "  cat ~/.claude/sync.log              # View sync log"
-echo "  launchctl start com.claude.config-sync  # Trigger sync now"

@@ -32,9 +32,13 @@ claude.json
 .last_sync_date
 sync-launchd.log
 
-# Plugin data (can be re-downloaded)
+# Plugin data (can be re-downloaded, contains machine-specific paths)
 plugins/marketplaces/
-plugins/cache/.git-sync-last-run
+plugins/cache/
+plugins/installed_plugins.json
+
+# Machine-specific settings (contains absolute paths and local permissions)
+settings.local.json
 
 # Session-specific data (machine-local, too large to sync)
 projects/
@@ -42,3 +46,4 @@ todos/
 paste-cache/
 plans/
 security_warnings_state_*.json
+image-cache/

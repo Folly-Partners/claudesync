@@ -9,13 +9,12 @@ REPOS=(
   "$HOME/.claude:claude-code-sync"
   "$HOME/Journal:Journal"
   "$HOME/tiny-investors-lovable:tiny-investors-lovable"
-  "$HOME/Projects/SuperThings:SuperThings"
+  "$HOME/SuperThings:SuperThings"
   "$HOME/deep-background:deep-background"
   "$HOME/email-triage:email-triage"
   "$HOME/ThingsTodayPanel:ThingsTodayPanel"
   "$HOME/tiny-investors:tiny-investors"
   "$HOME/Dealhunter:Dealhunter"
-  "$HOME/company-analyzer:Dealhunter"
   "$HOME/Overstory:Overstory"
   "$HOME/Deep-Personality:Deep-Personality"
 )
@@ -69,11 +68,11 @@ for REPO_INFO in "${REPOS[@]}"; do
     continue
   fi
 
-  # Check migration status
-  if echo "$CURRENT_REMOTE" | grep -q "$NEW_ORG/$REPO_NAME"; then
+  # Check migration status (case-insensitive - GitHub URLs are lowercase)
+  if echo "$CURRENT_REMOTE" | grep -iq "$NEW_ORG/$REPO_NAME"; then
     echo -e "${GREEN}✓${NC} $REPO_BASENAME - Already migrated to $NEW_ORG"
     ((ALREADY_MIGRATED++))
-  elif echo "$CURRENT_REMOTE" | grep -q "$OLD_ORG"; then
+  elif echo "$CURRENT_REMOTE" | grep -iq "$OLD_ORG"; then
     # Check for uncommitted changes
     UNCOMMITTED=""
     if ! git diff --quiet || ! git diff --cached --quiet; then
