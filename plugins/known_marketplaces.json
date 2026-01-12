@@ -5,6 +5,14 @@
       "repo": "anthropics/claude-plugins-official"
     },
     "installLocation": "/Users/andrewwilkinson/.claude/plugins/marketplaces/claude-plugins-official",
-    "lastUpdated": "2026-01-11T16:49:14.170Z"
+    "lastUpdated": "2026-01-12T01:21:05.317Z"
+  },
+  "every-marketplace": {
+    "source": {
+      "source": "git",
+      "url": "https://github.com/EveryInc/compound-engineering-plugin.git"
+    },
+    "installLocation": "/Users/andrew/.claude/plugins/marketplaces/every-marketplace",
+    "lastUpdated": "2026-01-12T01:17:30.199Z"
   }
 }
