@@ -90,7 +90,14 @@
       "mcp__plugin_compound-engineering_pw__browser_navigate",
       "Skill(vercel:deploy)",
       "Skill(plan_review)",
-      "Skill(work)"
+      "Skill(work)",
+      "mcp__plugin_github_github__get_file_contents",
+      "mcp__firecrawl-mcp__firecrawl_map",
+      "mcp__plugin_github_github__create_repository",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_take_screenshot",
+      "mcp__playwright__browser_press_key",
+      "mcp__playwright__browser_close"
     ],
     "deny": [],
     "ask": []

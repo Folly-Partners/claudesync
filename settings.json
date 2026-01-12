@@ -53,6 +53,7 @@
       "Bash(git push -f origin master:*)"
     ]
   },
+  "model": "sonnet",
   "hooks": {
     "Notification": [
       {
@@ -182,6 +183,5 @@
     "stripe@claude-plugins-official": true,
     "supabase@claude-plugins-official": true,
     "vercel@claude-plugins-official": true
-  },
-  "model": "opus"
+  }
 }
