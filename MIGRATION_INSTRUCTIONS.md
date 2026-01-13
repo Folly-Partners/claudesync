@@ -6,123 +6,153 @@ Copy and paste this entire message into Claude Code on your other computers that
 
 ## Instructions for Claude Code
 
-I need you to migrate my existing `claude-code-sync` setup to the new `andrews-plugin` structure. Here's what you need to do:
-
-### Step 1: Navigate to the plugin directory
-```bash
-cd ~/andrews-plugin
-```
-
-### Step 2: Pull the latest changes from GitHub
-This will download all the new plugin files (manifest.json, .mcp.json, servers/, scripts/, etc.)
-```bash
-git pull origin main
-```
-
-### Step 3: Run the migration script
-This script will:
-- Build SuperThings dependencies
-- Set up Unifi Python virtual environment
-- Update the LaunchAgent for auto-sync
-- Configure `~/.claude/settings.local.json` with the marketplace
-- Verify everything is working
+I need you to migrate my existing claude-code-sync setup to the new andrews-plugin structure. Run this single command:
 
 ```bash
-./scripts/migrate.sh
+bash <(curl -fsSL https://raw.githubusercontent.com/Folly-Partners/andrews-plugin/main/scripts/migrate.sh)
 ```
 
-### Step 4: Verify the setup
-Check that all servers and credentials are configured correctly:
-```bash
-./scripts/doctor.sh
-```
-
-### Step 5: Show me the results
-Once complete, please show me:
-1. The output from the migration script
-2. The output from the doctor script
-3. Confirmation that `~/.claude/settings.local.json` contains the marketplace configuration
+Then show me the output so I can confirm everything worked.
 
 ---
 
 ## What This Migration Does
 
-The migration transforms your existing `claude-code-sync` setup into "Andrew's Plugin":
+The migration script will automatically:
 
-**Before:**
-- Configuration scattered across multiple files
-- Hardcoded paths in `claude.json`
-- Manual setup required on each machine
+1. **Detect your current setup** - Finds your repo at `~/.claude`
+2. **Pull latest changes** - Downloads all new plugin files from GitHub
+3. **Move to new location** - Moves `~/.claude` → `~/andrews-plugin`
+4. **Create minimal ~/.claude** - Sets up a minimal `~/.claude` directory for settings only
+5. **Build dependencies** - Installs SuperThings (npm) and Unifi (Python venv)
+6. **Configure marketplace** - Registers the plugin in `~/.claude/settings.local.json`
+7. **Verify setup** - Runs health checks to ensure everything works
 
-**After:**
-- Proper Claude Code plugin structure
-- Portable MCP server declarations using `${CLAUDE_PLUGIN_ROOT}`
-- SuperThings and Unifi bundled into the plugin
-- One-command setup on new machines
-- Custom marketplace for easy distribution
+**Time Required:** ~2-3 minutes per machine
 
-**Key Changes:**
-- SuperThings moved to `~/andrews-plugin/servers/super-things/`
-- Unifi moved to `~/andrews-plugin/servers/unifi/`
-- All credentials managed via Deep Env (no changes needed)
-- Auto-sync LaunchAgent updated to use new structure
-- Plugin marketplace registered at `~/.claude/settings.local.json`
+---
 
-**No Downtime:**
-- Your existing MCP servers continue working
-- Credentials remain unchanged (managed by Deep Env)
-- Auto-sync continues running (updated LaunchAgent)
+## What Changes
+
+### Before Migration
+```
+~/.claude/                  # Git repo with everything
+  ├── agents/
+  ├── skills/
+  ├── mcp.json
+  ├── settings.json
+  └── ... (all files mixed together)
+```
+
+### After Migration
+```
+~/andrews-plugin/           # Git repo (moved from ~/.claude)
+  ├── manifest.json         # NEW: Plugin metadata
+  ├── .mcp.json             # NEW: Portable MCP declarations
+  ├── marketplace.json      # NEW: Custom marketplace
+  ├── servers/              # NEW: Bundled MCP servers
+  │   ├── super-things/     #   - SuperThings (copied from ~/SuperThings)
+  │   └── unifi/            #   - Unifi (moved from mcp-servers/)
+  ├── scripts/              # NEW: Setup & utility scripts
+  ├── agents/               # Existing agents
+  ├── skills/               # Existing skills
+  └── ...
+
+~/.claude/                  # NEW: Minimal directory for settings
+  ├── settings.local.json   # Plugin marketplace config
+  └── andrews-plugin/       # Symlink to ~/andrews-plugin
+```
+
+---
+
+## No Downtime
+
+Your existing setup continues working during migration:
+- ✅ All MCP servers keep running
+- ✅ Credentials stay unchanged (managed by Deep Env)
+- ✅ Auto-sync continues (LaunchAgent updates automatically)
+- ✅ All agents, skills, and hooks preserved
 
 ---
 
 ## Troubleshooting
 
-If you encounter any issues:
+If you encounter any issues, Claude can try these fixes:
 
-1. **"Permission denied" when pulling from GitHub**
-   - Check your git remote: `git remote -v`
-   - If using SSH and you get permission denied, switch to HTTPS:
-     ```bash
-     git remote set-url origin https://github.com/Folly-Partners/andrews-plugin.git
-     ```
+### 1. Git Permission Denied
+```bash
+cd ~/.claude
+git remote set-url origin https://github.com/Folly-Partners/andrews-plugin.git
+git pull origin main
+```
 
-2. **SuperThings build fails**
-   - Clean install: `cd ~/andrews-plugin/servers/super-things && rm -rf node_modules && npm install && npm run build`
+### 2. SuperThings Build Fails
+```bash
+cd ~/andrews-plugin/servers/super-things
+rm -rf node_modules package-lock.json
+npm install && npm run build
+```
 
-3. **Unifi venv fails**
-   - Recreate venv: `cd ~/andrews-plugin/servers/unifi && rm -rf venv && python3 -m venv venv && ./venv/bin/pip install "mcp>=1.2.0" "pyunifi>=2.21"`
+### 3. Unifi Virtual Environment Fails
+```bash
+cd ~/andrews-plugin/servers/unifi
+rm -rf venv
+python3 -m venv venv
+./venv/bin/pip install "mcp>=1.2.0" "pyunifi>=2.21"
+```
 
-4. **Doctor script reports missing credentials**
-   - Verify they're in Deep Env: `deep-env list`
-   - If missing, check iCloud sync: `deep-env pull`
+### 4. Missing Credentials
+```bash
+deep-env pull
+deep-env list
+```
 
-5. **settings.local.json update fails**
-   - Manually add this to `~/.claude/settings.local.json`:
-     ```json
-     {
-       "extraKnownMarketplaces": {
-         "andrews-marketplace": {
-           "source": {
-             "source": "url",
-             "url": "https://raw.githubusercontent.com/Folly-Partners/andrews-plugin/main/marketplace.json"
-           }
-         }
-       },
-       "enabledPlugins": {
-         "andrews-plugin@andrews-marketplace": true
-       }
-     }
-     ```
+### 5. Manual settings.local.json Update
+If the Python script fails, manually add this to `~/.claude/settings.local.json`:
+```json
+{
+  "extraKnownMarketplaces": {
+    "andrews-marketplace": {
+      "source": {
+        "source": "url",
+        "url": "https://raw.githubusercontent.com/Folly-Partners/andrews-plugin/main/marketplace.json"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "andrews-plugin@andrews-marketplace": true
+  }
+}
+```
 
 ---
 
 ## After Migration
 
-Once migrated, your setup will be identical to the primary machine:
-- All 10 MCP servers configured
-- SuperThings and Unifi bundled and ready
-- Auto-sync running daily at 9am
-- Plugin marketplace registered
-- New machines can be set up with a single bootstrap command
+Once migrated:
+- ✅ Restart Claude Code for changes to take effect
+- ✅ Your setup will be identical to the primary machine
+- ✅ All 10 MCP servers will be configured and ready
+- ✅ Auto-sync runs daily at 9am
+- ✅ Plugin marketplace is registered
 
-To verify everything is working, restart Claude Code after the migration completes.
+To verify: `~/andrews-plugin/scripts/doctor.sh`
+
+---
+
+## Alternative: Manual Migration
+
+If you prefer to run commands step-by-step instead of the one-liner:
+
+```bash
+# 1. Navigate to existing repo
+cd ~/.claude
+
+# 2. Pull latest changes (includes migration script)
+git pull origin main
+
+# 3. Run migration script
+./scripts/migrate.sh
+```
+
+This gives you more control and lets you see each step as it happens.

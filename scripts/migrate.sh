@@ -4,36 +4,97 @@
 
 set -e
 
-PLUGIN_DIR="$HOME/andrews-plugin"
-CLAUDE_DIR="$HOME/.claude"
+OLD_LOCATION="$HOME/.claude"
+NEW_LOCATION="$HOME/andrews-plugin"
 
 echo "=========================================="
 echo "Andrew's Plugin Migration Script"
 echo "=========================================="
 echo ""
 
-# Check if we're in the right directory
-if [ ! -d "$PLUGIN_DIR/.git" ]; then
-    echo "ERROR: $PLUGIN_DIR does not exist or is not a git repository"
-    echo "This script is for migrating existing setups only."
-    exit 1
-fi
-
-cd "$PLUGIN_DIR"
-
-# Check if already migrated
-if [ -f "manifest.json" ] && [ -f ".mcp.json" ] && [ -f "scripts/setup.sh" ]; then
-    echo "✓ Plugin files detected (already migrated)"
+# Detect current setup
+if [ -d "$NEW_LOCATION/.git" ]; then
+    echo "✓ Already at new location: $NEW_LOCATION"
+    REPO_DIR="$NEW_LOCATION"
+    NEEDS_MOVE=false
+elif [ -d "$OLD_LOCATION/.git" ]; then
+    echo "✓ Found repo at old location: $OLD_LOCATION"
+    REPO_DIR="$OLD_LOCATION"
+    NEEDS_MOVE=true
 else
-    echo "ERROR: Plugin files not found. Pull from GitHub first."
+    echo "ERROR: Could not find git repository at $OLD_LOCATION or $NEW_LOCATION"
+    echo "This script is for migrating existing claude-code-sync setups."
     exit 1
 fi
 
-echo "Step 1: Pulling latest changes from GitHub..."
-git pull origin main
+cd "$REPO_DIR"
 
 echo ""
-echo "Step 2: Checking for SuperThings and Unifi servers..."
+echo "Step 1: Pulling latest changes from GitHub..."
+
+# Check git remote and fix if needed
+REMOTE_URL=$(git remote get-url origin)
+if [[ "$REMOTE_URL" == *"claude-code-sync"* ]]; then
+    echo "Updating remote URL to andrews-plugin..."
+    git remote set-url origin https://github.com/Folly-Partners/andrews-plugin.git
+fi
+
+# Try to pull
+if git pull origin main; then
+    echo "✓ Successfully pulled latest changes"
+else
+    echo "WARNING: Pull failed. Attempting to fix..."
+    # Check if it's an SSH issue
+    if [[ "$REMOTE_URL" == git@github.com:* ]]; then
+        echo "Switching from SSH to HTTPS..."
+        git remote set-url origin https://github.com/Folly-Partners/andrews-plugin.git
+        git pull origin main
+    else
+        echo "ERROR: Failed to pull changes from GitHub"
+        exit 1
+    fi
+fi
+
+# Verify plugin files are present
+if [ ! -f "manifest.json" ] || [ ! -f ".mcp.json" ]; then
+    echo "ERROR: Plugin files not found after pull. Something went wrong."
+    exit 1
+fi
+
+echo "✓ Plugin files detected"
+
+# Move to new location if needed
+if [ "$NEEDS_MOVE" = true ]; then
+    echo ""
+    echo "Step 2: Moving repository to new location..."
+
+    # Check if new location already exists
+    if [ -d "$NEW_LOCATION" ] || [ -L "$NEW_LOCATION" ]; then
+        echo "WARNING: $NEW_LOCATION already exists"
+        echo "Please remove or rename it first, then run this script again."
+        exit 1
+    fi
+
+    # Move the repo
+    echo "Moving $OLD_LOCATION → $NEW_LOCATION..."
+    mv "$OLD_LOCATION" "$NEW_LOCATION"
+
+    # Create minimal ~/.claude for settings
+    echo "Creating minimal ~/.claude directory for settings..."
+    mkdir -p "$OLD_LOCATION"
+
+    # Create symlink for backwards compatibility (optional)
+    ln -s "$NEW_LOCATION" "$OLD_LOCATION/andrews-plugin"
+
+    echo "✓ Moved to $NEW_LOCATION"
+
+    # Update REPO_DIR for remaining steps
+    REPO_DIR="$NEW_LOCATION"
+    cd "$REPO_DIR"
+fi
+
+echo ""
+echo "Step 3: Checking server directories..."
 
 if [ ! -d "servers/super-things" ]; then
     echo "ERROR: servers/super-things directory not found"
@@ -48,29 +109,36 @@ fi
 echo "✓ Server directories found"
 
 echo ""
-echo "Step 3: Running setup to build dependencies..."
+echo "Step 4: Building dependencies and setting up services..."
+
+# Make scripts executable
+chmod +x scripts/*.sh 2>/dev/null || true
+
+# Run setup
 ./scripts/setup.sh
 
 echo ""
-echo "Step 4: Configuring ~/.claude/settings.local.json..."
+echo "Step 5: Configuring marketplace..."
 
-# Update settings.local.json
-if [ -f "$CLAUDE_DIR/settings.local.json" ]; then
+SETTINGS_FILE="$OLD_LOCATION/settings.local.json"
+
+# Ensure ~/.claude exists
+mkdir -p "$OLD_LOCATION"
+
+if [ -f "$SETTINGS_FILE" ]; then
     # Backup existing settings
-    cp "$CLAUDE_DIR/settings.local.json" "$CLAUDE_DIR/settings.local.json.backup.$(date +%Y%m%d%H%M%S)"
+    cp "$SETTINGS_FILE" "$SETTINGS_FILE.backup.$(date +%Y%m%d%H%M%S)"
     echo "✓ Backed up existing settings.local.json"
 
-    # Check if it already has the marketplace config
-    if grep -q "andrews-marketplace" "$CLAUDE_DIR/settings.local.json"; then
+    # Check if marketplace already configured
+    if grep -q "andrews-marketplace" "$SETTINGS_FILE"; then
         echo "✓ Marketplace already configured"
     else
         echo "Adding marketplace configuration..."
-        # Use Python to merge JSON (safer than manual editing)
         python3 -c "
 import json
-import sys
 
-with open('$CLAUDE_DIR/settings.local.json', 'r') as f:
+with open('$SETTINGS_FILE', 'r') as f:
     settings = json.load(f)
 
 # Add marketplace config
@@ -90,20 +158,16 @@ if 'enabledPlugins' not in settings:
 
 settings['enabledPlugins']['andrews-plugin@andrews-marketplace'] = True
 
-with open('$CLAUDE_DIR/settings.local.json', 'w') as f:
+with open('$SETTINGS_FILE', 'w') as f:
     json.dump(settings, f, indent=2)
     f.write('\n')
 
 print('✓ Updated settings.local.json')
-" || {
-            echo "ERROR: Failed to update settings.local.json"
-            echo "You may need to update it manually"
-            exit 1
-        }
+"
     fi
 else
     echo "Creating new settings.local.json..."
-    cat > "$CLAUDE_DIR/settings.local.json" << 'EOF'
+    cat > "$SETTINGS_FILE" << 'EOF'
 {
   "extraKnownMarketplaces": {
     "andrews-marketplace": {
@@ -122,7 +186,8 @@ EOF
 fi
 
 echo ""
-echo "Step 5: Running health check..."
+echo "Step 6: Running health check..."
+eval "$(deep-env export 2>/dev/null || true)"
 ./scripts/doctor.sh
 
 echo ""
@@ -130,12 +195,15 @@ echo "=========================================="
 echo "Migration Complete!"
 echo "=========================================="
 echo ""
-echo "The plugin is now configured and ready to use."
+echo "Your setup has been successfully migrated to the new plugin structure."
 echo ""
-echo "Changes made:"
-echo "  - SuperThings bundled into plugin (servers/super-things/)"
-echo "  - Unifi server moved to plugin (servers/unifi/)"
-echo "  - Auto-sync LaunchAgent updated"
-echo "  - Plugin marketplace registered"
+echo "Location: $NEW_LOCATION"
 echo ""
-echo "Next: Restart Claude Code for changes to take effect."
+echo "What changed:"
+echo "  ✓ Repository moved to ~/andrews-plugin"
+echo "  ✓ SuperThings bundled into plugin (servers/super-things/)"
+echo "  ✓ Unifi server bundled into plugin (servers/unifi/)"
+echo "  ✓ Auto-sync LaunchAgent updated"
+echo "  ✓ Plugin marketplace registered in ~/.claude/settings.local.json"
+echo ""
+echo "Next: Restart Claude Code for changes to take effect"
