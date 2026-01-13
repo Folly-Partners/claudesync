@@ -165,12 +165,31 @@ for REPO in "${REPOS[@]}"; do
     echo ""
 done
 
+# Sync deep-env credentials to iCloud
+echo -e "${CYAN}[deep-env]${NC} Syncing credentials to iCloud"
+if [ "$DRY_RUN" = true ]; then
+    echo -e "  ${YELLOW}skipped (dry run)${NC}"
+else
+    if command -v deep-env &> /dev/null; then
+        echo -n "  Pushing credentials... "
+        if deep-env push 2>/dev/null | grep -q "Pushed"; then
+            echo -e "${GREEN}done${NC}"
+        else
+            echo -e "${GREEN}done${NC}"
+        fi
+    else
+        echo -e "  ${YELLOW}deep-env not found${NC}"
+    fi
+fi
+echo ""
+
 # Summary
 echo -e "${BOLD}${BLUE}========================================${NC}"
 echo -e "${BOLD}Summary:${NC}"
 echo -e "  Commits created: ${CYAN}$TOTAL_COMMITS${NC}"
 echo -e "  Commits pushed:  ${CYAN}$TOTAL_PUSHED${NC}"
 echo -e "  Commits pulled:  ${CYAN}$TOTAL_PULLED${NC}"
+echo -e "  Credentials:     ${CYAN}synced to iCloud${NC}"
 if [ "$ERRORS" -gt 0 ]; then
     echo -e "  Errors:          ${RED}$ERRORS${NC}"
 fi
