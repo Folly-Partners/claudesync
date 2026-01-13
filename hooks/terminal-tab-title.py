@@ -3,14 +3,14 @@
 # requires-python = ">=3.10"
 # dependencies = ["anthropic"]
 # ///
-"""Updates Terminal tab title with project name and task summary using Claude API."""
+"""Sets terminal tab title to project name on first prompt of session."""
 
 import json
 import os
 import subprocess
 import sys
 
-import anthropic
+MARKER_DIR = "/tmp/claude-tab-titles"
 
 
 def ensure_anthropic_key():
@@ -32,59 +32,91 @@ def ensure_anthropic_key():
     return False
 
 
-def get_title_from_prompt(prompt: str) -> str:
-    """Use Claude Haiku to generate a terminal tab title."""
+def get_project_name(prompt: str) -> str:
+    """Use Claude Haiku to extract project name from prompt."""
     if not ensure_anthropic_key():
-        return prompt[:40].split('\n')[0]
+        return "Claude Code"
     try:
+        import anthropic
         client = anthropic.Anthropic()
         response = client.messages.create(
             model="claude-haiku-3-5-latest",
-            max_tokens=50,
+            max_tokens=30,
             messages=[{
                 "role": "user",
                 "content": (
-                    "Generate a short terminal tab title (max 40 chars) from this user request. "
-                    "Format: 'ProjectName: Task' if a project is mentioned, otherwise just 'Task'. "
-                    "Common project names: Deep Personality, Claude Code. "
-                    "Output ONLY the title, no quotes or explanation.\n\n"
-                    f"{prompt[:500]}"  # Limit input length
+                    "Extract the project name from this message. "
+                    "Output ONLY the project name (2-4 words max), nothing else. "
+                    "If no clear project is mentioned, output 'Claude Code'.\n\n"
+                    f"{prompt[:500]}"
                 )
             }]
         )
         return response.content[0].text.strip()
     except Exception:
-        # Fallback: first 40 chars of prompt
-        return prompt[:40].split('\n')[0]
+        return "Claude Code"
 
 
 def set_tab_title(title: str):
-    """Set macOS Terminal tab title using ANSI escape sequence."""
-    # Write to the terminal, not stdout (which Claude captures)
+    """Set macOS Terminal/iTerm2 tab title using AppleScript."""
     try:
-        with open('/dev/tty', 'w') as tty:
-            tty.write(f'\033]1;{title}\007')
-            tty.flush()
+        # Escape single quotes in title
+        safe_title = title.replace("'", "'\\''")
+
+        # Try iTerm2 first, fall back to Terminal.app
+        script = f'''
+        tell application "System Events"
+            set frontApp to name of first application process whose frontmost is true
+        end tell
+
+        if frontApp is "iTerm2" then
+            tell application "iTerm2"
+                tell current session of current tab of current window
+                    set name to "{safe_title}"
+                end tell
+            end tell
+        else if frontApp is "Terminal" then
+            tell application "Terminal"
+                set custom title of front window to "{safe_title}"
+            end tell
+        end if
+        '''
+        subprocess.run(
+            ["osascript", "-e", script],
+            capture_output=True,
+            timeout=5
+        )
     except Exception:
-        pass  # Silently fail if no TTY
+        pass
 
 
 def main():
-    # Read hook input from stdin
     try:
         hook_input = json.loads(sys.stdin.read())
     except json.JSONDecodeError:
         return
 
-    # Get user prompt (only present in UserPromptSubmit)
-    user_prompt = hook_input.get("user_prompt", "")
-    hook_event = hook_input.get("hook_event_name", "")
+    session_id = hook_input.get("session_id", "")
+    if not session_id:
+        return
 
-    if hook_event == "SessionStart":
-        set_tab_title("Claude Code")
-    elif user_prompt:
-        title = get_title_from_prompt(user_prompt)
-        set_tab_title(title)
+    # Check if already ran this session
+    os.makedirs(MARKER_DIR, exist_ok=True)
+    marker_file = os.path.join(MARKER_DIR, session_id)
+    if os.path.exists(marker_file):
+        return  # Already set title for this session
+
+    # Get project name from first prompt
+    user_prompt = hook_input.get("user_prompt", "")
+    if not user_prompt:
+        return
+
+    title = get_project_name(user_prompt)
+    set_tab_title(title)
+
+    # Mark as done for this session
+    with open(marker_file, 'w') as f:
+        f.write(title)
 
 
 if __name__ == "__main__":

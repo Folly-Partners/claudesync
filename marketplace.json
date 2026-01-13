@@ -1,0 +1,13 @@
+{
+  "version": "1",
+  "plugins": [
+    {
+      "name": "andrews-plugin",
+      "displayName": "Andrew's Plugin",
+      "description": "Andrew's global MCP servers, skills, and agents",
+      "version": "1.0.0",
+      "repository": "https://github.com/Folly-Partners/andrews-plugin",
+      "author": "Andrew Wilkinson"
+    }
+  ]
+}

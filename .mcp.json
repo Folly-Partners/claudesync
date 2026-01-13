@@ -1,0 +1,66 @@
+{
+  "mcpServers": {
+    "SuperThings": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/servers/super-things/dist/index.js"],
+      "env": {
+        "THINGS_AUTH_TOKEN": "${THINGS_AUTH_TOKEN}"
+      }
+    },
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"]
+    },
+    "hunter": {
+      "type": "sse",
+      "url": "https://mcp.hunter.io/sse",
+      "headers": {
+        "X-API-KEY": "${HUNTER_API_KEY}"
+      }
+    },
+    "ahrefs": {
+      "type": "http",
+      "url": "https://api.ahrefs.com/mcp/mcp"
+    },
+    "browserbase": {
+      "type": "http",
+      "url": "https://server.smithery.ai/@browserbasehq/mcp-browserbase/mcp"
+    },
+    "webflow": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["mcp-remote", "https://mcp.webflow.com/sse"]
+    },
+    "tavily": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["mcp-remote", "https://mcp.tavily.com/mcp/?tavilyApiKey=${TAVILY_API_KEY}"]
+    },
+    "zapier": {
+      "type": "http",
+      "url": "https://mcp.zapier.com/api/mcp/${ZAPIER_MCP_TOKEN}/mcp"
+    },
+    "xero": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@xeroapi/xero-mcp-server@latest"],
+      "env": {
+        "XERO_CLIENT_ID": "${XERO_CLIENT_ID}",
+        "XERO_CLIENT_SECRET": "${XERO_CLIENT_SECRET}",
+        "XERO_REDIRECT_URI": "http://localhost:5000/callback"
+      }
+    },
+    "unifi": {
+      "type": "stdio",
+      "command": "${CLAUDE_PLUGIN_ROOT}/servers/unifi/venv/bin/python",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/servers/unifi/server.py"],
+      "env": {
+        "UNIFI_HOST": "${UNIFI_HOST}",
+        "UNIFI_USERNAME": "${UNIFI_USERNAME}",
+        "UNIFI_PASSWORD": "${UNIFI_PASSWORD}"
+      }
+    }
+  }
+}
