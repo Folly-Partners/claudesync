@@ -20,13 +20,14 @@
         "X-API-KEY": "${HUNTER_API_KEY}"
       }
     },
-    "ahrefs": {
-      "type": "http",
-      "url": "https://api.ahrefs.com/mcp/mcp"
-    },
     "browserbase": {
-      "type": "http",
-      "url": "https://server.smithery.ai/@browserbasehq/mcp-browserbase/mcp"
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@browserbasehq/mcp-server-browserbase"],
+      "env": {
+        "BROWSERBASE_API_KEY": "${BROWSERBASE_API_KEY}",
+        "BROWSERBASE_PROJECT_ID": "${BROWSERBASE_PROJECT_ID}"
+      }
     },
     "webflow": {
       "type": "stdio",
