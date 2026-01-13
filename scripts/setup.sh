@@ -17,7 +17,7 @@ npm run build
 echo "Setting up unifi server..."
 cd "$PLUGIN_ROOT/servers/unifi"
 python3 -m venv venv
-./venv/bin/pip install -r requirements.txt
+./venv/bin/pip install "mcp>=1.2.0" "pyunifi>=2.21"
 
 # 3. Make scripts executable
 chmod +x "$PLUGIN_ROOT/scripts/"*.sh
