@@ -7,6 +7,10 @@ description: Secure credential manager for environment variables. Use this skill
 
 Use this skill to manage environment variables securely across all of Andrew's Macs.
 
+## Architecture
+
+**All credentials are stored in a SINGLE keychain entry as JSON.** This means only ONE keychain password prompt, ever - no matter how many credentials you have.
+
 ## When to Use This Skill
 
 Automatically invoke this skill when:
@@ -15,7 +19,6 @@ Automatically invoke this skill when:
 - Error messages mention missing environment variables (e.g., "ANTHROPIC_API_KEY is not defined")
 - Setting up or cloning a new project
 - User asks about credentials, secrets, or environment variables
-- **At session start**: Run `deep-env diff .` to catch keys configured elsewhere (e.g., Vercel) but not stored in deep-env
 
 ## Known Projects
 
@@ -96,43 +99,6 @@ Deep-Personality
   API_SECRET_KEY          kgg/...nSE=
 ```
 
-### Diff - Find unstored keys
-```bash
-deep-env diff .                    # Check current directory
-deep-env diff ~/Deep-Personality   # Check specific project
-deep-env diff dp                   # Using shortcut
-```
-
-This compares `.env.local` against Keychain and shows:
-- ✓ Keys that are synced (in both)
-- ~ Keys with different values (file vs keychain)
-- ✗ Keys NOT in Keychain (configured elsewhere, e.g., Vercel)
-
-**Use this to catch keys that were configured in Vercel/production but never stored in deep-env!**
-
-### Project Registry & Auto-Check
-```bash
-# Register projects to monitor
-deep-env projects add ~/Deep-Personality   # Register a project
-deep-env projects add .                    # Register current directory
-deep-env projects                          # List registered projects
-deep-env projects remove ~/old-project     # Remove a project
-
-# Check all registered projects at once
-deep-env check                             # Check ALL projects for unstored keys
-deep-env full-sync                         # Check + push to iCloud
-
-# Enable automatic checks (runs at 9 AM and 5 PM)
-deep-env auto-sync enable                  # Enable scheduled sync
-deep-env auto-sync status                  # Check if enabled
-deep-env auto-sync disable                 # Disable
-```
-
-When auto-sync runs, it:
-1. Checks all registered projects for unstored keys
-2. Sends a macOS notification if any are found
-3. Pushes credentials to iCloud
-
 ### Other commands
 ```bash
 deep-env get KEY_NAME      # Get single value (for scripting)
@@ -164,17 +130,6 @@ deep-env export            # Output as shell exports
 3. Push to iCloud: `deep-env push`
 4. If in a project, sync: `deep-env sync .`
 
-### Detecting unstored keys (IMPORTANT!)
-When working on a project that may have keys configured elsewhere (Vercel, production, etc.):
-1. Run `deep-env diff .` to check for unstored keys
-2. If keys are found in .env.local but NOT in Keychain:
-   - Ask user if they want to import them
-   - Run `deep-env import .env.local` to store all
-   - Or store individually: `deep-env store KEY "value"`
-3. Push to iCloud: `deep-env push`
-
-**Why this matters:** Keys configured directly in Vercel or copied from production won't sync to other Macs unless stored in deep-env!
-
 ### Cross-Mac sync
 ```bash
 # On main Mac (after storing new credentials)
@@ -187,11 +142,22 @@ deep-env sync .        # Generate .env.local
 
 ### On a new Mac (if deep-env not installed):
 ```bash
+# 1. Copy deep-env from iCloud
 mkdir -p ~/.local/bin
 cp ~/Library/Mobile\ Documents/com~apple~CloudDocs/.deep-env/deep-env ~/.local/bin/
 chmod +x ~/.local/bin/deep-env
-deep-env pull  # Ask user for sync password
-deep-env auto-sync enable
+
+# 2. Ensure ~/.local/bin is in PATH (add to ~/.zshrc if needed)
+export PATH="$HOME/.local/bin:$PATH"
+
+# 3. Migrate any old individual keychain entries (one-time, safe to run)
+deep-env migrate
+
+# 4. Pull credentials from iCloud (will ask for sync password)
+deep-env pull
+
+# 5. Sync to projects as needed
+deep-env sync /path/to/project
 ```
 
 ## Important Notes
@@ -199,14 +165,8 @@ deep-env auto-sync enable
 - Never commit `.env.local` to git
 - Always `deep-env push` after storing new credentials
 - The sync password is known only to the user - ask if needed
+- **All credentials stored in a single keychain entry** = only 1 password prompt ever
 - Credentials are stored in macOS Keychain (hardware-backed on Apple Silicon)
-- Sync password stored in Keychain (not plaintext file)
 - iCloud sync uses AES-256 encryption
 - Project assignments are stored in `~/.config/deep-env/project-keys.json`
-
-## Security Features
-
-- **Access logging**: All credential access logged to `~/.config/deep-env/access.log`
-- **Secure password handling**: OpenSSL uses stdin (hidden from `ps aux`)
-- **Secure temp files**: Plaintext temp files overwritten before deletion
-- **Keychain-backed**: Sync password in Keychain, not plaintext file
+- Run `deep-env migrate` once per Mac to move old individual entries to new format
