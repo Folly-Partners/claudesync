@@ -6,13 +6,36 @@
 """Updates Terminal tab title with project name and task summary using Claude API."""
 
 import json
+import os
+import subprocess
 import sys
 
 import anthropic
 
 
+def ensure_anthropic_key():
+    """Ensure ANTHROPIC_API_KEY is set, fetching from deep-env if needed."""
+    if os.environ.get("ANTHROPIC_API_KEY"):
+        return True
+    try:
+        result = subprocess.run(
+            ["deep-env", "get", "ANTHROPIC_API_KEY"],
+            capture_output=True,
+            text=True,
+            timeout=5
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            os.environ["ANTHROPIC_API_KEY"] = result.stdout.strip()
+            return True
+    except Exception:
+        pass
+    return False
+
+
 def get_title_from_prompt(prompt: str) -> str:
     """Use Claude Haiku to generate a terminal tab title."""
+    if not ensure_anthropic_key():
+        return prompt[:40].split('\n')[0]
     try:
         client = anthropic.Anthropic()
         response = client.messages.create(
