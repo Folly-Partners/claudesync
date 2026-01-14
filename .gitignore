@@ -19,6 +19,8 @@ downloads/
 
 # Local environment variables or secrets
 .env
+.env.local
+.env.*
 *.key
 *.pem
 auth_token
