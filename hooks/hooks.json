@@ -5,6 +5,17 @@
         "type": "command",
         "command": "$CLAUDE_PLUGIN_ROOT/hooks/setup-wizard.sh"
       }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PLUGIN_ROOT/hooks/set-tab-title.sh"
+          }
+        ]
+      }
     ]
   }
 }

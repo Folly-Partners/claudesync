@@ -32,6 +32,8 @@ ln -sf "$HOME/.claude/claude.json" "$HOME/.claude.json"
 echo "🔐 Making scripts executable..."
 chmod +x "$HOME/.claude/sync-claude-config.sh"
 chmod +x "$HOME/.claude/skills/"*/*.sh 2>/dev/null || true
+chmod +x "$HOME/.claude/hooks/"*.sh 2>/dev/null || true
+chmod +x "$HOME/.claude/hooks/"*.py 2>/dev/null || true
 
 # Set up deep-env for credential management
 echo "🔑 Setting up deep-env for credentials..."
@@ -115,6 +117,14 @@ launchctl load "$HOME/Library/LaunchAgents/com.claude.config-sync.plist"
 echo "🔄 Running initial sync..."
 "$HOME/.claude/sync-claude-config.sh" || true
 
+# Configure Terminal.app for clean tab titles
+echo "🖥️  Configuring Terminal.app for clean tab titles..."
+defaults write com.apple.Terminal ShowActiveProcessInTitle -bool false
+defaults write com.apple.Terminal ShowActiveProcessArgumentsInTitle -bool false
+defaults write com.apple.Terminal ShowWorkingDirectoryInTitle -bool false
+defaults write com.apple.Terminal ShowDimensionsInTitle -bool false
+echo "   Terminal.app configured (restart Terminal to apply)"
+
 echo ""
 echo "✅ Setup complete!"
 echo ""
@@ -122,6 +132,7 @@ echo "Your Claude Code is now synced with:"
 echo "  - MCP servers (SuperThings, playwright, hunter, ahrefs, browserbase)"
 echo "  - Custom agents and skills"
 echo "  - All your settings"
+echo "  - Tab title hook (auto-sets terminal tab based on project)"
 echo ""
 echo "Credentials:"
 echo "  - Stored in macOS Keychain via deep-env"
