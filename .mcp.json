@@ -29,11 +29,6 @@
         "BROWSERBASE_PROJECT_ID": "${BROWSERBASE_PROJECT_ID}"
       }
     },
-    "webflow": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["mcp-remote", "https://mcp.webflow.com/sse"]
-    },
     "tavily": {
       "type": "stdio",
       "command": "npx",
@@ -42,16 +37,6 @@
     "zapier": {
       "type": "http",
       "url": "https://mcp.zapier.com/api/mcp/${ZAPIER_MCP_TOKEN}/mcp"
-    },
-    "xero": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@xeroapi/xero-mcp-server@latest"],
-      "env": {
-        "XERO_CLIENT_ID": "${XERO_CLIENT_ID}",
-        "XERO_CLIENT_SECRET": "${XERO_CLIENT_SECRET}",
-        "XERO_REDIRECT_URI": "http://localhost:5000/callback"
-      }
     },
     "unifi": {
       "type": "stdio",
