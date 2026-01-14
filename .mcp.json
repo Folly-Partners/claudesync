@@ -39,8 +39,12 @@
       "url": "https://mcp.zapier.com/api/mcp/${ZAPIER_MCP_TOKEN}/mcp"
     },
     "linear": {
-      "type": "sse",
-      "url": "https://mcp.linear.app/sse"
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "linear-mcp"],
+      "env": {
+        "LINEAR_ACCESS_TOKEN": "${LINEAR_ACCESS_TOKEN}"
+      }
     },
     "unifi": {
       "type": "stdio",
