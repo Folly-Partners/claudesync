@@ -18,18 +18,28 @@ NC='\033[0m' # No Color
 # Track issues found
 ISSUES=()
 AUTO_FIXES=()
+BUILD_FAILURES=()
 
-# Helper to add issue
+# ============================================================================
+#  Helper Functions
+# ============================================================================
+
 add_issue() {
     ISSUES+=("$1")
 }
 
-# Helper to add auto-fixable issue
 add_auto_fix() {
     AUTO_FIXES+=("$1")
 }
 
-# Check deep-env installation
+add_build_failure() {
+    BUILD_FAILURES+=("$1")
+}
+
+# ============================================================================
+#  Check Functions
+# ============================================================================
+
 check_deep_env() {
     if command -v deep-env &> /dev/null || [ -f "$HOME/.local/bin/deep-env" ]; then
         return 0
@@ -44,7 +54,6 @@ check_deep_env() {
     return 1
 }
 
-# Check launchd sync agent
 check_launchd() {
     if [ -f "$LAUNCHD_PLIST" ]; then
         # Check if loaded
@@ -58,10 +67,8 @@ check_launchd() {
     return 1
 }
 
-# Check if credentials are synced
 check_credentials() {
     if [ -f "$HOME/.local/bin/deep-env" ] || command -v deep-env &> /dev/null; then
-        # Check for key credentials
         local missing_creds=()
 
         for key in HUNTER_API_KEY TAVILY_API_KEY THINGS_AUTH_TOKEN; do
@@ -76,7 +83,6 @@ check_credentials() {
     fi
 }
 
-# Check .zshrc has deep-env
 check_shell_config() {
     if [ -f "$HOME/.zshrc" ]; then
         if ! grep -q "deep-env export" "$HOME/.zshrc" 2>/dev/null; then
@@ -85,7 +91,6 @@ check_shell_config() {
     fi
 }
 
-# Check marketplace is registered
 check_marketplace() {
     local marketplace_file="$HOME/.claude/plugins/marketplaces/andrews-plugin.json"
     if [ ! -f "$marketplace_file" ]; then
@@ -93,11 +98,8 @@ check_marketplace() {
     fi
 }
 
-# Check Every Inc marketplace is registered
 check_every_marketplace() {
-    # Check if every-marketplace exists (could be named differently)
     if ! ls "$HOME/.claude/plugins/marketplaces/"*every* &>/dev/null 2>&1; then
-        # Also check via claude CLI if available
         if command -v claude &>/dev/null; then
             if ! claude plugin marketplace list 2>/dev/null | grep -qi "every"; then
                 add_issue "EVERY_MARKETPLACE_MISSING"
@@ -108,15 +110,13 @@ check_every_marketplace() {
     fi
 }
 
-# Check Compound Engineering plugin is installed
 check_compound_engineering() {
-    # Check if plugin is installed
     if ! ls "$HOME/.claude/plugins/cache/"*every*"/compound-engineering" &>/dev/null 2>&1; then
         add_issue "COMPOUND_ENGINEERING_MISSING"
     fi
 }
 
-# Check if SuperThings MCP server is built
+# Check if SuperThings needs building
 check_superthings_build() {
     local server_dir="$PLUGIN_DIR/servers/super-things"
     if [ -d "$server_dir" ]; then
@@ -126,7 +126,7 @@ check_superthings_build() {
     fi
 }
 
-# Check if Unifi MCP server venv exists
+# Check if Unifi venv exists
 check_unifi_venv() {
     local server_dir="$PLUGIN_DIR/servers/unifi"
     if [ -d "$server_dir" ]; then
@@ -136,7 +136,168 @@ check_unifi_venv() {
     fi
 }
 
-# Run all checks
+# ============================================================================
+#  Build Functions (with proper error handling)
+# ============================================================================
+
+# Check Python version for Unifi
+check_python_version() {
+    local version
+    version=$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")' 2>/dev/null)
+
+    if [ -z "$version" ]; then
+        echo -e "  ${RED}Python 3 not found${NC}"
+        return 1
+    fi
+
+    local major minor
+    major=$(echo "$version" | cut -d. -f1)
+    minor=$(echo "$version" | cut -d. -f2)
+
+    if [ "$major" -lt 3 ] || { [ "$major" -eq 3 ] && [ "$minor" -lt 10 ]; }; then
+        echo -e "  ${RED}Python 3.10+ required (found $version)${NC}"
+        return 1
+    fi
+
+    return 0
+}
+
+# Build SuperThings with step-by-step error handling
+build_superthings() {
+    local server_dir="$PLUGIN_DIR/servers/super-things"
+    local original_dir
+    original_dir=$(pwd)
+
+    echo -e "${YELLOW}Building SuperThings MCP server...${NC}"
+
+    # Step 0: Verify directory exists
+    if [ ! -d "$server_dir" ]; then
+        echo -e "  ${RED}Server directory not found: $server_dir${NC}"
+        add_build_failure "SuperThings: directory not found"
+        return 1
+    fi
+
+    cd "$server_dir" || {
+        echo -e "  ${RED}Cannot access server directory${NC}"
+        add_build_failure "SuperThings: cannot access directory"
+        cd "$original_dir"
+        return 1
+    }
+
+    # Step 1: npm install
+    echo -e "  ${BLUE}-> Installing dependencies...${NC}"
+    local npm_output
+    if ! npm_output=$(npm install 2>&1); then
+        echo -e "  ${RED}npm install failed${NC}"
+        echo "$npm_output" | tail -5 | sed 's/^/     /'
+        echo -e "  ${YELLOW}-> Run manually: cd $server_dir && npm install${NC}"
+        add_build_failure "SuperThings: npm install failed"
+        cd "$original_dir"
+        return 1
+    fi
+
+    # Step 2: npm run build
+    echo -e "  ${BLUE}-> Compiling TypeScript...${NC}"
+    local build_output
+    if ! build_output=$(npm run build 2>&1); then
+        echo -e "  ${RED}Build failed${NC}"
+        echo "$build_output" | tail -5 | sed 's/^/     /'
+        echo -e "  ${YELLOW}-> Run manually: cd $server_dir && npm run build${NC}"
+        add_build_failure "SuperThings: build failed"
+        cd "$original_dir"
+        return 1
+    fi
+
+    # Step 3: Verify output exists
+    if [ ! -f "$server_dir/dist/index.js" ]; then
+        echo -e "  ${RED}Build output missing (dist/index.js)${NC}"
+        echo -e "  ${YELLOW}Build completed but output not created${NC}"
+        add_build_failure "SuperThings: dist/index.js missing after build"
+        cd "$original_dir"
+        return 1
+    fi
+
+    echo -e "  ${GREEN}SuperThings built successfully${NC}"
+    cd "$original_dir"
+    return 0
+}
+
+# Build Unifi venv with step-by-step error handling
+build_unifi_venv() {
+    local server_dir="$PLUGIN_DIR/servers/unifi"
+    local original_dir
+    original_dir=$(pwd)
+
+    echo -e "${YELLOW}Setting up Unifi MCP server...${NC}"
+
+    # Step 0: Verify directory exists
+    if [ ! -d "$server_dir" ]; then
+        echo -e "  ${RED}Server directory not found: $server_dir${NC}"
+        add_build_failure "Unifi: directory not found"
+        return 1
+    fi
+
+    # Step 1: Check Python version
+    echo -e "  ${BLUE}-> Checking Python version...${NC}"
+    if ! check_python_version; then
+        add_build_failure "Unifi: Python 3.10+ required"
+        return 1
+    fi
+
+    cd "$server_dir" || {
+        echo -e "  ${RED}Cannot access server directory${NC}"
+        add_build_failure "Unifi: cannot access directory"
+        cd "$original_dir"
+        return 1
+    }
+
+    # Step 2: Create venv (clean up old one if it exists but is broken)
+    echo -e "  ${BLUE}-> Creating virtual environment...${NC}"
+    if [ -d "venv" ] && [ ! -f "venv/bin/python" ]; then
+        echo -e "  ${YELLOW}Cleaning up broken venv...${NC}"
+        rm -rf venv
+    fi
+
+    if [ ! -d "venv" ]; then
+        local venv_output
+        if ! venv_output=$(python3 -m venv venv 2>&1); then
+            echo -e "  ${RED}Failed to create venv${NC}"
+            echo "$venv_output" | tail -3 | sed 's/^/     /'
+            add_build_failure "Unifi: venv creation failed"
+            cd "$original_dir"
+            return 1
+        fi
+    fi
+
+    # Step 3: Install dependencies
+    echo -e "  ${BLUE}-> Installing fastmcp...${NC}"
+    local pip_output
+    if ! pip_output=$(./venv/bin/pip install fastmcp 2>&1); then
+        echo -e "  ${RED}pip install failed${NC}"
+        echo "$pip_output" | tail -5 | sed 's/^/     /'
+        echo -e "  ${YELLOW}-> Run manually: cd $server_dir && ./venv/bin/pip install fastmcp${NC}"
+        add_build_failure "Unifi: pip install failed"
+        cd "$original_dir"
+        return 1
+    fi
+
+    # Step 4: Verify installation
+    if ! ./venv/bin/python -c "import fastmcp" 2>/dev/null; then
+        echo -e "  ${RED}fastmcp not importable after install${NC}"
+        add_build_failure "Unifi: fastmcp import failed"
+        cd "$original_dir"
+        return 1
+    fi
+
+    echo -e "  ${GREEN}Unifi venv created successfully${NC}"
+    cd "$original_dir"
+    return 0
+}
+
+# ============================================================================
+#  Run Checks
+# ============================================================================
+
 run_checks() {
     check_deep_env
     check_launchd
@@ -149,39 +310,30 @@ run_checks() {
     check_unifi_venv
 }
 
-# Auto-fix issues that can be fixed automatically
+# ============================================================================
+#  Auto-Fix (Build servers)
+# ============================================================================
+
 run_auto_fixes() {
     if [ ${#AUTO_FIXES[@]} -eq 0 ]; then
         return
     fi
 
     echo ""
-    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${BLUE}----------------------------------------------------------------------${NC}"
     echo -e "${BLUE}  Andrews Plugin - Auto-Setup${NC}"
-    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${BLUE}----------------------------------------------------------------------${NC}"
     echo ""
 
     for fix in "${AUTO_FIXES[@]}"; do
         case "$fix" in
             SUPERTHINGS_NOT_BUILT)
-                echo -e "${YELLOW}Building SuperThings MCP server...${NC}"
-                local server_dir="$PLUGIN_DIR/servers/super-things"
-                if cd "$server_dir" && npm install --silent 2>/dev/null && npm run build --silent 2>/dev/null; then
-                    echo -e "  ${GREEN}✅ SuperThings built successfully${NC}"
-                else
-                    echo -e "  ${RED}✗ SuperThings build failed${NC}"
-                    echo -e "    ${YELLOW}→ Run manually: cd $server_dir && npm install && npm run build${NC}"
+                if ! build_superthings; then
                     add_issue "SUPERTHINGS_BUILD_FAILED"
                 fi
                 ;;
             UNIFI_VENV_MISSING)
-                echo -e "${YELLOW}Setting up Unifi MCP server...${NC}"
-                local server_dir="$PLUGIN_DIR/servers/unifi"
-                if cd "$server_dir" && python3 -m venv venv 2>/dev/null && ./venv/bin/pip install -q fastmcp 2>/dev/null; then
-                    echo -e "  ${GREEN}✅ Unifi venv created successfully${NC}"
-                else
-                    echo -e "  ${RED}✗ Unifi setup failed${NC}"
-                    echo -e "    ${YELLOW}→ Run manually: cd $server_dir && python3 -m venv venv && ./venv/bin/pip install fastmcp${NC}"
+                if ! build_unifi_venv; then
                     add_issue "UNIFI_SETUP_FAILED"
                 fi
                 ;;
@@ -190,19 +342,36 @@ run_auto_fixes() {
     echo ""
 }
 
-# Report status
+# ============================================================================
+#  Report Status
+# ============================================================================
+
 report_status() {
+    # Report build failures first
+    if [ ${#BUILD_FAILURES[@]} -gt 0 ]; then
+        echo ""
+        echo -e "${RED}----------------------------------------------------------------------${NC}"
+        echo -e "${RED}  Build Failures${NC}"
+        echo -e "${RED}----------------------------------------------------------------------${NC}"
+        echo ""
+        for failure in "${BUILD_FAILURES[@]}"; do
+            echo -e "  ${RED}x${NC} $failure"
+        done
+        echo ""
+    fi
+
     if [ ${#ISSUES[@]} -eq 0 ]; then
         # All good - silent exit
-        # Update state file to skip checks for today
+        # Update state file to skip non-critical checks for today
+        mkdir -p "$(dirname "$SETUP_STATE_FILE")"
         echo "$(date +%Y-%m-%d)" > "$SETUP_STATE_FILE"
         exit 0
     fi
 
     echo ""
-    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${BLUE}----------------------------------------------------------------------${NC}"
     echo -e "${BLUE}  Andrews Plugin Setup${NC}"
-    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${BLUE}----------------------------------------------------------------------${NC}"
     echo ""
     echo -e "${YELLOW}Some components need attention:${NC}"
     echo ""
@@ -210,68 +379,103 @@ report_status() {
     for issue in "${ISSUES[@]}"; do
         case "$issue" in
             DEEP_ENV_MISSING)
-                echo -e "  ${RED}✗${NC} deep-env not found (credential manager)"
-                echo -e "    ${YELLOW}→ Install from another Mac or set up fresh${NC}"
+                echo -e "  ${RED}x${NC} deep-env not found (credential manager)"
+                echo -e "    ${YELLOW}-> Install from another Mac or set up fresh${NC}"
                 ;;
             DEEP_ENV_AVAILABLE)
                 echo -e "  ${YELLOW}!${NC} deep-env available in iCloud but not installed"
-                echo -e "    ${GREEN}→ Run: mkdir -p ~/.local/bin && cp ~/Library/Mobile\\ Documents/com~apple~CloudDocs/.deep-env/deep-env ~/.local/bin/ && chmod +x ~/.local/bin/deep-env${NC}"
+                echo -e "    ${GREEN}-> Run: mkdir -p ~/.local/bin && cp ~/Library/Mobile\\ Documents/com~apple~CloudDocs/.deep-env/deep-env ~/.local/bin/ && chmod +x ~/.local/bin/deep-env${NC}"
                 ;;
             LAUNCHD_MISSING)
-                echo -e "  ${RED}✗${NC} Sync agent not installed (auto-sync disabled)"
-                echo -e "    ${YELLOW}→ Run: ~/.claude/plugins/andrews-plugin/scripts/setup.sh${NC}"
+                echo -e "  ${RED}x${NC} Sync agent not installed (auto-sync disabled)"
+                echo -e "    ${YELLOW}-> Run: ~/.claude/plugins/andrews-plugin/scripts/setup.sh${NC}"
                 ;;
             LAUNCHD_NOT_LOADED)
                 echo -e "  ${YELLOW}!${NC} Sync agent installed but not running"
-                echo -e "    ${GREEN}→ Run: launchctl load ~/Library/LaunchAgents/com.claude.config-sync.plist${NC}"
+                echo -e "    ${GREEN}-> Run: launchctl load ~/Library/LaunchAgents/com.claude.config-sync.plist${NC}"
                 ;;
             CREDENTIALS_MISSING:*)
                 local creds="${issue#CREDENTIALS_MISSING:}"
                 echo -e "  ${YELLOW}!${NC} Missing credentials: $creds"
-                echo -e "    ${GREEN}→ Run: deep-env pull (if synced) or deep-env store KEY VALUE${NC}"
+                echo -e "    ${GREEN}-> Run: deep-env pull (if synced) or deep-env store KEY VALUE${NC}"
                 ;;
             SHELL_NOT_CONFIGURED)
                 echo -e "  ${YELLOW}!${NC} Shell not configured for deep-env"
-                echo -e "    ${GREEN}→ Add to ~/.zshrc: eval \"\$(deep-env export 2>/dev/null)\"${NC}"
+                echo -e "    ${GREEN}-> Add to ~/.zshrc: eval \"\$(deep-env export 2>/dev/null)\"${NC}"
                 ;;
             MARKETPLACE_NOT_REGISTERED)
                 echo -e "  ${YELLOW}!${NC} Andrews marketplace not registered"
-                echo -e "    ${GREEN}→ Run: claude plugin marketplace add https://raw.githubusercontent.com/Folly-Partners/andrews-plugin/main/marketplace.json${NC}"
+                echo -e "    ${GREEN}-> Run: claude plugin marketplace add https://raw.githubusercontent.com/Folly-Partners/andrews-plugin/main/marketplace.json${NC}"
                 ;;
             EVERY_MARKETPLACE_MISSING)
                 echo -e "  ${YELLOW}!${NC} Every Inc marketplace not registered"
-                echo -e "    ${GREEN}→ Run: claude plugin marketplace add https://github.com/EveryInc/every-marketplace${NC}"
+                echo -e "    ${GREEN}-> Run: claude plugin marketplace add https://github.com/EveryInc/every-marketplace${NC}"
                 ;;
             COMPOUND_ENGINEERING_MISSING)
                 echo -e "  ${YELLOW}!${NC} Compound Engineering plugin not installed"
-                echo -e "    ${GREEN}→ Run: claude plugin install compound-engineering${NC}"
+                echo -e "    ${GREEN}-> Run: claude plugin install compound-engineering${NC}"
+                ;;
+            SUPERTHINGS_BUILD_FAILED)
+                echo -e "  ${RED}x${NC} SuperThings build failed"
+                echo -e "    ${YELLOW}-> Run manually: cd $PLUGIN_DIR/servers/super-things && npm install && npm run build${NC}"
+                ;;
+            UNIFI_SETUP_FAILED)
+                echo -e "  ${RED}x${NC} Unifi setup failed"
+                echo -e "    ${YELLOW}-> Run manually: cd $PLUGIN_DIR/servers/unifi && python3 -m venv venv && ./venv/bin/pip install fastmcp${NC}"
                 ;;
         esac
         echo ""
     done
 
-    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${BLUE}----------------------------------------------------------------------${NC}"
     echo -e "  Run ${GREEN}/setup${NC} for interactive setup, or fix issues manually above."
-    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${BLUE}----------------------------------------------------------------------${NC}"
     echo ""
 }
 
-# Check if we should skip (already checked today)
+# ============================================================================
+#  Skip Logic (CRITICAL: Always check builds even if skipping other checks)
+# ============================================================================
+
 should_skip() {
+    # NEVER skip if critical builds are missing
+    if [ -d "$PLUGIN_DIR/servers/super-things" ] && [ ! -f "$PLUGIN_DIR/servers/super-things/dist/index.js" ]; then
+        return 1  # Don't skip - need to build SuperThings
+    fi
+
+    if [ -d "$PLUGIN_DIR/servers/unifi" ] && [ ! -d "$PLUGIN_DIR/servers/unifi/venv" ]; then
+        return 1  # Don't skip - need to create Unifi venv
+    fi
+
+    # Only skip non-critical checks if already checked today
     if [ -f "$SETUP_STATE_FILE" ]; then
-        local last_check=$(cat "$SETUP_STATE_FILE" 2>/dev/null)
-        local today=$(date +%Y-%m-%d)
+        local last_check
+        last_check=$(cat "$SETUP_STATE_FILE" 2>/dev/null)
+        local today
+        today=$(date +%Y-%m-%d)
         if [ "$last_check" = "$today" ]; then
-            return 0
+            return 0  # Skip - already checked today and builds are present
         fi
     fi
-    return 1
+
+    return 1  # Don't skip - need to check
 }
 
-# Main
+# ============================================================================
+#  Main
+# ============================================================================
+
 main() {
-    # Skip if already checked today (unless forced)
-    if [ "$1" != "--force" ] && should_skip; then
+    # Allow forcing a full check
+    if [ "$1" = "--force" ]; then
+        run_checks
+        run_auto_fixes
+        report_status
+        return
+    fi
+
+    # Smart skip: always check builds, skip other checks if done today
+    if should_skip; then
         exit 0
     fi
 
