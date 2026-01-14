@@ -186,6 +186,28 @@ check_unifi_venv() {
     fi
 }
 
+# Check if settings.json is symlinked
+check_settings_symlink() {
+    local plugin_settings="$PLUGIN_DIR/settings.json"
+    local claude_settings="$HOME/.claude/settings.json"
+
+    # Check if settings.json exists in plugin
+    if [ ! -f "$plugin_settings" ]; then
+        return 0  # No settings to apply
+    fi
+
+    # Check if already symlinked correctly
+    if [ -L "$claude_settings" ]; then
+        local target
+        target=$(readlink "$claude_settings")
+        if [ "$target" = "$plugin_settings" ]; then
+            return 0  # Already correct
+        fi
+    fi
+
+    add_auto_fix "SETTINGS_NOT_LINKED"
+}
+
 # ============================================================================
 #  Version Check Functions
 # ============================================================================
@@ -385,6 +407,42 @@ build_unifi_venv() {
     return 0
 }
 
+# Apply settings.json symlink
+apply_settings_symlink() {
+    local plugin_settings="$PLUGIN_DIR/settings.json"
+    local claude_settings="$HOME/.claude/settings.json"
+
+    echo -e "${YELLOW}Applying plugin settings...${NC}"
+
+    # Backup existing settings if not a symlink
+    if [ -f "$claude_settings" ] && [ ! -L "$claude_settings" ]; then
+        local backup="$claude_settings.backup.$(date +%Y%m%d%H%M%S)"
+        echo -e "  ${BLUE}-> Backing up existing settings to ${backup}${NC}"
+        if ! mv "$claude_settings" "$backup"; then
+            echo -e "  ${RED}Failed to backup existing settings${NC}"
+            add_issue "SETTINGS_LINK_FAILED"
+            return 1
+        fi
+    fi
+
+    # Remove existing symlink if pointing elsewhere
+    if [ -L "$claude_settings" ]; then
+        rm -f "$claude_settings"
+    fi
+
+    # Create symlink
+    echo -e "  ${BLUE}-> Creating symlink to plugin settings${NC}"
+    if ! ln -sf "$plugin_settings" "$claude_settings"; then
+        echo -e "  ${RED}Failed to create settings symlink${NC}"
+        add_issue "SETTINGS_LINK_FAILED"
+        return 1
+    fi
+
+    echo -e "  ${GREEN}Settings applied successfully${NC}"
+    echo -e "  ${YELLOW}Note: Restart Claude Code for settings to take effect${NC}"
+    return 0
+}
+
 # ============================================================================
 #  Run Checks
 # ============================================================================
@@ -399,6 +457,7 @@ run_checks() {
     check_compound_engineering
     check_superthings_build
     check_unifi_venv
+    check_settings_symlink
 }
 
 # ============================================================================
@@ -427,6 +486,9 @@ run_auto_fixes() {
                 if ! build_unifi_venv; then
                     add_issue "UNIFI_SETUP_FAILED"
                 fi
+                ;;
+            SETTINGS_NOT_LINKED)
+                apply_settings_symlink
                 ;;
         esac
     done
@@ -535,6 +597,10 @@ report_status() {
             UNIFI_SETUP_FAILED)
                 echo -e "  ${RED}x${NC} Unifi setup failed"
                 echo -e "    ${YELLOW}-> Run manually: cd $PLUGIN_DIR/servers/unifi && python3 -m venv venv && ./venv/bin/pip install fastmcp${NC}"
+                ;;
+            SETTINGS_LINK_FAILED)
+                echo -e "  ${RED}x${NC} Failed to apply settings"
+                echo -e "    ${YELLOW}-> Run manually: ln -sf $PLUGIN_DIR/settings.json ~/.claude/settings.json${NC}"
                 ;;
         esac
         echo ""
