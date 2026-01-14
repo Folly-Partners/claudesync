@@ -117,76 +117,19 @@ chmod +x scripts/*.sh 2>/dev/null || true
 # Run setup
 ./scripts/setup.sh
 
-echo ""
-echo "Step 5: Configuring marketplace..."
+# Note: Marketplace config is in ~/andrews-plugin/settings.json
+# which setup.sh symlinked to ~/.claude/settings.json
+# No need to create settings.local.json (it would override the symlink)
 
-SETTINGS_FILE="$OLD_LOCATION/settings.local.json"
-
-# Ensure ~/.claude exists
-mkdir -p "$OLD_LOCATION"
-
-if [ -f "$SETTINGS_FILE" ]; then
-    # Backup existing settings
-    cp "$SETTINGS_FILE" "$SETTINGS_FILE.backup.$(date +%Y%m%d%H%M%S)"
-    echo "✓ Backed up existing settings.local.json"
-
-    # Check if marketplace already configured
-    if grep -q "andrews-marketplace" "$SETTINGS_FILE"; then
-        echo "✓ Marketplace already configured"
-    else
-        echo "Adding marketplace configuration..."
-        python3 -c "
-import json
-
-with open('$SETTINGS_FILE', 'r') as f:
-    settings = json.load(f)
-
-# Add marketplace config
-if 'extraKnownMarketplaces' not in settings:
-    settings['extraKnownMarketplaces'] = {}
-
-settings['extraKnownMarketplaces']['andrews-marketplace'] = {
-    'source': {
-        'source': 'url',
-        'url': 'https://raw.githubusercontent.com/Folly-Partners/andrews-plugin/main/marketplace.json'
-    }
-}
-
-# Add enabled plugins
-if 'enabledPlugins' not in settings:
-    settings['enabledPlugins'] = {}
-
-settings['enabledPlugins']['andrews-plugin@andrews-marketplace'] = True
-
-with open('$SETTINGS_FILE', 'w') as f:
-    json.dump(settings, f, indent=2)
-    f.write('\n')
-
-print('✓ Updated settings.local.json')
-"
-    fi
-else
-    echo "Creating new settings.local.json..."
-    cat > "$SETTINGS_FILE" << 'EOF'
-{
-  "extraKnownMarketplaces": {
-    "andrews-marketplace": {
-      "source": {
-        "source": "url",
-        "url": "https://raw.githubusercontent.com/Folly-Partners/andrews-plugin/main/marketplace.json"
-      }
-    }
-  },
-  "enabledPlugins": {
-    "andrews-plugin@andrews-marketplace": true
-  }
-}
-EOF
-    echo "✓ Created settings.local.json"
+# Clean up any stale settings.local.json from previous migrations
+if [ -f "$OLD_LOCATION/settings.local.json" ]; then
+    echo "Removing stale settings.local.json (config is now in settings.json)..."
+    rm "$OLD_LOCATION/settings.local.json"
+    echo "✓ Cleaned up settings.local.json"
 fi
 
 echo ""
-echo "Step 6: Running health check..."
+echo "Step 5: Running health check..."
 eval "$(deep-env export 2>/dev/null || true)"
 ./scripts/doctor.sh
 
@@ -204,6 +147,6 @@ echo "  ✓ Repository moved to ~/andrews-plugin"
 echo "  ✓ SuperThings bundled into plugin (servers/super-things/)"
 echo "  ✓ Unifi server bundled into plugin (servers/unifi/)"
 echo "  ✓ Auto-sync LaunchAgent updated"
-echo "  ✓ Plugin marketplace registered in ~/.claude/settings.local.json"
+echo "  ✓ Settings symlinked: ~/.claude/settings.json → ~/andrews-plugin/settings.json"
 echo ""
 echo "Next: Restart Claude Code for changes to take effect"
