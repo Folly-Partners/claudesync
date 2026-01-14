@@ -23,7 +23,45 @@ python3 -m venv venv
 chmod +x "$PLUGIN_ROOT/scripts/"*.sh
 chmod +x "$PLUGIN_ROOT/skills/"*/*.sh 2>/dev/null || true
 
-# 4. Install LaunchAgent for auto-sync
+# 4. Create settings.json symlink (so synced permissions work)
+echo "Setting up settings symlink..."
+mkdir -p "$HOME/.claude"
+if [ -f "$HOME/.claude/settings.json" ] && [ ! -L "$HOME/.claude/settings.json" ]; then
+  mv "$HOME/.claude/settings.json" "$HOME/.claude/settings.json.backup"
+fi
+ln -sf "$PLUGIN_ROOT/settings.json" "$HOME/.claude/settings.json"
+
+# 5. Create settings.local.json with machine-specific hooks
+echo "Creating settings.local.json..."
+cat > "$HOME/.claude/settings.local.json" << EOF
+{
+  "hooks": {
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$PLUGIN_ROOT/skills/github-sync/sync-mcp-oauth.sh push --quiet"
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "andrews-plugin@andrews-marketplace": true
+  },
+  "extraKnownMarketplaces": {
+    "andrews-marketplace": {
+      "source": {
+        "source": "url",
+        "url": "https://raw.githubusercontent.com/Folly-Partners/andrews-plugin/main/marketplace.json"
+      }
+    }
+  }
+}
+EOF
+
+# 6. Install LaunchAgent for auto-sync
 echo "Installing LaunchAgent for auto-sync..."
 PLIST_SRC="$PLUGIN_ROOT/scripts/com.andrews-plugin.sync.plist.template"
 PLIST_DST="$HOME/Library/LaunchAgents/com.andrews-plugin.sync.plist"

@@ -54,18 +54,6 @@
     ]
   },
   "model": "opus",
-  "hooks": {
-    "SessionEnd": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/Users/andrewwilkinson/.claude/skills/github-sync/sync-mcp-oauth.sh push --quiet"
-          }
-        ]
-      }
-    ]
-  },
   "enabledPlugins": {
     "compound-engineering@every-marketplace": true,
     "firebase@claude-plugins-official": true,
