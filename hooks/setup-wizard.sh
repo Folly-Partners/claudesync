@@ -17,10 +17,16 @@ NC='\033[0m' # No Color
 
 # Track issues found
 ISSUES=()
+AUTO_FIXES=()
 
 # Helper to add issue
 add_issue() {
     ISSUES+=("$1")
+}
+
+# Helper to add auto-fixable issue
+add_auto_fix() {
+    AUTO_FIXES+=("$1")
 }
 
 # Check deep-env installation
@@ -138,6 +144,26 @@ check_official_plugins() {
     fi
 }
 
+# Check if SuperThings MCP server is built
+check_superthings_build() {
+    local server_dir="$PLUGIN_DIR/servers/super-things"
+    if [ -d "$server_dir" ]; then
+        if [ ! -f "$server_dir/dist/index.js" ]; then
+            add_auto_fix "SUPERTHINGS_NOT_BUILT"
+        fi
+    fi
+}
+
+# Check if Unifi MCP server venv exists
+check_unifi_venv() {
+    local server_dir="$PLUGIN_DIR/servers/unifi"
+    if [ -d "$server_dir" ]; then
+        if [ ! -d "$server_dir/venv" ]; then
+            add_auto_fix "UNIFI_VENV_MISSING"
+        fi
+    fi
+}
+
 # Run all checks
 run_checks() {
     check_deep_env
@@ -149,6 +175,49 @@ run_checks() {
     check_compound_engineering
     check_official_marketplace
     check_official_plugins
+    check_superthings_build
+    check_unifi_venv
+}
+
+# Auto-fix issues that can be fixed automatically
+run_auto_fixes() {
+    if [ ${#AUTO_FIXES[@]} -eq 0 ]; then
+        return
+    fi
+
+    echo ""
+    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${BLUE}  Andrews Plugin - Auto-Setup${NC}"
+    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo ""
+
+    for fix in "${AUTO_FIXES[@]}"; do
+        case "$fix" in
+            SUPERTHINGS_NOT_BUILT)
+                echo -e "${YELLOW}Building SuperThings MCP server...${NC}"
+                local server_dir="$PLUGIN_DIR/servers/super-things"
+                if cd "$server_dir" && npm install --silent 2>/dev/null && npm run build --silent 2>/dev/null; then
+                    echo -e "  ${GREEN}✅ SuperThings built successfully${NC}"
+                else
+                    echo -e "  ${RED}✗ SuperThings build failed${NC}"
+                    echo -e "    ${YELLOW}→ Run manually: cd $server_dir && npm install && npm run build${NC}"
+                    add_issue "SUPERTHINGS_BUILD_FAILED"
+                fi
+                ;;
+            UNIFI_VENV_MISSING)
+                echo -e "${YELLOW}Setting up Unifi MCP server...${NC}"
+                local server_dir="$PLUGIN_DIR/servers/unifi"
+                if cd "$server_dir" && python3 -m venv venv 2>/dev/null && ./venv/bin/pip install -q fastmcp 2>/dev/null; then
+                    echo -e "  ${GREEN}✅ Unifi venv created successfully${NC}"
+                else
+                    echo -e "  ${RED}✗ Unifi setup failed${NC}"
+                    echo -e "    ${YELLOW}→ Run manually: cd $server_dir && python3 -m venv venv && ./venv/bin/pip install fastmcp${NC}"
+                    add_issue "UNIFI_SETUP_FAILED"
+                fi
+                ;;
+        esac
+    done
+    echo ""
 }
 
 # Report status
@@ -246,6 +315,7 @@ main() {
     fi
 
     run_checks
+    run_auto_fixes
     report_status
 }
 
