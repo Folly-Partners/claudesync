@@ -13,11 +13,27 @@ CYAN='\033[0;36m'
 BOLD='\033[1m'
 NC='\033[0m'
 
-# Repositories to sync (add more as needed)
-REPOS=(
-    "$HOME/andrews-plugin"
-    "$HOME/Deep-Personality"
-)
+# Find all git repos in home directory (excluding common non-project directories)
+REPOS=()
+while IFS= read -r repo; do
+    repo_dir=$(dirname "$repo")
+    REPOS+=("$repo_dir")
+done < <(find "$HOME" -maxdepth 4 -name ".git" -type d 2>/dev/null | \
+    grep -v "/Library/" | \
+    grep -v "/.Trash/" | \
+    grep -v "/node_modules/" | \
+    grep -v "/.npm/" | \
+    grep -v "/.cache/" | \
+    grep -v "/.local/" | \
+    grep -v "/.cargo/" | \
+    grep -v "/.rustup/" | \
+    grep -v "/vendor/" | \
+    grep -v "/.gem/" | \
+    grep -v "/go/pkg/" | \
+    grep -v "/.cocoapods/" | \
+    grep -v "/Pods/" | \
+    grep -v "/.claude/" | \
+    sort)
 
 # Parse arguments
 DRY_RUN=false

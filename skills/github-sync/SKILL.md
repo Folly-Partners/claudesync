@@ -19,8 +19,9 @@ Ensures Claude Code sessions stay synchronized with GitHub, preventing lost work
 **At session start**, run this check (auto-skips if already run today):
 
 ```bash
-# Quick git health check for common directories
-for dir in ~/.claude ~/Deep-Personality; do
+# Quick git health check - automatically finds all repos in ~/
+# The actual script scans for .git directories up to 4 levels deep
+for dir in $(find ~ -maxdepth 4 -name ".git" -type d | xargs dirname); do
   if [ -d "$dir/.git" ]; then
     echo "=== Git status for $dir ==="
     cd "$dir"
@@ -90,14 +91,8 @@ If the user says goodbye, ends work, or the conversation seems to be concluding:
 ## Quick Reference Commands
 
 ```bash
-# Full sync (pull then push)
-cd ~/.claude && git pull origin main && git add -A && git commit -m "Sync: $(date '+%Y-%m-%d %H:%M')" && git push origin main
-
 # Check status across key repos
 ~/.claude/skills/github-sync/git-sync-check.sh
-
-# Force sync ~/.claude config
-~/.claude/sync-claude-config.sh
 
 # Push changes to current repo
 git add -A && git commit -m "message" && git push origin main
@@ -105,9 +100,11 @@ git add -A && git commit -m "message" && git push origin main
 
 ## Repositories to Monitor
 
-- `~/.claude` - Claude Code configuration (syncs via launch agent, but check anyway)
-- `~/Deep-Personality` - Deep Personality project
-- Any directory where user is actively working
+The script automatically discovers all git repositories in your home directory (up to 4 levels deep), excluding:
+- `~/.claude/` (Claude Code config - managed separately)
+- `Library/`, `.Trash/`, `node_modules/`, `.npm/`, `.cache/`
+- `.local/`, `.cargo/`, `.rustup/`, `vendor/`, `.gem/`
+- `go/pkg/`, `.cocoapods/`, `Pods/`
 
 ## MCP OAuth Credential Sync
 

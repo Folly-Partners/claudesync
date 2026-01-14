@@ -36,26 +36,28 @@ GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Repositories to check (add more as needed)
-REPOS=(
-    "$HOME/.claude"
-    "$HOME/Deep-Personality"
-)
-
-# Add current directory if it's a git repo and not already in the list
-if [ -d ".git" ]; then
-    CWD=$(pwd)
-    ALREADY_LISTED=false
-    for repo in "${REPOS[@]}"; do
-        if [ "$repo" = "$CWD" ]; then
-            ALREADY_LISTED=true
-            break
-        fi
-    done
-    if [ "$ALREADY_LISTED" = false ]; then
-        REPOS+=("$CWD")
-    fi
-fi
+# Find all git repos in home directory (excluding common non-project directories)
+REPOS=()
+while IFS= read -r repo; do
+    # Get the parent directory (the actual repo, not .git)
+    repo_dir=$(dirname "$repo")
+    REPOS+=("$repo_dir")
+done < <(find "$HOME" -maxdepth 4 -name ".git" -type d 2>/dev/null | \
+    grep -v "/Library/" | \
+    grep -v "/.Trash/" | \
+    grep -v "/node_modules/" | \
+    grep -v "/.npm/" | \
+    grep -v "/.cache/" | \
+    grep -v "/.local/" | \
+    grep -v "/.cargo/" | \
+    grep -v "/.rustup/" | \
+    grep -v "/vendor/" | \
+    grep -v "/.gem/" | \
+    grep -v "/go/pkg/" | \
+    grep -v "/.cocoapods/" | \
+    grep -v "/Pods/" | \
+    grep -v "/.claude/" | \
+    sort)
 
 echo "========================================"
 echo "Git Sync Status Check"
