@@ -116,34 +116,6 @@ check_compound_engineering() {
     fi
 }
 
-# Check Anthropic Official marketplace
-check_official_marketplace() {
-    if ! ls "$HOME/.claude/plugins/marketplaces/"*official* &>/dev/null 2>&1; then
-        if command -v claude &>/dev/null; then
-            if ! claude plugin marketplace list 2>/dev/null | grep -qi "official"; then
-                add_issue "OFFICIAL_MARKETPLACE_MISSING"
-            fi
-        else
-            add_issue "OFFICIAL_MARKETPLACE_MISSING"
-        fi
-    fi
-}
-
-# Check official MCP plugins
-check_official_plugins() {
-    local missing_plugins=()
-
-    for plugin in github supabase vercel; do
-        if ! ls "$HOME/.claude/plugins/cache/"*official*"/$plugin" &>/dev/null 2>&1; then
-            missing_plugins+=("$plugin")
-        fi
-    done
-
-    if [ ${#missing_plugins[@]} -gt 0 ]; then
-        add_issue "OFFICIAL_PLUGINS_MISSING:${missing_plugins[*]}"
-    fi
-}
-
 # Check if SuperThings MCP server is built
 check_superthings_build() {
     local server_dir="$PLUGIN_DIR/servers/super-things"
@@ -173,8 +145,6 @@ run_checks() {
     check_marketplace
     check_every_marketplace
     check_compound_engineering
-    check_official_marketplace
-    check_official_plugins
     check_superthings_build
     check_unifi_venv
 }
@@ -275,15 +245,6 @@ report_status() {
             COMPOUND_ENGINEERING_MISSING)
                 echo -e "  ${YELLOW}!${NC} Compound Engineering plugin not installed"
                 echo -e "    ${GREEN}→ Run: claude plugin install compound-engineering${NC}"
-                ;;
-            OFFICIAL_MARKETPLACE_MISSING)
-                echo -e "  ${YELLOW}!${NC} Anthropic Official marketplace not registered"
-                echo -e "    ${GREEN}→ Run: claude plugin marketplace add https://github.com/anthropics/claude-plugins-official${NC}"
-                ;;
-            OFFICIAL_PLUGINS_MISSING:*)
-                local plugins="${issue#OFFICIAL_PLUGINS_MISSING:}"
-                echo -e "  ${YELLOW}!${NC} Missing official plugins: $plugins"
-                echo -e "    ${GREEN}→ Run: claude plugin install <plugin-name> for each${NC}"
                 ;;
         esac
         echo ""
