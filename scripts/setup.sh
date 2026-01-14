@@ -31,37 +31,12 @@ if [ -f "$HOME/.claude/settings.json" ] && [ ! -L "$HOME/.claude/settings.json" 
 fi
 ln -sf "$PLUGIN_ROOT/settings.json" "$HOME/.claude/settings.json"
 
-# 5. Create settings.local.json with machine-specific hooks
-echo "Creating settings.local.json..."
-cat > "$HOME/.claude/settings.local.json" << EOF
-{
-  "hooks": {
-    "SessionEnd": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$PLUGIN_ROOT/skills/github-sync/sync-mcp-oauth.sh push --quiet"
-          }
-        ]
-      }
-    ]
-  },
-  "enabledPlugins": {
-    "andrews-plugin@andrews-marketplace": true
-  },
-  "extraKnownMarketplaces": {
-    "andrews-marketplace": {
-      "source": {
-        "source": "url",
-        "url": "https://raw.githubusercontent.com/Folly-Partners/andrews-plugin/main/marketplace.json"
-      }
-    }
-  }
-}
-EOF
+# Remove any existing settings.local.json (everything is now in settings.json)
+if [ -f "$HOME/.claude/settings.local.json" ]; then
+  rm "$HOME/.claude/settings.local.json"
+fi
 
-# 6. Install LaunchAgent for auto-sync
+# 5. Install LaunchAgent for auto-sync
 echo "Installing LaunchAgent for auto-sync..."
 PLIST_SRC="$PLUGIN_ROOT/scripts/com.andrews-plugin.sync.plist.template"
 PLIST_DST="$HOME/Library/LaunchAgents/com.andrews-plugin.sync.plist"

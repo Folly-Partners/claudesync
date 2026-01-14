@@ -54,13 +54,34 @@
     ]
   },
   "model": "opus",
+  "hooks": {
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/andrews-plugin/skills/github-sync/sync-mcp-oauth.sh push --quiet"
+          }
+        ]
+      }
+    ]
+  },
   "enabledPlugins": {
     "compound-engineering@every-marketplace": true,
+    "andrews-plugin@andrews-marketplace": true,
     "firebase@claude-plugins-official": true,
     "security-guidance@claude-plugins-official": true,
     "stripe@claude-plugins-official": true,
     "supabase@claude-plugins-official": true,
     "vercel@claude-plugins-official": true,
     "github@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "andrews-marketplace": {
+      "source": {
+        "source": "url",
+        "url": "https://raw.githubusercontent.com/Folly-Partners/andrews-plugin/main/marketplace.json"
+      }
+    }
   }
 }
