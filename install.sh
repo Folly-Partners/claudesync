@@ -18,6 +18,18 @@ if ! command -v claude &> /dev/null; then
 fi
 
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "  Removing OAuth Plugins (replaced by API key MCPs)"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+# Uninstall OAuth-based plugins that we're replacing with API key versions
+for plugin in github supabase vercel; do
+    if claude plugin uninstall "$plugin" 2>/dev/null; then
+        echo "   🗑️  Removed $plugin OAuth plugin (replaced by API key MCP)"
+    fi
+done
+
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "  Adding Marketplaces"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
