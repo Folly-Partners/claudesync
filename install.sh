@@ -17,51 +17,100 @@ if ! command -v claude &> /dev/null; then
     exit 1
 fi
 
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "  Adding Marketplaces"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+# Add Anthropic Official marketplace
+echo "1️⃣  Adding Anthropic Official marketplace..."
+if claude plugin marketplace add https://github.com/anthropics/claude-plugins-official 2>/dev/null; then
+    echo "   ✅ Anthropic Official marketplace added"
+else
+    echo "   ℹ️  May already exist, continuing..."
+fi
+
 # Add Andrews Plugin marketplace
-echo "1️⃣  Adding Andrews Plugin marketplace..."
+echo "2️⃣  Adding Andrews Plugin marketplace..."
 if claude plugin marketplace add https://raw.githubusercontent.com/Folly-Partners/andrews-plugin/main/marketplace.json 2>/dev/null; then
     echo "   ✅ Andrews marketplace added"
 else
-    echo "   ℹ️  Andrews marketplace may already exist, continuing..."
+    echo "   ℹ️  May already exist, continuing..."
 fi
 
 # Add Every Inc marketplace (for Compound Engineering)
-echo "2️⃣  Adding Every Inc marketplace..."
+echo "3️⃣  Adding Every Inc marketplace..."
 if claude plugin marketplace add https://github.com/EveryInc/every-marketplace 2>/dev/null; then
     echo "   ✅ Every Inc marketplace added"
 else
-    echo "   ℹ️  Every Inc marketplace may already exist, continuing..."
+    echo "   ℹ️  May already exist, continuing..."
 fi
 
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "  Installing Plugins"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
 # Install Andrews Plugin
-echo "3️⃣  Installing Andrews Plugin..."
+echo "4️⃣  Installing Andrews Plugin..."
 if claude plugin install andrews-plugin 2>/dev/null; then
     echo "   ✅ Andrews Plugin installed"
 else
-    echo "   ℹ️  Andrews Plugin may already be installed, continuing..."
+    echo "   ℹ️  May already be installed, continuing..."
 fi
 
 # Install Compound Engineering Plugin
-echo "4️⃣  Installing Compound Engineering Plugin..."
+echo "5️⃣  Installing Compound Engineering..."
 if claude plugin install compound-engineering 2>/dev/null; then
     echo "   ✅ Compound Engineering installed"
 else
-    echo "   ℹ️  Compound Engineering may already be installed, continuing..."
+    echo "   ℹ️  May already be installed, continuing..."
+fi
+
+# Install Official MCP Plugins
+echo "6️⃣  Installing GitHub MCP..."
+if claude plugin install github 2>/dev/null; then
+    echo "   ✅ GitHub MCP installed"
+else
+    echo "   ℹ️  May already be installed, continuing..."
+fi
+
+echo "7️⃣  Installing Supabase MCP..."
+if claude plugin install supabase 2>/dev/null; then
+    echo "   ✅ Supabase MCP installed"
+else
+    echo "   ℹ️  May already be installed, continuing..."
+fi
+
+echo "8️⃣  Installing Vercel MCP..."
+if claude plugin install vercel 2>/dev/null; then
+    echo "   ✅ Vercel MCP installed"
+else
+    echo "   ℹ️  May already be installed, continuing..."
 fi
 
 echo ""
-echo "✅ Installation complete!"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "  ✅ Installation Complete!"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
-echo "Installed:"
-echo "  • Andrews Plugin (MCP servers, skills, commands, agents)"
-echo "  • Compound Engineering (advanced workflows)"
+echo "Installed Marketplaces:"
+echo "  • Anthropic Official (GitHub, Supabase, Vercel, etc.)"
+echo "  • Andrews Plugin (custom MCP servers, skills, commands)"
+echo "  • Every Inc (Compound Engineering)"
+echo ""
+echo "Installed Plugins:"
+echo "  • Andrews Plugin - MCP servers, skills, commands, agents"
+echo "  • Compound Engineering - Advanced workflows"
+echo "  • GitHub - Repository management MCP"
+echo "  • Supabase - Database & auth MCP"
+echo "  • Vercel - Deployment MCP"
 echo ""
 echo "Next: Start Claude Code - the plugin will guide you through setup."
 echo ""
 echo "What happens on first run:"
 echo "  • Checks for deep-env (credential manager)"
 echo "  • Sets up automatic sync (launchd agent)"
-echo "  • Configures MCP servers"
+echo "  • Configures MCP servers & credentials"
 echo "  • Pulls credentials from iCloud (if available)"
 echo ""
 echo "Run 'claude' to get started!"
