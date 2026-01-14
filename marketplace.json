@@ -1,13 +1,21 @@
 {
-  "version": "1",
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "Andrew's Plugin Marketplace",
+  "version": "1.0.0",
+  "description": "Andrew's personal plugin collection",
+  "owner": {
+    "name": "Andrew Wilkinson"
+  },
   "plugins": [
     {
       "name": "andrews-plugin",
-      "displayName": "Andrew's Plugin",
-      "description": "Andrew's global MCP servers, skills, and agents",
+      "description": "Global MCP servers, skills, commands, and agents for cross-machine sync",
       "version": "1.0.0",
-      "repository": "https://github.com/Folly-Partners/andrews-plugin",
-      "author": "Andrew Wilkinson"
+      "author": {
+        "name": "Andrew Wilkinson"
+      },
+      "source": ".",
+      "category": "productivity"
     }
   ]
 }
