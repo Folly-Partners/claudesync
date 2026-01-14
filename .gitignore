@@ -56,3 +56,22 @@ image-cache/
 servers/super-things/node_modules/
 servers/super-things/dist/
 servers/unifi/venv/
+
+# Build artifacts and caches
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+node_modules/
+dist/
+build/
+
+# Backup files
+*.bak
+*.bak.*
+
+# Sync timestamps (machine-specific)
+.git-sync-last-run
+
+# Data directories
+data/

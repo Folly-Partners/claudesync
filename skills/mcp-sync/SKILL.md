@@ -14,18 +14,18 @@ Credentials are stored in deep-env (macOS Keychain) and synced via iCloud.
 
 ```bash
 # Check if required env vars are set (default)
-~/.claude/skills/mcp-sync/mcp-sync.sh
+~/andrews-plugin/skills/mcp-sync/mcp-sync.sh
 
 # List servers in mcp.json
-~/.claude/skills/mcp-sync/mcp-sync.sh list
+~/andrews-plugin/skills/mcp-sync/mcp-sync.sh list
 
 # Reload env vars from deep-env and check
-~/.claude/skills/mcp-sync/mcp-sync.sh reload
+~/andrews-plugin/skills/mcp-sync/mcp-sync.sh reload
 ```
 
 ## Adding a New MCP Server
 
-1. Edit `~/.claude/mcp.json`
+1. Edit `~/andrews-plugin/mcp.json`
 2. Use `${HOME}` for any paths
 3. Use `${VAR_NAME}` for credentials
 4. Store the credential: `deep-env store VAR_NAME "value"`
@@ -66,14 +66,14 @@ deep-env pull
 source ~/.zshrc
 
 # Verify all vars are set
-~/.claude/skills/mcp-sync/mcp-sync.sh check
+~/andrews-plugin/skills/mcp-sync/mcp-sync.sh check
 ```
 
 ## Files
 
 | File | Purpose |
 |------|---------|
-| `~/.claude/mcp.json` | Server configs with `${VAR}` syntax (synced via git) |
+| `~/andrews-plugin/mcp.json` | Server configs with `${VAR}` syntax (synced via git) |
 | Keychain via deep-env | Credentials (synced via iCloud) |
 | `~/.zshrc` | Loads credentials via `deep-env export` |
 

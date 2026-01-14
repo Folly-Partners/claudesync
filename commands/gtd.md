@@ -1,1 +1,0 @@
-/Users/andrewwilkinson/Projects/SuperThings/commands/gtd.md

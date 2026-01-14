@@ -11,7 +11,7 @@ Triage and organize the Things inbox by cleaning up task titles and assigning th
 **ALWAYS load learned patterns before processing:**
 
 ```bash
-cat ~/Projects/SuperThings/data/patterns.json
+cat ~/andrews-plugin/servers/super-things/data/patterns.json
 ```
 
 The patterns file contains:
@@ -154,7 +154,7 @@ Runs on Haiku, but **auto-escalates to Sonnet** when hitting speedbumps:
    echo '[
      {"id":"ID1","original_title":"ORIG1","original_list":"inbox"},
      {"id":"ID2","original_title":"ORIG2","original_list":"inbox"}
-   ]' > ~/Projects/SuperThings/data/last_triage.json
+   ]' > ~/andrews-plugin/servers/super-things/data/last_triage.json
    ```
 
 8. **Execute updates** using `mcp__SuperThings__things_update_todo` for approved items
@@ -174,11 +174,11 @@ Runs on Haiku, but **auto-escalates to Sonnet** when hitting speedbumps:
 
    a) **Append to history.jsonl** - For EACH processed item:
    ```bash
-   echo '{"ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","original":"ORIGINAL_TITLE","suggested":"SUGGESTED_TITLE","final":"FINAL_TITLE","project":"PROJECT_NAME","accepted":true}' >> ~/Projects/SuperThings/data/history.jsonl
+   echo '{"ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","original":"ORIGINAL_TITLE","suggested":"SUGGESTED_TITLE","final":"FINAL_TITLE","project":"PROJECT_NAME","accepted":true}' >> ~/andrews-plugin/servers/super-things/data/history.jsonl
    ```
 
    b) **Update patterns.json** if user made corrections:
-   - Read current: `cat ~/Projects/SuperThings/data/patterns.json`
+   - Read current: `cat ~/andrews-plugin/servers/super-things/data/patterns.json`
    - If title was changed differently than suggested, add to `exact_overrides`
    - If pattern emerges (e.g., "Fix X" → "Delegate: Fix X"), add to `title_transforms`
    - Write updated JSON back to file
@@ -248,7 +248,7 @@ The learning happens in Step 7 above. Here's how patterns work:
 
 ### Reading History
 
-To see past decisions: `cat ~/Projects/SuperThings/data/history.jsonl | tail -20`
+To see past decisions: `cat ~/andrews-plugin/servers/super-things/data/history.jsonl | tail -20`
 
 ## Undo Last Triage
 
@@ -256,7 +256,7 @@ If user says "undo" or "revert", restore the last triage batch:
 
 1. **Read last_triage.json**:
    ```bash
-   cat ~/Projects/SuperThings/data/last_triage.json
+   cat ~/andrews-plugin/servers/super-things/data/last_triage.json
    ```
 
 2. **For each item**, restore original state:
@@ -271,7 +271,7 @@ If user says "undo" or "revert", restore the last triage batch:
 
 4. **Clear the undo file** after successful revert:
    ```bash
-   echo '[]' > ~/Projects/SuperThings/data/last_triage.json
+   echo '[]' > ~/andrews-plugin/servers/super-things/data/last_triage.json
    ```
 
 **Note:** Only the LAST triage batch can be undone. Running a new triage overwrites the undo state.
@@ -279,7 +279,7 @@ If user says "undo" or "revert", restore the last triage batch:
 ## Execution
 
 Now execute the triage workflow:
-1. **Load patterns first** - Read `~/Projects/SuperThings/data/patterns.json`
+1. **Load patterns first** - Read `~/andrews-plugin/servers/super-things/data/patterns.json`
 2. **Fetch inbox** - Call `mcp__SuperThings__things_get_inbox` (server handles caching)
 3. Apply learned patterns when generating suggestions
 4. Show `[learned: Nx]` for pattern-based suggestions

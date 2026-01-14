@@ -1,8 +1,0 @@
-README.md
-pyproject.toml
-server.py
-unifi_mcp_server.egg-info/PKG-INFO
-unifi_mcp_server.egg-info/SOURCES.txt
-unifi_mcp_server.egg-info/dependency_links.txt
-unifi_mcp_server.egg-info/requires.txt
-unifi_mcp_server.egg-info/top_level.txt

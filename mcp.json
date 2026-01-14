@@ -3,7 +3,7 @@
     "SuperThings": {
       "type": "stdio",
       "command": "node",
-      "args": ["${HOME}/SuperThings/dist/index.js"],
+      "args": ["${HOME}/andrews-plugin/servers/super-things/dist/index.js"],
       "env": {
         "THINGS_AUTH_TOKEN": "${THINGS_AUTH_TOKEN}"
       }

@@ -11,7 +11,7 @@ Run the setup wizard to ensure this Mac is fully configured.
 
 1. First, run the setup check to see current status:
 ```bash
-~/.claude/plugins/andrews-plugin/hooks/setup-wizard.sh --force
+~/andrews-plugin/hooks/setup-wizard.sh --force
 ```
 
 2. Based on the output, guide the user through fixing any issues interactively.

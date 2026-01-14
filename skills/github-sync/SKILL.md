@@ -92,7 +92,7 @@ If the user says goodbye, ends work, or the conversation seems to be concluding:
 
 ```bash
 # Check status across key repos
-~/.claude/skills/github-sync/git-sync-check.sh
+~/andrews-plugin/skills/github-sync/git-sync-check.sh
 
 # Push changes to current repo
 git add -A && git commit -m "message" && git push origin main
@@ -121,7 +121,7 @@ The github-sync skill also handles **automatic syncing of MCP OAuth tokens** acr
 
 After authenticating MCP servers (Zapier, Browserbase, etc.) for the first time:
 ```bash
-~/.claude/skills/github-sync/sync-mcp-oauth.sh push
+~/andrews-plugin/skills/github-sync/sync-mcp-oauth.sh push
 ```
 
 After that, everything is automatic. Your other Macs will automatically get the tokens.
@@ -130,13 +130,13 @@ After that, everything is automatic. Your other Macs will automatically get the 
 
 ```bash
 # Push credentials to iCloud
-~/.claude/skills/github-sync/sync-mcp-oauth.sh push
+~/andrews-plugin/skills/github-sync/sync-mcp-oauth.sh push
 
 # Pull credentials from iCloud (merges with local)
-~/.claude/skills/github-sync/sync-mcp-oauth.sh pull
+~/andrews-plugin/skills/github-sync/sync-mcp-oauth.sh pull
 
 # Check sync status
-~/.claude/skills/github-sync/sync-mcp-oauth.sh status
+~/andrews-plugin/skills/github-sync/sync-mcp-oauth.sh status
 ```
 
 ### Technical Details

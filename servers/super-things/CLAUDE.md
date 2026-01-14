@@ -120,7 +120,7 @@ Apply this workflow when:
 
 Always follow this order:
 
-1. **Check Cache First**: Read `~/.claude/data/email-cache.json` for existing entries (key format: `lowercase name|domain`)
+1. **Check Cache First**: Read `~/andrews-plugin/data/email-cache.json` for existing entries (key format: `lowercase name|domain`)
 
 2. **Gmail/Contacts Search**: Use `mcp__zapier__gmail_find_email` with the person's name
 
@@ -146,7 +146,7 @@ Try common patterns: `company.com`, `companyinc.com`, `thecompany.com`, `company
 
 ### Caching Results
 
-After finding an email, update `~/.claude/data/email-cache.json`:
+After finding an email, update `~/andrews-plugin/data/email-cache.json`:
 
 ```json
 {
@@ -175,4 +175,4 @@ After finding an email, update `~/.claude/data/email-cache.json`:
 
 - **Gmail**: `mcp__zapier__gmail_find_email` with query containing person name
 - **Hunter**: Use Hunter MCP tools to find/verify emails by name + domain
-- **Cache**: `~/.claude/data/email-cache.json` (syncs via GitHub)
+- **Cache**: `~/andrews-plugin/data/email-cache.json` (syncs via GitHub)

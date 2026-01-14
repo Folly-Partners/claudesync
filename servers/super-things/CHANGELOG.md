@@ -38,7 +38,7 @@ All notable changes to SuperThings will be documented in this file.
 
 - Renamed from `things-mcp-silent` to `SuperThings`
 - Consolidated MCP server, commands, and skills into single plugin
-- Commands moved into plugin (`commands/`) with symlinks to `~/.claude/commands/`
+- Commands moved into plugin (`commands/`) with symlinks to `~/andrews-plugin/commands/`
 - Added `data/` directory for patterns, history, and research cache
 - Added `SKILL.md` for Claude Code skill documentation
 - Updated package name to `superthings` version 2.0.0

@@ -14,13 +14,13 @@ Model Context Protocol server for managing Ubiquiti Unifi networks through Claud
 
 1. Install dependencies:
 ```bash
-cd ~/.claude/mcp-servers/unifi
+cd ~/andrews-plugin/mcp-servers/unifi
 pip install -e .
 ```
 
 Or with uv (recommended):
 ```bash
-cd ~/.claude/mcp-servers/unifi
+cd ~/andrews-plugin/mcp-servers/unifi
 uv pip install -e .
 ```
 
@@ -53,14 +53,14 @@ deep-env push
 
 ### 2. Add to Claude Code MCP Configuration
 
-Add this to `~/.claude/config.json` under `mcpServers`:
+Add this to `~/andrews-plugin/config.json` under `mcpServers`:
 
 ```json
 {
   "mcpServers": {
     "unifi": {
       "command": "python3",
-      "args": ["/Users/andrewwilkinson/.claude/mcp-servers/unifi/server.py"],
+      "args": ["~/andrews-plugin/mcp-servers/unifi/server.py"],
       "env": {
         "UNIFI_HOST": "{{env.UNIFI_HOST}}",
         "UNIFI_USERNAME": "{{env.UNIFI_USERNAME}}",

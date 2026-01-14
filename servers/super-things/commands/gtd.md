@@ -92,7 +92,7 @@ Andrew</p>
 
 ## Research Cache System
 
-**All research results are cached** to `~/Projects/SuperThings/data/research-cache.json`:
+**All research results are cached** to `~/andrews-plugin/servers/super-things/data/research-cache.json`:
 - Results persist for 7 days
 - Use `/gtd resume` to continue a previous session
 - Say "details N" to expand cached findings
@@ -101,7 +101,7 @@ Andrew</p>
 
 ### Step 1: Check for Previous Session
 ```bash
-cat ~/Projects/SuperThings/data/research-cache.json
+cat ~/andrews-plugin/servers/super-things/data/research-cache.json
 ```
 If recent session exists (< 24h), ask: "Continue previous session or start fresh?"
 

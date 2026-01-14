@@ -1,165 +1,271 @@
-# Claude Code Sync
+# Andrews Plugin
 
-Syncs Claude Code configuration across all my computers automatically.
+Personal Claude Code plugin for Andrew Wilkinson. Provides MCP servers, skills, commands, and agents that sync across all Macs via GitHub.
 
-## Quick Setup (New Computer)
+## Quick Install
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Folly-Partners/claude-code-sync/main/setup-new-computer.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Folly-Partners/andrews-plugin/main/install.sh | bash
 ```
 
-That's it. Everything else is automatic.
+This installs the plugin and registers it with Claude Code's plugin marketplace system.
 
 ---
 
-## What Gets Synced
+## What's Included
 
-| Item | Path | Description |
-|------|------|-------------|
-| MCP Servers | `claude.json` | 7 servers: things-mcp, webflow, browserbase, tavily, zapier, ahrefs, xero (with auth tokens) |
-| Custom Agents | `agents/` | email-response-processor, inbox-task-manager, wardrobe-cataloger |
-| Settings | `settings.local.json` | Enabled MCP servers + permissions |
-| Plugins | `plugins/` | Plugin configuration |
-| History | `history.jsonl` | Chat history |
-| Todos | `todos/` | Task lists |
-| Projects | `projects/` | Conversation history |
+### 11 MCP Servers
 
-## What Does NOT Sync
+Complete list in [MCP-SERVERS.md](MCP-SERVERS.md):
 
-| Item | Path | Reason |
-|------|------|--------|
-| OAuth Tokens | `.credentials.json` | Machine-specific, would cause auth conflicts |
-| Debug Logs | `debug/` | Not useful across machines |
-| Session Data | `session-env/`, `shell-snapshots/` | Machine-specific |
-| Analytics | `statsig/` | Machine-specific |
+| Server | Purpose |
+|--------|---------|
+| **SuperThings** | Things 3 task management integration |
+| **Playwright** | Browser automation and testing |
+| **Zapier** | Gmail, Google Calendar, Sheets, Docs, Drive automation |
+| **Browserbase** | Cloud browser automation |
+| **Tavily** | AI-powered web search |
+| **Hunter** | Email finding and verification |
+| **Linear** | Issue tracking |
+| **Unifi** | Network management |
+| **GitHub** | Repository operations |
+| **Supabase** | Database management |
+| **Vercel** | Deployment platform |
 
-## How It Works
+### 5 Skills
 
-### Architecture
+- **deep-env** - Secure credential management (macOS Keychain + iCloud sync)
+- **github-sync** - Automatic git synchronization across repos
+- **enhanced-planning** - Structured planning workflow with parallel research
+- **history-pruner** - Clean up old conversation history
+- **mcp-sync** - MCP server configuration validation
 
-```
-~/.claude.json  →  symlink  →  ~/.claude/claude.json (in git repo)
-~/.claude/      →  git repo  →  github.com/Folly-Partners/claude-code-sync
-```
+### 11 Commands
 
-The key trick: `~/.claude.json` (where Claude Code looks for MCP config) is a symlink pointing to `~/.claude/claude.json` (inside the git repo). This lets us sync the MCP config without moving it.
+| Command | Purpose |
+|---------|---------|
+| `/commit` | Stage all changes and commit with auto-generated message |
+| `/push` | Stage all, commit, and push to remote |
+| `/scommit` | Selective staging with file picker |
+| `/spush` | Selective staging + push |
+| `/github-sync` | Full sync across all git repos |
+| `/test` | Run tests and generate comprehensive reports |
+| `/deepcodereview` | Multi-hour autonomous code review |
+| `/setup` | Interactive setup wizard |
+| `/setup-deep-env` | Configure deep-env credential manager |
+| `/sync-env` | Sync environment variables to project |
+| `/add-credential` | Store credentials securely |
 
-### Sync Flow
+### 3 Custom Agents
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                    sync-claude-config.sh                │
-├─────────────────────────────────────────────────────────┤
-│  1. Check: Already synced today? → Skip if yes         │
-│  2. Check: Internet available? → Skip if no            │
-│  3. git pull origin main (get changes from other Macs) │
-│  4. git add . (stage local changes)                    │
-│  5. git commit (with timestamp)                        │
-│  6. git push origin main (push to GitHub)              │
-│  7. Mark today as synced (prevents re-runs)            │
-└─────────────────────────────────────────────────────────┘
-```
+- **email-response-processor** - Process Gmail "simple-decision" emails with multi-option responses
+- **inbox-task-manager** - Triage and organize Things 3 inbox tasks
+- **wardrobe-cataloger** - Analyze clothing photos and catalog to Google Sheets
 
-### Schedule
+---
 
-The sync runs automatically via macOS Launch Agent (`~/Library/LaunchAgents/com.claude.config-sync.plist`):
-- **On login** - when you start your Mac
-- **Daily at 9am** - catches any missed syncs
+## Architecture
 
-The script self-throttles to once per day, so multiple triggers won't cause issues.
-
-## File Structure
+### Plugin Structure
 
 ```
-~/.claude/
-├── claude.json              # MCP server config (symlinked from ~/.claude.json)
-├── settings.local.json      # Claude Code settings
-├── agents/                  # Custom agents
-│   ├── email-response-processor.md
-│   ├── inbox-task-manager.md
-│   └── wardrobe-cataloger.md
-├── plugins/                 # Plugin config
-├── projects/                # Conversation history
-├── todos/                   # Task lists
-├── history.jsonl            # Chat history
-├── sync-claude-config.sh    # Sync script
-├── setup-new-computer.sh    # Setup script for new Macs
-├── .gitignore               # Excludes sensitive/machine-specific files
-├── sync.log                 # Sync script log
-└── sync-launchd.log         # Launch agent log
+~/andrews-plugin/
+├── .claude-plugin/           # Plugin metadata
+├── agents/                   # Custom AI agents
+├── commands/                 # Slash commands
+├── skills/                   # Reusable skills
+├── servers/                  # Custom MCP servers
+│   ├── super-things/        # Things 3 integration (TypeScript)
+│   └── unifi/               # Network management (Python)
+├── hooks/                    # Event hooks (SessionStart, UserPromptSubmit)
+├── scripts/                  # Setup and maintenance scripts
+├── mcp.json                  # MCP server configuration
+└── marketplace.json          # Plugin marketplace definition
 ```
 
-## Manual Commands
+### How Syncing Works
+
+1. **Plugin Repository** - `~/andrews-plugin/` is a git repo cloned from GitHub
+2. **GitHub Sync Skill** - Automatically checks all git repos daily (including andrews-plugin)
+3. **Credential Sync** - `deep-env` syncs credentials via iCloud (encrypted AES-256)
+4. **MCP OAuth Sync** - OAuth tokens sync via iCloud at session start/end
+
+---
+
+## Setup on New Mac
+
+### Automated Setup
 
 ```bash
-# Force sync now (bypass daily limit)
-rm ~/.claude/.last_sync_date && ~/.claude/sync-claude-config.sh
+# Clone the repo
+git clone https://github.com/Folly-Partners/andrews-plugin.git ~/andrews-plugin
+cd ~/andrews-plugin
 
-# View sync log
-cat ~/.claude/sync.log
-
-# Trigger sync via launch agent
-launchctl start com.claude.config-sync
-
-# Check launch agent status
-launchctl list | grep claude.config
-
-# Disable auto-sync
-launchctl unload ~/Library/LaunchAgents/com.claude.config-sync.plist
-
-# Re-enable auto-sync
-launchctl load ~/Library/LaunchAgents/com.claude.config-sync.plist
+# Run setup script
+./scripts/setup.sh
 ```
+
+The setup script will:
+1. Build SuperThings MCP server (npm install + build)
+2. Set up Python environment for Unifi server
+3. Register plugin with Claude Code
+4. Configure auto-sync
+
+### Manual Steps
+
+If you prefer manual setup:
+
+```bash
+# 1. Clone repo
+git clone https://github.com/Folly-Partners/andrews-plugin.git ~/andrews-plugin
+
+# 2. Set git identity
+cd ~/andrews-plugin
+git config user.name "Andrew Wilkinson"
+git config user.email "andrew@tiny.com"
+
+# 3. Build SuperThings server
+cd ~/andrews-plugin/servers/super-things
+npm install && npm run build
+
+# 4. Setup Python for Unifi server
+cd ~/andrews-plugin/servers/unifi
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+# 5. Register plugin with Claude Code
+# Open Claude Code settings and add custom marketplace
+```
+
+---
+
+## Configuration Files
+
+### mcp.json
+
+Defines all MCP servers with portable paths using `${VAR}` expansion:
+
+```json
+{
+  "SuperThings": {
+    "command": "node",
+    "args": ["${HOME}/andrews-plugin/servers/super-things/dist/index.js"]
+  }
+}
+```
+
+### CLAUDE.md
+
+Project-level instructions stored in:
+- `~/andrews-plugin/CLAUDE.md` - Instructions for working on the plugin itself
+- `~/CLAUDE.md` - Global instructions for Claude Code (copied from plugin)
+- `~/.claude/CLAUDE.md` - User-level instructions (synced across all projects)
+
+---
+
+## Skills Overview
+
+### deep-env (Credential Management)
+
+Stores credentials in macOS Keychain, syncs encrypted to iCloud:
+
+```bash
+# Store a credential
+deep-env store ANTHROPIC_API_KEY "sk-ant-..."
+
+# Sync to current project
+deep-env sync .
+
+# Push to iCloud (for other Macs)
+deep-env push
+```
+
+### github-sync (Git Synchronization)
+
+Automatically discovers and checks all git repos in home directory:
+
+```bash
+# Manual check (daily auto-check via CLAUDE.md)
+~/andrews-plugin/skills/github-sync/git-sync-check.sh
+
+# Force check
+~/andrews-plugin/skills/github-sync/git-sync-check.sh --force
+
+# Sync all repos
+~/andrews-plugin/skills/github-sync/git-sync-all.sh
+```
+
+---
 
 ## Troubleshooting
 
-### Sync failed with merge conflict
+### Plugin not showing in Claude Code
+
+Check plugin is registered:
 ```bash
-cd ~/.claude
-git status                    # See what conflicted
-git checkout --theirs .       # Accept remote version (or --ours for local)
-git add . && git commit -m "Resolve merge conflict"
-git push origin main
+cat ~/.claude/settings.json | grep andrews-plugin
+```
+
+Should show:
+```json
+"enabledPlugins": {
+  "andrews-plugin@andrews-plugin-marketplace": true
+}
 ```
 
 ### MCP servers not loading
-Check the symlink exists:
+
+Check MCP configuration:
 ```bash
-ls -la ~/.claude.json
-# Should show: ~/.claude.json -> ~/.claude/claude.json
+claude mcp list
 ```
 
-If broken, recreate it:
+Verify SuperThings is built:
 ```bash
-ln -sf ~/.claude/claude.json ~/.claude.json
+ls ~/andrews-plugin/servers/super-things/dist/index.js
 ```
 
-### Launch agent not running
+### Git sync not working
+
+Check git status:
 ```bash
-launchctl list | grep claude.config
-# If not listed:
-launchctl load ~/Library/LaunchAgents/com.claude.config-sync.plist
+cd ~/andrews-plugin
+git status
+git log --oneline -5
 ```
 
-## Limitations
+Verify github-sync skill is working:
+```bash
+~/andrews-plugin/skills/github-sync/git-sync-check.sh --force
+```
 
-- **Conversations are NOT resumable across computers** - `/resume` only works for sessions started on that specific machine
-- **Sync is one-way per run** - if two computers make changes before syncing, you may get merge conflicts
-- **macOS only** - the launch agent setup is Mac-specific (Linux would need cron/systemd)
+### Credentials not syncing
+
+Check deep-env status:
+```bash
+deep-env list
+deep-env pull  # Pull from iCloud
+```
+
+---
+
+## Version History
+
+- **1.3.0** - Major cleanup, removed session artifacts, updated docs, fixed paths
+- **1.2.0** - Added auto-discovery for git repos, updated git identity
+- **1.1.0** - Initial plugin marketplace release
+- **1.0.0** - Legacy claude-code-sync architecture
+
+---
 
 ## For Claude (AI Assistant)
 
-If a user asks you to set up Claude Code sync on a new computer, direct them to run:
+When working with this plugin:
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/Folly-Partners/claude-code-sync/main/setup-new-computer.sh | bash
-```
+1. **Git identity** - Always use Andrew Wilkinson <andrew@tiny.com>
+2. **Path references** - Use `~/andrews-plugin/` (not `~/.claude/`)
+3. **Session start** - Run github-sync check daily (auto-limited to once per 24 hours)
+4. **Credentials** - Use deep-env for storing API keys and secrets
 
-This will:
-1. Backup existing `~/.claude` and `~/.claude.json` if present
-2. Clone this repo to `~/.claude`
-3. Create symlink: `~/.claude.json` → `~/.claude/claude.json`
-4. Set up launch agent for automatic sync (login + 9am daily)
-5. Run initial sync
-
-No manual steps required.
+See [CLAUDE.md](CLAUDE.md) for complete instructions.
