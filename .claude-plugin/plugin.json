@@ -1,7 +1,7 @@
 {
   "name": "andrews-plugin",
   "description": "Andrew's global MCP servers, skills, commands, and agents for cross-machine sync",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "author": {
     "name": "Andrew Wilkinson"
   },

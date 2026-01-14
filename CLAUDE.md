@@ -2,6 +2,12 @@
 
 This directory contains Claude Code configuration that syncs across all of Andrew's Macs.
 
+## Git Identity
+
+When making commits, use:
+- **Name:** Andrew Wilkinson
+- **Email:** andrew@tiny.com
+
 ## Session Start: Git Sync Check (Daily)
 
 **Once per day**, run the git sync check at session start:
@@ -12,7 +18,7 @@ This directory contains Claude Code configuration that syncs across all of Andre
 
 The script self-limits to once every 24 hours. To force a check: `git-sync-check.sh --force`
 
-This checks `~/.claude` and `~/Deep-Personality` for:
+This automatically finds all git repos in your home directory and checks them for:
 - Uncommitted changes (from previous sessions)
 - Unpushed commits (work that didn't get synced)
 - Commits to pull from remote (changes from other machines)
