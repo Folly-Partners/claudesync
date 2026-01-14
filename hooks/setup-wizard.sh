@@ -87,6 +87,29 @@ check_marketplace() {
     fi
 }
 
+# Check Every Inc marketplace is registered
+check_every_marketplace() {
+    # Check if every-marketplace exists (could be named differently)
+    if ! ls "$HOME/.claude/plugins/marketplaces/"*every* &>/dev/null 2>&1; then
+        # Also check via claude CLI if available
+        if command -v claude &>/dev/null; then
+            if ! claude plugin marketplace list 2>/dev/null | grep -qi "every"; then
+                add_issue "EVERY_MARKETPLACE_MISSING"
+            fi
+        else
+            add_issue "EVERY_MARKETPLACE_MISSING"
+        fi
+    fi
+}
+
+# Check Compound Engineering plugin is installed
+check_compound_engineering() {
+    # Check if plugin is installed
+    if ! ls "$HOME/.claude/plugins/cache/"*every*"/compound-engineering" &>/dev/null 2>&1; then
+        add_issue "COMPOUND_ENGINEERING_MISSING"
+    fi
+}
+
 # Run all checks
 run_checks() {
     check_deep_env
@@ -94,6 +117,8 @@ run_checks() {
     check_credentials
     check_shell_config
     check_marketplace
+    check_every_marketplace
+    check_compound_engineering
 }
 
 # Report status
@@ -141,8 +166,16 @@ report_status() {
                 echo -e "    ${GREEN}→ Add to ~/.zshrc: eval \"\$(deep-env export 2>/dev/null)\"${NC}"
                 ;;
             MARKETPLACE_NOT_REGISTERED)
-                echo -e "  ${YELLOW}!${NC} Marketplace not registered in config"
+                echo -e "  ${YELLOW}!${NC} Andrews marketplace not registered"
                 echo -e "    ${GREEN}→ Run: claude plugin marketplace add https://raw.githubusercontent.com/Folly-Partners/andrews-plugin/main/marketplace.json${NC}"
+                ;;
+            EVERY_MARKETPLACE_MISSING)
+                echo -e "  ${YELLOW}!${NC} Every Inc marketplace not registered"
+                echo -e "    ${GREEN}→ Run: claude plugin marketplace add https://github.com/EveryInc/every-marketplace${NC}"
+                ;;
+            COMPOUND_ENGINEERING_MISSING)
+                echo -e "  ${YELLOW}!${NC} Compound Engineering plugin not installed"
+                echo -e "    ${GREEN}→ Run: claude plugin install compound-engineering${NC}"
                 ;;
         esac
         echo ""
