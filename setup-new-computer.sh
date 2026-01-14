@@ -3,7 +3,7 @@
 # Claude Code Sync - New Computer Setup Script
 # Run this on any new Mac to set up Claude Code config sync
 #
-# Usage: curl -fsSL https://raw.githubusercontent.com/Folly-Partners/claude-code-sync/main/setup-new-computer.sh | bash
+# Usage: curl -fsSL https://raw.githubusercontent.com/Folly-Partners/andrews-plugin/main/setup-new-computer.sh | bash
 
 set -e
 
@@ -22,7 +22,7 @@ fi
 
 # Clone the repo
 echo "📥 Cloning claude-code-sync repository..."
-git clone https://github.com/Folly-Partners/claude-code-sync.git "$HOME/.claude"
+git clone https://github.com/Folly-Partners/andrews-plugin.git "$HOME/.claude"
 
 # Create symlink for MCP config
 echo "🔗 Creating symlink for MCP config..."

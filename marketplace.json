@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "Andrew's Plugin Marketplace",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Andrew's personal plugin collection",
   "owner": {
     "name": "Andrew Wilkinson"
@@ -10,7 +10,7 @@
     {
       "name": "andrews-plugin",
       "description": "Global MCP servers, skills, commands, and agents for cross-machine sync",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "author": {
         "name": "Andrew Wilkinson"
       },
