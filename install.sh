@@ -6,7 +6,6 @@
 # Usage: curl -fsSL https://raw.githubusercontent.com/Folly-Partners/andrews-plugin/main/install.sh | bash
 
 set -e
-set -o pipefail
 
 # Track current step for error messages
 CURRENT_STEP="initialization"
@@ -86,7 +85,16 @@ EVERY_MARKETPLACE="https://github.com/EveryInc/every-marketplace"
 CURRENT_STEP="adding Andrews marketplace"
 echo "1. Adding Andrews Plugin marketplace..."
 
-if claude plugin marketplace add "$ANDREWS_MARKETPLACE" 2>&1 | grep -v "^$"; then
+# Capture output and exit code separately to avoid grep exit code issues
+add_output=""
+if add_output=$(claude plugin marketplace add "$ANDREWS_MARKETPLACE" 2>&1); then
+    add_success=true
+else
+    add_success=false
+fi
+[ -n "$add_output" ] && log_verbose "$add_output"
+
+if [ "$add_success" = "true" ]; then
     echo "   Andrews marketplace added"
 elif claude plugin marketplace list 2>/dev/null | grep -qi "andrew"; then
     echo "   Andrews marketplace already registered"
@@ -100,7 +108,15 @@ fi
 CURRENT_STEP="adding Every Inc marketplace"
 echo "2. Adding Every Inc marketplace..."
 
-if claude plugin marketplace add "$EVERY_MARKETPLACE" 2>&1 | grep -v "^$"; then
+add_output=""
+if add_output=$(claude plugin marketplace add "$EVERY_MARKETPLACE" 2>&1); then
+    add_success=true
+else
+    add_success=false
+fi
+[ -n "$add_output" ] && log_verbose "$add_output"
+
+if [ "$add_success" = "true" ]; then
     echo "   Every Inc marketplace added"
 elif claude plugin marketplace list 2>/dev/null | grep -qi "every"; then
     echo "   Every Inc marketplace already registered"
@@ -122,32 +138,42 @@ echo "----------------------------------------------------"
 CURRENT_STEP="installing Andrews Plugin"
 echo "3. Installing Andrews Plugin..."
 
-if claude plugin install andrews-plugin 2>&1 | grep -v "^$"; then
-    echo "   Andrews Plugin installed"
+install_output=""
+if install_output=$(claude plugin install andrews-plugin 2>&1); then
+    install_success=true
 else
-    # Check if already installed
-    if claude plugin list 2>/dev/null | grep -qi "andrews-plugin"; then
-        echo "   Andrews Plugin already installed"
-    else
-        echo "   Failed to install Andrews Plugin"
-        exit 1
-    fi
+    install_success=false
+fi
+[ -n "$install_output" ] && log_verbose "$install_output"
+
+if [ "$install_success" = "true" ]; then
+    echo "   Andrews Plugin installed"
+elif claude plugin list 2>/dev/null | grep -qi "andrews-plugin"; then
+    echo "   Andrews Plugin already installed"
+else
+    echo "   Failed to install Andrews Plugin"
+    exit 1
 fi
 
 # Install Compound Engineering Plugin
 CURRENT_STEP="installing Compound Engineering"
 echo "4. Installing Compound Engineering..."
 
-if claude plugin install compound-engineering 2>&1 | grep -v "^$"; then
-    echo "   Compound Engineering installed"
+install_output=""
+if install_output=$(claude plugin install compound-engineering 2>&1); then
+    install_success=true
 else
-    # Check if already installed
-    if claude plugin list 2>/dev/null | grep -qi "compound"; then
-        echo "   Compound Engineering already installed"
-    else
-        echo "   Compound Engineering not available (non-critical)"
-        log_verbose "Every Inc marketplace may not have been added"
-    fi
+    install_success=false
+fi
+[ -n "$install_output" ] && log_verbose "$install_output"
+
+if [ "$install_success" = "true" ]; then
+    echo "   Compound Engineering installed"
+elif claude plugin list 2>/dev/null | grep -qi "compound"; then
+    echo "   Compound Engineering already installed"
+else
+    echo "   Compound Engineering not available (non-critical)"
+    log_verbose "Every Inc marketplace may not have been added"
 fi
 
 # ============================================================================

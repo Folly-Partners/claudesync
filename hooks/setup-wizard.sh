@@ -6,6 +6,7 @@
 
 PLUGIN_DIR="${CLAUDE_PLUGIN_ROOT:-$(dirname "$(dirname "$0")")}"
 SETUP_STATE_FILE="$HOME/.claude/.andrews-plugin-setup-state"
+LOCK_FILE="$HOME/.claude/.andrews-plugin-setup.lock"
 LAUNCHD_PLIST="$HOME/Library/LaunchAgents/com.claude.config-sync.plist"
 
 # Colors for output
@@ -19,6 +20,55 @@ NC='\033[0m' # No Color
 ISSUES=()
 AUTO_FIXES=()
 BUILD_FAILURES=()
+
+# Track current build directory for cleanup on interrupt
+BUILDING_DIR=""
+
+# ============================================================================
+#  Lock File Management (prevent concurrent runs)
+# ============================================================================
+
+acquire_lock() {
+    if [ -f "$LOCK_FILE" ]; then
+        local lock_pid
+        lock_pid=$(cat "$LOCK_FILE" 2>/dev/null)
+        if [ -n "$lock_pid" ] && kill -0 "$lock_pid" 2>/dev/null; then
+            # Another setup is actually running
+            exit 0
+        fi
+        # Stale lock file from crashed process, remove it
+        rm -f "$LOCK_FILE"
+    fi
+    mkdir -p "$(dirname "$LOCK_FILE")"
+    echo $$ > "$LOCK_FILE"
+}
+
+release_lock() {
+    rm -f "$LOCK_FILE"
+}
+
+# ============================================================================
+#  Interrupt Handler (clean up partial builds)
+# ============================================================================
+
+cleanup_on_interrupt() {
+    echo ""
+    echo -e "${YELLOW}Interrupted! Cleaning up...${NC}"
+    if [ -n "$BUILDING_DIR" ] && [ -d "$BUILDING_DIR" ]; then
+        echo -e "  Removing partial build in $BUILDING_DIR"
+        rm -rf "$BUILDING_DIR/node_modules" "$BUILDING_DIR/dist" 2>/dev/null
+    fi
+    release_lock
+    exit 130
+}
+
+cleanup_on_exit() {
+    release_lock
+}
+
+# Set up traps
+trap cleanup_on_interrupt INT TERM
+trap cleanup_on_exit EXIT
 
 # ============================================================================
 #  Helper Functions
@@ -137,8 +187,29 @@ check_unifi_venv() {
 }
 
 # ============================================================================
-#  Build Functions (with proper error handling)
+#  Version Check Functions
 # ============================================================================
+
+# Check Node.js version for SuperThings
+check_node_version() {
+    local version
+    version=$(node --version 2>/dev/null | sed 's/^v//')
+
+    if [ -z "$version" ]; then
+        echo -e "  ${RED}Node.js not found${NC}"
+        return 1
+    fi
+
+    local major
+    major=$(echo "$version" | cut -d. -f1)
+
+    if [ "$major" -lt 18 ]; then
+        echo -e "  ${RED}Node.js 18+ required (found v$version)${NC}"
+        return 1
+    fi
+
+    return 0
+}
 
 # Check Python version for Unifi
 check_python_version() {
@@ -162,6 +233,10 @@ check_python_version() {
     return 0
 }
 
+# ============================================================================
+#  Build Functions (with proper error handling)
+# ============================================================================
+
 # Build SuperThings with step-by-step error handling
 build_superthings() {
     local server_dir="$PLUGIN_DIR/servers/super-things"
@@ -184,7 +259,18 @@ build_superthings() {
         return 1
     }
 
-    # Step 1: npm install
+    # Step 1: Check Node.js version
+    echo -e "  ${BLUE}-> Checking Node.js version...${NC}"
+    if ! check_node_version; then
+        add_build_failure "SuperThings: Node.js 18+ required"
+        cd "$original_dir"
+        return 1
+    fi
+
+    # Mark this directory as being built (for interrupt cleanup)
+    BUILDING_DIR="$server_dir"
+
+    # Step 2: npm install
     echo -e "  ${BLUE}-> Installing dependencies...${NC}"
     local npm_output
     if ! npm_output=$(npm install 2>&1); then
@@ -192,11 +278,12 @@ build_superthings() {
         echo "$npm_output" | tail -5 | sed 's/^/     /'
         echo -e "  ${YELLOW}-> Run manually: cd $server_dir && npm install${NC}"
         add_build_failure "SuperThings: npm install failed"
+        BUILDING_DIR=""
         cd "$original_dir"
         return 1
     fi
 
-    # Step 2: npm run build
+    # Step 3: npm run build
     echo -e "  ${BLUE}-> Compiling TypeScript...${NC}"
     local build_output
     if ! build_output=$(npm run build 2>&1); then
@@ -204,11 +291,15 @@ build_superthings() {
         echo "$build_output" | tail -5 | sed 's/^/     /'
         echo -e "  ${YELLOW}-> Run manually: cd $server_dir && npm run build${NC}"
         add_build_failure "SuperThings: build failed"
+        BUILDING_DIR=""
         cd "$original_dir"
         return 1
     fi
 
-    # Step 3: Verify output exists
+    # Clear building marker
+    BUILDING_DIR=""
+
+    # Step 4: Verify output exists
     if [ ! -f "$server_dir/dist/index.js" ]; then
         echo -e "  ${RED}Build output missing (dist/index.js)${NC}"
         echo -e "  ${YELLOW}Build completed but output not created${NC}"
@@ -343,6 +434,24 @@ run_auto_fixes() {
 }
 
 # ============================================================================
+#  Check if critical builds are OK
+# ============================================================================
+
+critical_builds_ok() {
+    # Check SuperThings
+    if [ -d "$PLUGIN_DIR/servers/super-things" ] && [ ! -f "$PLUGIN_DIR/servers/super-things/dist/index.js" ]; then
+        return 1
+    fi
+
+    # Check Unifi
+    if [ -d "$PLUGIN_DIR/servers/unifi" ] && [ ! -d "$PLUGIN_DIR/servers/unifi/venv" ]; then
+        return 1
+    fi
+
+    return 0
+}
+
+# ============================================================================
 #  Report Status
 # ============================================================================
 
@@ -360,11 +469,15 @@ report_status() {
         echo ""
     fi
 
-    if [ ${#ISSUES[@]} -eq 0 ]; then
-        # All good - silent exit
-        # Update state file to skip non-critical checks for today
+    # Write state file if critical builds succeeded (even if other issues exist)
+    # This prevents re-running full checks every session for non-critical issues
+    if critical_builds_ok; then
         mkdir -p "$(dirname "$SETUP_STATE_FILE")"
         echo "$(date +%Y-%m-%d)" > "$SETUP_STATE_FILE"
+    fi
+
+    if [ ${#ISSUES[@]} -eq 0 ]; then
+        # All good - silent exit
         exit 0
     fi
 
@@ -439,12 +552,8 @@ report_status() {
 
 should_skip() {
     # NEVER skip if critical builds are missing
-    if [ -d "$PLUGIN_DIR/servers/super-things" ] && [ ! -f "$PLUGIN_DIR/servers/super-things/dist/index.js" ]; then
-        return 1  # Don't skip - need to build SuperThings
-    fi
-
-    if [ -d "$PLUGIN_DIR/servers/unifi" ] && [ ! -d "$PLUGIN_DIR/servers/unifi/venv" ]; then
-        return 1  # Don't skip - need to create Unifi venv
+    if ! critical_builds_ok; then
+        return 1  # Don't skip - need to build
     fi
 
     # Only skip non-critical checks if already checked today
@@ -466,6 +575,9 @@ should_skip() {
 # ============================================================================
 
 main() {
+    # Acquire lock to prevent concurrent runs
+    acquire_lock
+
     # Allow forcing a full check
     if [ "$1" = "--force" ]; then
         run_checks
