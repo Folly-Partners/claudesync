@@ -1,8 +1,10 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "Andrew's Plugin Marketplace",
-  "version": "1.3.0",
-  "description": "Andrew's personal plugin collection",
+  "name": "Folly",
+  "metadata": {
+    "description": "Folly Partners plugin collection for cross-machine sync",
+    "version": "1.3.0"
+  },
   "owner": {
     "name": "Andrew Wilkinson"
   },
@@ -15,7 +17,8 @@
         "name": "Andrew Wilkinson"
       },
       "source": ".",
-      "category": "productivity"
+      "category": "productivity",
+      "strict": false
     }
   ]
 }
