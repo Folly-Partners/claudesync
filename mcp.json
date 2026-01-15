@@ -1,5 +1,13 @@
 {
   "mcpServers": {
+    "trmnl": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["${HOME}/andrews-plugin/servers/trmnl/dist/index.js"],
+      "env": {
+        "TRMNL_API_KEY": "${TRMNL_API_KEY}"
+      }
+    },
     "SuperThings": {
       "type": "stdio",
       "command": "node",
