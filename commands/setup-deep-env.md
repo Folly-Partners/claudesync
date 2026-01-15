@@ -16,31 +16,52 @@ cp ~/Library/Mobile\ Documents/com~apple~CloudDocs/.deep-env/deep-env ~/.local/b
 chmod +x ~/.local/bin/deep-env
 ```
 
-3. Check if credentials are already pulled:
+3. Add to PATH if not already (check with `echo $PATH`):
 ```bash
-~/.local/bin/deep-env list
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
 ```
 
-4. If no credentials shown, pull from iCloud:
+4. Check if credentials are already pulled:
 ```bash
-~/.local/bin/deep-env pull
+deep-env list
+```
+
+5. If no credentials shown, pull from iCloud:
+```bash
+deep-env pull
 ```
 **ASK THE USER FOR THE SYNC PASSWORD** - they set it on their main Mac.
+(Hint: check `~/.config/deep-env/.sync_pass` on another working Mac)
 
-5. Enable auto-sync:
+6. Validate the installation:
 ```bash
-~/.local/bin/deep-env auto-sync enable
+deep-env validate
+deep-env list | head -10
 ```
 
-6. Verify setup:
+If validate shows errors, try:
 ```bash
-~/.local/bin/deep-env list
-~/.local/bin/deep-env auto-sync status
+deep-env pull  # Re-pull from iCloud
 ```
 
-7. If working in a project directory, sync credentials:
+7. Check version:
 ```bash
-~/.local/bin/deep-env sync .
+deep-env --version
+```
+
+8. If working in a project directory, sync credentials:
+```bash
+deep-env sync .
+```
+
+## Troubleshooting
+
+If "No credentials stored" but user had credentials:
+```bash
+deep-env validate        # Check for corruption
+deep-env restore         # List available backups
+deep-env pull            # Re-pull from iCloud
 ```
 
 ## Summary
@@ -49,3 +70,5 @@ After setup, tell the user:
 - `deep-env store KEY VALUE` - Store new credentials
 - `deep-env push` - Push changes to iCloud
 - `deep-env list` - See all stored credentials
+- `deep-env backup` - Create a backup
+- `deep-env validate` - Check data integrity

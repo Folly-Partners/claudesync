@@ -99,6 +99,15 @@ Deep-Personality
   API_SECRET_KEY          kgg/...nSE=
 ```
 
+### Backup and restore
+```bash
+deep-env backup            # Create timestamped backup
+deep-env restore           # List available backups
+deep-env restore <file>    # Restore from specific backup
+deep-env validate          # Check keychain data integrity
+deep-env --version         # Show version number
+```
+
 ### Other commands
 ```bash
 deep-env get KEY_NAME      # Get single value (for scripting)
@@ -170,3 +179,95 @@ deep-env sync /path/to/project
 - iCloud sync uses AES-256 encryption
 - Project assignments are stored in `~/.config/deep-env/project-keys.json`
 - Run `deep-env migrate` once per Mac to move old individual entries to new format
+- Multi-line values (like PEM keys) are fully supported
+
+## New Mac Setup Checklist
+
+1. [ ] Copy CLI: `cp ~/Library/Mobile\ Documents/com~apple~CloudDocs/.deep-env/deep-env ~/.local/bin/`
+2. [ ] Make executable: `chmod +x ~/.local/bin/deep-env`
+3. [ ] Add to PATH: `echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc && source ~/.zshrc`
+4. [ ] Pull credentials: `deep-env pull` (enter sync password)
+5. [ ] Validate: `deep-env validate`
+6. [ ] Verify: `deep-env list` (should show all credentials)
+7. [ ] Test sync: `cd ~/some-project && deep-env sync .`
+
+## Troubleshooting
+
+### "No credentials stored" but you had credentials
+
+This usually means corrupted data. Run diagnostics:
+```bash
+deep-env validate
+```
+
+**If validation fails:**
+1. Check for backups: `ls ~/.config/deep-env/backups/`
+2. Restore from backup: `deep-env restore <backup_file>`
+3. Or pull from iCloud: `deep-env pull`
+
+### Sync password forgotten
+
+The sync password is stored locally in `~/.config/deep-env/.sync_pass`. If you have another Mac with deep-env working:
+1. On working Mac: `cat ~/.config/deep-env/.sync_pass`
+2. Use that password on new Mac
+
+### Pull fails with "Decryption failed"
+
+Wrong sync password. Check another Mac or re-push from a Mac with working credentials.
+
+### Credentials not syncing to other Macs
+
+After storing credentials, always run:
+```bash
+deep-env push
+```
+
+Then on other Macs:
+```bash
+deep-env pull
+```
+
+### Validate shows "hex-encoded" or "literal newlines"
+
+The keychain data is corrupted. Recovery options:
+1. Restore from backup: `deep-env restore`
+2. Pull from iCloud: `deep-env pull`
+
+## Recovery Procedures
+
+### From Local Backup
+```bash
+# List backups
+deep-env restore
+
+# Restore specific backup
+deep-env restore ~/.config/deep-env/backups/credentials_20260115_120000.json
+```
+
+### From iCloud (if local is corrupted)
+```bash
+deep-env pull
+# Enter sync password
+```
+
+### Manual Recovery (last resort)
+
+If keychain has hex-encoded data, decode and fix:
+```bash
+# Read hex, decode to file
+security find-generic-password -a "deep-env" -s "deep-env-credentials" -w | xxd -r -p > /tmp/raw.json
+
+# Fix any issues in the JSON manually, then:
+security delete-generic-password -a "deep-env" -s "deep-env-credentials"
+security add-generic-password -a "deep-env" -s "deep-env-credentials" -w "$(cat /tmp/fixed.json)"
+
+# Clean up
+rm /tmp/raw.json /tmp/fixed.json
+```
+
+## Version History
+
+| Version | Date | Changes |
+|---------|------|---------|
+| 1.1.0 | 2026-01-15 | Added backup/restore/validate commands, fixed push/pull JSON corruption, auto-backup before pull |
+| 1.0.0 | 2024-12-01 | Initial release with single keychain entry storage |
