@@ -5,7 +5,7 @@
   "author": {
     "name": "Andrew Wilkinson"
   },
-  "repository": "https://github.com/Folly-Partners/andrews-plugin",
+  "repository": "https://github.com/Folly-Partners/claudesync",
   "license": "MIT",
   "claudeCodeVersion": ">=2.0.0",
   "hooks": ["./hooks/hooks.json"],
