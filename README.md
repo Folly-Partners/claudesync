@@ -1,14 +1,34 @@
-# Andrews Plugin
+```
+   _____ _                 _      _____
+  / ____| |               | |    / ____|
+ | |    | | __ _ _   _  __| | ___| (___  _   _ _ __   ___
+ | |    | |/ _` | | | |/ _` |/ _ \\___ \| | | | '_ \ / __|
+ | |____| | (_| | |_| | (_| |  __/____) | |_| | | | | (__
+  \_____|_|\__,_|\__,_|\__,_|\___|_____/ \__, |_| |_|\___|
+                                          __/ |
+                                         |___/
+```
 
-Personal Claude Code plugin for Andrew Wilkinson. Provides MCP servers, skills, commands, and agents that sync across all Macs via GitHub.
+# claudesync
+
+**Sync Claude Code across all your Macs** - MCP servers, skills, commands, credentials, and more.
+
+Part of the **Folly** marketplace.
 
 ## Quick Install
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Folly-Partners/andrews-plugin/main/install.sh | bash
+# Add the Folly marketplace
+/plugin marketplace add Folly-Partners/andrews-plugin
+
+# Install claudesync
+/plugin install claudesync@Folly
 ```
 
-This installs the plugin and registers it with Claude Code's plugin marketplace system.
+Or run the setup wizard:
+```bash
+./hooks/setup-wizard.sh
+```
 
 ---
 
@@ -22,7 +42,7 @@ Complete list in [MCP-SERVERS.md](MCP-SERVERS.md):
 |--------|---------|
 | **SuperThings** | Things 3 task management integration |
 | **Playwright** | Browser automation and testing |
-| **Zapier** | Gmail, Google Calendar, Sheets, Docs, Drive automation |
+| **Pipedream** | 10,000+ tools across 3,000+ APIs |
 | **Browserbase** | Cloud browser automation |
 | **Tavily** | AI-powered web search |
 | **Hunter** | Email finding and verification |
@@ -85,10 +105,17 @@ Complete list in [MCP-SERVERS.md](MCP-SERVERS.md):
 
 ### How Syncing Works
 
-1. **Plugin Repository** - `~/andrews-plugin/` is a git repo cloned from GitHub
-2. **GitHub Sync Skill** - Automatically checks all git repos daily (including andrews-plugin)
-3. **Credential Sync** - `deep-env` syncs credentials via iCloud (encrypted AES-256)
-4. **MCP OAuth Sync** - OAuth tokens sync via iCloud at session start/end
+| What | How | When |
+|------|-----|------|
+| **Plugin updates** | Folly marketplace | Automatic (Claude Code auto-updates) |
+| **Credentials** | deep-env → iCloud | Daily at 9am + login (LaunchAgent) |
+| **Manual changes** | Git push → marketplace | When you're ready |
+
+**Workflow:**
+1. Modify plugin on Mac A (add skill, update MCP server, etc.)
+2. Commit & push to GitHub
+3. Marketplace distributes the update
+4. Mac B gets update automatically
 
 ---
 
@@ -204,13 +231,13 @@ Automatically discovers and checks all git repos in home directory:
 
 Check plugin is registered:
 ```bash
-cat ~/.claude/settings.json | grep andrews-plugin
+cat ~/.claude/settings.json | grep claudesync
 ```
 
 Should show:
 ```json
 "enabledPlugins": {
-  "andrews-plugin@andrews-plugin-marketplace": true
+  "claudesync@Folly": true
 }
 ```
 
@@ -264,8 +291,8 @@ deep-env pull  # Pull from iCloud
 When working with this plugin:
 
 1. **Git identity** - Always use Andrew Wilkinson <andrew@tiny.com>
-2. **Path references** - Use `~/andrews-plugin/` (not `~/.claude/`)
-3. **Session start** - Run github-sync check daily (auto-limited to once per 24 hours)
+2. **Path references** - Use `~/andrews-plugin/` for the repo
+3. **Plugin name** - `claudesync@Folly`
 4. **Credentials** - Use deep-env for storing API keys and secrets
 
 See [CLAUDE.md](CLAUDE.md) for complete instructions.

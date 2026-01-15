@@ -11,7 +11,7 @@ This document describes each MCP server included in Andrews Plugin, their requir
 | Hunter | SSE | API Key | `HUNTER_API_KEY` |
 | Browserbase | stdio | API Key | `BROWSERBASE_API_KEY`, `BROWSERBASE_PROJECT_ID` |
 | Tavily | stdio | API Key | `TAVILY_API_KEY` |
-| Zapier | HTTP | Token | `ZAPIER_MCP_TOKEN` |
+| Pipedream | HTTP | API Key | `PIPEDREAM_API_KEY` |
 | Linear | stdio | API Key | `LINEAR_ACCESS_TOKEN` |
 | Unifi | stdio | Credentials | `UNIFI_HOST`, `UNIFI_USERNAME`, `UNIFI_PASSWORD` |
 | GitHub | stdio | PAT | `GITHUB_PERSONAL_ACCESS_TOKEN` |
@@ -122,23 +122,30 @@ deep-env store TAVILY_API_KEY "tvly-xxxxxxxx"
 
 ---
 
-### Zapier
+### Pipedream
 
-**Purpose**: Integration with Zapier's automation platform.
+**Purpose**: Integration with 10,000+ pre-built tools across 3,000+ APIs.
+
+**Why Pipedream**:
+- Better security: Credentials isolated from AI models
+- SOC 2 Type II, HIPAA, GDPR compliant
+- Simple API key auth (no OAuth dance)
 
 **Requirements**:
-- Zapier MCP token from Zapier dashboard
+- Pipedream account
+- `PIPEDREAM_API_KEY` from Pipedream dashboard
 
 **Setup**:
 ```bash
-deep-env store ZAPIER_MCP_TOKEN "your-mcp-token"
+# Get API key from Pipedream → Settings → API Keys
+deep-env store PIPEDREAM_API_KEY "pd_xxxxxx"
 ```
 
-**Connection Type**: HTTP to `https://mcp.zapier.com/api/mcp/`
+**Connection Type**: HTTP to `https://mcp.pipedream.com/mcp/`
 
 **Common Errors**:
-- `403 Forbidden`: Token expired or invalid
-- `404 Not Found`: MCP not enabled on Zapier account
+- `401 Unauthorized`: Invalid API key
+- `403 Forbidden`: Key doesn't have required permissions
 
 ---
 

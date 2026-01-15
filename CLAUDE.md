@@ -1,6 +1,6 @@
-# Claude Code Configuration
+# claudesync
 
-This directory contains Claude Code configuration that syncs across all of Andrew's Macs.
+This plugin syncs Claude Code configuration across all of Andrew's Macs via the **Folly** marketplace.
 
 ## Git Identity
 
