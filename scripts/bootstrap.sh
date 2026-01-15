@@ -25,7 +25,7 @@ deep-env pull
 
 # 3. Clone plugin
 echo "Cloning plugin..."
-git clone git@github.com:Folly-Partners/andrews-plugin.git ~/andrews-plugin
+git clone git@github.com:Folly-Partners/claudesync.git ~/andrews-plugin
 
 # 4. Run setup
 echo "Running setup..."

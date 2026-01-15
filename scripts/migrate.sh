@@ -36,7 +36,7 @@ echo "Step 1: Pulling latest changes from GitHub..."
 REMOTE_URL=$(git remote get-url origin)
 if [[ "$REMOTE_URL" == *"claude-code-sync"* ]]; then
     echo "Updating remote URL to andrews-plugin..."
-    git remote set-url origin https://github.com/Folly-Partners/andrews-plugin.git
+    git remote set-url origin https://github.com/Folly-Partners/claudesync.git
 fi
 
 # Try to pull
@@ -47,7 +47,7 @@ else
     # Check if it's an SSH issue
     if [[ "$REMOTE_URL" == git@github.com:* ]]; then
         echo "Switching from SSH to HTTPS..."
-        git remote set-url origin https://github.com/Folly-Partners/andrews-plugin.git
+        git remote set-url origin https://github.com/Folly-Partners/claudesync.git
         git pull origin main
     else
         echo "ERROR: Failed to pull changes from GitHub"

@@ -549,7 +549,7 @@ report_status() {
                 ;;
             MARKETPLACE_NOT_REGISTERED)
                 step_warn "claudesync not registered in settings"
-                echo -e "       ${GREEN}-> Run: /plugin marketplace add Folly-Partners/andrews-plugin${NC}"
+                echo -e "       ${GREEN}-> Run: /plugin marketplace add Folly-Partners/claudesync${NC}"
                 echo -e "       ${GREEN}-> Then: /plugin install claudesync@Folly${NC}"
                 ;;
             SUPERTHINGS_BUILD_FAILED)

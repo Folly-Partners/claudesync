@@ -54,7 +54,7 @@ Push to iCloud: `deep-env push`
 
 ### 5. Marketplace Registration
 - **Check:** `ls ~/.claude/plugins/marketplaces/andrews-plugin.json`
-- **Add:** `claude plugin marketplace add https://raw.githubusercontent.com/Folly-Partners/andrews-plugin/main/marketplace.json`
+- **Add:** `claude plugin marketplace add https://raw.githubusercontent.com/Folly-Partners/claudesync/main/marketplace.json`
 
 ## Interactive Flow
 

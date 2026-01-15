@@ -19,7 +19,7 @@ Part of the **Folly** marketplace.
 
 ```bash
 # Add the Folly marketplace
-/plugin marketplace add Folly-Partners/andrews-plugin
+/plugin marketplace add Folly-Partners/claudesync
 
 # Install claudesync
 /plugin install claudesync@Folly
@@ -125,7 +125,7 @@ Complete list in [MCP-SERVERS.md](MCP-SERVERS.md):
 
 ```bash
 # Clone the repo
-git clone https://github.com/Folly-Partners/andrews-plugin.git ~/andrews-plugin
+git clone https://github.com/Folly-Partners/claudesync.git ~/andrews-plugin
 cd ~/andrews-plugin
 
 # Run setup script
@@ -144,7 +144,7 @@ If you prefer manual setup:
 
 ```bash
 # 1. Clone repo
-git clone https://github.com/Folly-Partners/andrews-plugin.git ~/andrews-plugin
+git clone https://github.com/Folly-Partners/claudesync.git ~/andrews-plugin
 
 # 2. Set git identity
 cd ~/andrews-plugin

@@ -3,7 +3,7 @@
 # Andrews Plugin - One-Line Installer
 # Installs via Claude Code's official plugin system
 #
-# Usage: curl -fsSL https://raw.githubusercontent.com/Folly-Partners/andrews-plugin/main/install.sh | bash
+# Usage: curl -fsSL https://raw.githubusercontent.com/Folly-Partners/claudesync/main/install.sh | bash
 
 set -e
 
@@ -78,7 +78,7 @@ echo "----------------------------------------------------"
 echo "  Adding Marketplaces"
 echo "----------------------------------------------------"
 
-ANDREWS_MARKETPLACE="https://raw.githubusercontent.com/Folly-Partners/andrews-plugin/main/marketplace.json"
+ANDREWS_MARKETPLACE="https://raw.githubusercontent.com/Folly-Partners/claudesync/main/marketplace.json"
 EVERY_MARKETPLACE="https://github.com/EveryInc/every-marketplace"
 
 # Add Andrews Plugin marketplace
