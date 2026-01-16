@@ -71,6 +71,10 @@ build/
 # Backup files
 *.bak
 *.bak.*
+*.backup
+
+# macOS metadata
+**/.DS_Store
 
 # Sync timestamps (machine-specific)
 .git-sync-last-run

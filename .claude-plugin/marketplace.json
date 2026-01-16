@@ -16,7 +16,7 @@
       "author": {
         "name": "Andrew Wilkinson"
       },
-      "source": ".",
+      "source": "./",
       "category": "productivity",
       "strict": false
     }
