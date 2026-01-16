@@ -9,290 +9,266 @@
                                          |___/
 ```
 
-# claudesync
+# ClaudeSync
 
-**Sync Claude Code across all your Macs** - MCP servers, skills, commands, credentials, and more.
+**One plugin. All your Macs. Always in sync.**
 
-Part of the **Folly** marketplace.
+ClaudeSync keeps your Claude Code setup identical across every Mac you own. MCP servers, credentials, custom commands, AI agents—set it up once, use it everywhere.
 
-## Quick Install
+---
+
+## The Problem
+
+You have multiple Macs. You've configured Claude Code beautifully on one of them:
+- API keys stored somewhere
+- MCP servers configured just right
+- Custom workflows and commands
+- That one setting you can never remember
+
+Now do it again on your other Mac. And again. And keep them all in sync when you change something.
+
+**ClaudeSync fixes this.**
+
+---
+
+## Quick Start
 
 ```bash
-# Add the Folly marketplace
+# In Claude Code, run:
 /plugin marketplace add Folly-Partners/claudesync
-
-# Install claudesync
 /plugin install claudesync@Folly
 ```
 
-Or run the setup wizard:
+That's it. You now have access to 11 MCP servers, 11 commands, 5 skills, and 3 custom agents.
+
+---
+
+## What You Get
+
+### MCP Servers (11)
+
+| Server | What it does |
+|--------|--------------|
+| **SuperThings** | Control Things 3 directly from Claude |
+| **Playwright** | Automate browsers, take screenshots, test websites |
+| **Tavily** | Search the web with AI-powered results |
+| **Hunter** | Find anyone's email address |
+| **Browserbase** | Cloud browsers that don't get blocked |
+| **Linear** | Manage issues and projects |
+| **Ahrefs** | SEO data and competitor analysis |
+| **TRMNL** | Push content to your TRMNL display |
+| **Unifi** | Manage your UniFi network |
+| **GitHub** | Repository operations without OAuth hassle |
+| **Supabase** | Database queries and management |
+
+Full setup guide: [MCP-SERVERS.md](MCP-SERVERS.md)
+
+### Commands (11)
+
+**Git shortcuts:**
+- `/commit` — Stage everything, generate a smart commit message, done
+- `/push` — Same as commit, but also pushes
+- `/scommit` — Pick specific files to commit
+- `/spush` — Pick specific files, commit, and push
+
+**Sync & maintenance:**
+- `/github-sync` — Sync all your git repos at once
+- `/setup` — Interactive setup wizard
+- `/sync-env` — Generate `.env.local` from your stored credentials
+- `/add-credential KEY value` — Store a new API key securely
+
+**Power tools:**
+- `/test [project]` — Run tests, find bugs, fix them automatically
+- `/deepcodereview [project]` — Hours-long autonomous code review
+
+### Skills (5)
+
+**deep-env** — The secret sauce. Stores all your API keys in macOS Keychain, syncs them encrypted via iCloud. One password prompt. Ever.
+
 ```bash
-./hooks/setup-wizard.sh
+deep-env store OPENAI_KEY "sk-..."   # Store it
+deep-env push                         # Sync to iCloud
+deep-env sync .                       # Generate .env.local
+```
+
+**github-sync** — Checks all your git repos daily. Uncommitted changes? It'll tell you. Remote has updates? It'll pull them.
+
+**enhanced-planning** — When Claude plans a feature, it runs parallel research: codebase patterns, external docs, best practices. All at once.
+
+**history-pruner** — Conversation history getting huge? This cleans it up while keeping what matters.
+
+**mcp-sync** — Validates your MCP config. Catches broken `${VAR}` expansions before they bite you.
+
+### Agents (3)
+
+**inbox-task-manager** — Say "let's go" and it triages your Things 3 inbox. Categorizes, rewrites for clarity, moves to the right projects.
+
+**email-response-processor** — Handles those "just reply with A, B, or C" emails automatically.
+
+**wardrobe-cataloger** — Take photos of clothes, it catalogs them to a spreadsheet. (Yes, really.)
+
+---
+
+## How Sync Works
+
+```
+┌─────────────┐     ┌──────────┐     ┌─────────────┐
+│   Mac A     │────▶│  GitHub  │────▶│   Mac B     │
+│             │     │          │     │             │
+│ Edit plugin │     │ Central  │     │ Auto-update │
+│ git push    │     │  repo    │     │ via plugin  │
+└─────────────┘     └──────────┘     └─────────────┘
+```
+
+**Plugin updates:** Edit on any Mac → push to GitHub → other Macs get it automatically
+
+**Credentials:** Stored in Keychain → encrypted to iCloud → available everywhere
+
+**No manual copying. No forgotten configs. Just works.**
+
+---
+
+## Setup
+
+### New Installation
+
+```bash
+/plugin marketplace add Folly-Partners/claudesync
+/plugin install claudesync@Folly
+```
+
+Then run the setup wizard:
+```bash
+/setup
+```
+
+It'll walk you through:
+1. Installing the `deep-env` credential manager
+2. Configuring your shell
+3. Setting up daily sync
+4. Storing your API keys
+
+### Adding to Another Mac
+
+```bash
+# 1. Install the plugin (same as above)
+/plugin marketplace add Folly-Partners/claudesync
+/plugin install claudesync@Folly
+
+# 2. Pull your credentials from iCloud
+deep-env pull
+
+# 3. Done. Everything's synced.
+```
+
+### Manual Setup (if you prefer)
+
+```bash
+git clone https://github.com/Folly-Partners/claudesync.git ~/claudesync
+cd ~/claudesync
+
+# Build the custom MCP servers
+cd servers/super-things && npm install && npm run build
+cd ../unifi && python3 -m venv venv && ./venv/bin/pip install -r requirements.txt
 ```
 
 ---
 
-## What's Included
+## Credential Management
 
-### 11 MCP Servers
+ClaudeSync includes `deep-env`, a credential manager that actually makes sense:
 
-Complete list in [MCP-SERVERS.md](MCP-SERVERS.md):
+```bash
+# Store credentials (goes to macOS Keychain)
+deep-env store ANTHROPIC_API_KEY "sk-ant-..."
+deep-env store OPENAI_KEY "sk-..."
+deep-env store SUPABASE_URL "https://..."
 
-| Server | Purpose |
-|--------|---------|
-| **SuperThings** | Things 3 task management integration |
-| **Playwright** | Browser automation and testing |
-| **Pipedream** | 10,000+ tools across 3,000+ APIs |
-| **Browserbase** | Cloud browser automation |
-| **Tavily** | AI-powered web search |
-| **Hunter** | Email finding and verification |
-| **Linear** | Issue tracking |
-| **Unifi** | Network management |
-| **GitHub** | Repository operations |
-| **Supabase** | Database management |
-| **Vercel** | Deployment platform |
+# Sync to iCloud (encrypted, for your other Macs)
+deep-env push
 
-### 5 Skills
+# On another Mac, pull them down
+deep-env pull
 
-- **deep-env** - Secure credential management (macOS Keychain + iCloud sync)
-- **github-sync** - Automatic git synchronization across repos
-- **enhanced-planning** - Structured planning workflow with parallel research
-- **history-pruner** - Clean up old conversation history
-- **mcp-sync** - MCP server configuration validation
+# Generate .env.local for any project
+cd ~/my-project
+deep-env sync .
+```
 
-### 11 Commands
-
-| Command | Purpose |
-|---------|---------|
-| `/commit` | Stage all changes and commit with auto-generated message |
-| `/push` | Stage all, commit, and push to remote |
-| `/scommit` | Selective staging with file picker |
-| `/spush` | Selective staging + push |
-| `/github-sync` | Full sync across all git repos |
-| `/test` | Run tests and generate comprehensive reports |
-| `/deepcodereview` | Multi-hour autonomous code review |
-| `/setup` | Interactive setup wizard |
-| `/setup-deep-env` | Configure deep-env credential manager |
-| `/sync-env` | Sync environment variables to project |
-| `/add-credential` | Store credentials securely |
-
-### 3 Custom Agents
-
-- **email-response-processor** - Process Gmail "simple-decision" emails with multi-option responses
-- **inbox-task-manager** - Triage and organize Things 3 inbox tasks
-- **wardrobe-cataloger** - Analyze clothing photos and catalog to Google Sheets
+**Why it's good:**
+- Single Keychain entry (one password prompt, ever)
+- AES-256 encrypted iCloud sync
+- Project-specific credential assignment
+- Works offline after initial sync
 
 ---
 
-## Architecture
-
-### Plugin Structure
+## File Structure
 
 ```
 ~/claudesync/
-├── .claude-plugin/           # Plugin metadata
-├── agents/                   # Custom AI agents
-├── commands/                 # Slash commands
-├── skills/                   # Reusable skills
-├── servers/                  # Custom MCP servers
-│   ├── super-things/        # Things 3 integration (TypeScript)
-│   └── unifi/               # Network management (Python)
-├── hooks/                    # Event hooks (SessionStart, UserPromptSubmit)
-├── scripts/                  # Setup and maintenance scripts
-├── mcp.json                  # MCP server configuration
-└── marketplace.json          # Plugin marketplace definition
-```
-
-### How Syncing Works
-
-| What | How | When |
-|------|-----|------|
-| **Plugin updates** | Folly marketplace | Automatic (Claude Code auto-updates) |
-| **Credentials** | deep-env → iCloud | Daily at 9am + login (LaunchAgent) |
-| **Manual changes** | Git push → marketplace | When you're ready |
-
-**Workflow:**
-1. Modify plugin on Mac A (add skill, update MCP server, etc.)
-2. Commit & push to GitHub
-3. Marketplace distributes the update
-4. Mac B gets update automatically
-
----
-
-## Setup on New Mac
-
-### Automated Setup
-
-```bash
-# Clone the repo
-git clone https://github.com/Folly-Partners/claudesync.git ~/claudesync
-cd ~/claudesync
-
-# Run setup script
-./scripts/setup.sh
-```
-
-The setup script will:
-1. Build SuperThings MCP server (npm install + build)
-2. Set up Python environment for Unifi server
-3. Register plugin with Claude Code
-4. Configure auto-sync
-
-### Manual Steps
-
-If you prefer manual setup:
-
-```bash
-# 1. Clone repo
-git clone https://github.com/Folly-Partners/claudesync.git ~/claudesync
-
-# 2. Set git identity
-cd ~/claudesync
-git config user.name "Andrew Wilkinson"
-git config user.email "andrew@tiny.com"
-
-# 3. Build SuperThings server
-cd ~/claudesync/servers/super-things
-npm install && npm run build
-
-# 4. Setup Python for Unifi server
-cd ~/claudesync/servers/unifi
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-
-# 5. Register plugin with Claude Code
-# Open Claude Code settings and add custom marketplace
-```
-
----
-
-## Configuration Files
-
-### mcp.json
-
-Defines all MCP servers with portable paths using `${VAR}` expansion:
-
-```json
-{
-  "SuperThings": {
-    "command": "node",
-    "args": ["${HOME}/claudesync/servers/super-things/dist/index.js"]
-  }
-}
-```
-
-### CLAUDE.md
-
-Project-level instructions stored in:
-- `~/claudesync/CLAUDE.md` - Instructions for working on the plugin itself
-- `~/CLAUDE.md` - Global instructions for Claude Code (copied from plugin)
-- `~/.claude/CLAUDE.md` - User-level instructions (synced across all projects)
-
----
-
-## Skills Overview
-
-### deep-env (Credential Management)
-
-Stores credentials in macOS Keychain, syncs encrypted to iCloud:
-
-```bash
-# Store a credential
-deep-env store ANTHROPIC_API_KEY "sk-ant-..."
-
-# Sync to current project
-deep-env sync .
-
-# Push to iCloud (for other Macs)
-deep-env push
-```
-
-### github-sync (Git Synchronization)
-
-Automatically discovers and checks all git repos in home directory:
-
-```bash
-# Manual check (daily auto-check via CLAUDE.md)
-~/claudesync/skills/github-sync/git-sync-check.sh
-
-# Force check
-~/claudesync/skills/github-sync/git-sync-check.sh --force
-
-# Sync all repos
-~/claudesync/skills/github-sync/git-sync-all.sh
+├── commands/        # 11 slash commands
+├── skills/          # 5 reusable workflows
+├── agents/          # 3 custom AI agents
+├── servers/         # Custom MCP servers
+│   ├── super-things/   # Things 3 (TypeScript)
+│   ├── trmnl/          # TRMNL display (TypeScript)
+│   └── unifi/          # Network management (Python)
+├── hooks/           # Session start & prompt hooks
+├── mcp.json         # MCP server configuration
+└── CLAUDE.md        # Instructions for Claude
 ```
 
 ---
 
 ## Troubleshooting
 
-### Plugin not showing in Claude Code
-
-Check plugin is registered:
+**Plugin not showing up?**
 ```bash
 cat ~/.claude/settings.json | grep claudesync
+# Should show: "claudesync@Folly": true
 ```
 
-Should show:
-```json
-"enabledPlugins": {
-  "claudesync@Folly": true
-}
-```
-
-### MCP servers not loading
-
-Check MCP configuration:
+**MCP servers not loading?**
 ```bash
-claude mcp list
-```
-
-Verify SuperThings is built:
-```bash
+# Check if SuperThings is built
 ls ~/claudesync/servers/super-things/dist/index.js
+
+# If missing, build it
+cd ~/claudesync/servers/super-things && npm run build
 ```
 
-### Git sync not working
-
-Check git status:
+**Credentials not syncing?**
 ```bash
-cd ~/claudesync
-git status
-git log --oneline -5
+deep-env list      # See what's stored
+deep-env validate  # Check for corruption
+deep-env pull      # Pull from iCloud
 ```
 
-Verify github-sync skill is working:
+**Git sync issues?**
 ```bash
 ~/claudesync/skills/github-sync/git-sync-check.sh --force
-```
-
-### Credentials not syncing
-
-Check deep-env status:
-```bash
-deep-env list
-deep-env pull  # Pull from iCloud
 ```
 
 ---
 
 ## Version History
 
-- **1.3.0** - Major cleanup, removed session artifacts, updated docs, fixed paths
-- **1.2.0** - Added auto-discovery for git repos, updated git identity
-- **1.1.0** - Initial plugin marketplace release
-- **1.0.0** - Legacy claude-code-sync architecture
+| Version | Changes |
+|---------|---------|
+| **1.4.0** | Fixed marketplace schema, cleaned up sensitive files |
+| **1.3.0** | Major cleanup, improved documentation |
+| **1.2.0** | Auto-discovery for git repos |
+| **1.1.0** | Initial marketplace release |
 
 ---
 
-## For Claude (AI Assistant)
+## Links
 
-When working with this plugin:
+- **Marketplace:** [Folly-Partners/claudesync](https://github.com/Folly-Partners/claudesync)
+- **MCP Server Guide:** [MCP-SERVERS.md](MCP-SERVERS.md)
+- **Claude Code Docs:** [code.claude.com/docs](https://code.claude.com/docs)
 
-1. **Git identity** - Always use Andrew Wilkinson <andrew@tiny.com>
-2. **Path references** - Use `~/claudesync/` for the repo
-3. **Plugin name** - `claudesync@Folly`
-4. **Credentials** - Use deep-env for storing API keys and secrets
+---
 
-See [CLAUDE.md](CLAUDE.md) for complete instructions.
+*Part of the Folly marketplace. Built by Andrew Wilkinson.*
