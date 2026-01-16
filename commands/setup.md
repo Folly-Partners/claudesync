@@ -1,9 +1,9 @@
 ---
 name: setup
-description: Interactive setup wizard for Andrews Plugin - configures deep-env, sync agent, and credentials
+description: Interactive setup wizard for ClaudeSync - configures identity, deep-env, sync agent, and credentials
 ---
 
-# Andrews Plugin Setup
+# ClaudeSync Setup
 
 Run the setup wizard to ensure this Mac is fully configured.
 
@@ -18,7 +18,26 @@ Run the setup wizard to ensure this Mac is fully configured.
 
 ## Setup Components
 
-### 1. deep-env (Credential Manager)
+### 1. Git Identity (REQUIRED FIRST)
+
+Ask the user for their git commit identity using AskUserQuestion:
+- **Name:** "What name should be used for git commits?"
+- **Email:** "What email should be used for git commits?"
+
+Store in deep-env:
+```bash
+deep-env store GIT_COMMIT_NAME "User Name"
+deep-env store GIT_COMMIT_EMAIL "user@example.com"
+deep-env push
+```
+
+Also configure git locally:
+```bash
+git config --global user.name "User Name"
+git config --global user.email "user@example.com"
+```
+
+### 2. deep-env (Credential Manager)
 - **Check:** `command -v deep-env` or `~/.local/bin/deep-env`
 - **Install from iCloud:** `mkdir -p ~/.local/bin && cp ~/Library/Mobile\ Documents/com~apple~CloudDocs/.deep-env/deep-env ~/.local/bin/ && chmod +x ~/.local/bin/deep-env`
 - **Pull credentials:** `deep-env pull` (will prompt for sync password)

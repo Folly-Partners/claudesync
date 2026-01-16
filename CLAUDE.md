@@ -1,12 +1,16 @@
-# claudesync
+# ClaudeSync
 
-This plugin syncs Claude Code configuration across all of Andrew's Macs via the **Folly** marketplace.
+This plugin syncs Claude Code configuration across all your Macs via the **Folly** marketplace.
 
 ## Git Identity
 
-When making commits, use:
-- **Name:** Andrew Wilkinson
-- **Email:** andrew@tiny.com
+When making commits, get the user's configured identity:
+```bash
+deep-env get GIT_COMMIT_NAME
+deep-env get GIT_COMMIT_EMAIL
+```
+
+If not set, ask the user to run `/setup` to configure their git identity.
 
 ## Session Start: Git Sync Check (Daily)
 
@@ -57,8 +61,8 @@ See `~/claudesync/skills/` for available skills:
 
 4. **Structured Output** - Write plan with: research findings, user flows, implementation steps, open questions, testing strategy
 
-**When to apply:** Any feature touching 3+ files, new integrations, architectural changes, or when Andrew says "plan" for something complex. Skip for simple bug fixes or single-file changes.
+**When to apply:** Any feature touching 3+ files, new integrations, architectural changes, or when the user says "plan" for something complex. Skip for simple bug fixes or single-file changes.
 
 ## Interaction Preferences
 
-- **Plans with options**: When presenting plans that have multiple approaches or options, use the `AskUserQuestion` tool with multiple choice format instead of writing out options in prose. This lets Andrew quickly tap to select rather than typing responses.
+- **Plans with options**: When presenting plans that have multiple approaches or options, use the `AskUserQuestion` tool with multiple choice format instead of writing out options in prose. This lets the user quickly tap to select rather than typing responses.
