@@ -1,11 +1,11 @@
 #!/bin/bash
 # Migration script for existing claude-code-sync setups
-# Transforms to the new andrews-plugin structure
+# Transforms to the new claudesync structure
 
 set -e
 
 OLD_LOCATION="$HOME/.claude"
-NEW_LOCATION="$HOME/andrews-plugin"
+NEW_LOCATION="$HOME/claudesync"
 
 echo "=========================================="
 echo "Andrew's Plugin Migration Script"
@@ -35,7 +35,7 @@ echo "Step 1: Pulling latest changes from GitHub..."
 # Check git remote and fix if needed
 REMOTE_URL=$(git remote get-url origin)
 if [[ "$REMOTE_URL" == *"claude-code-sync"* ]]; then
-    echo "Updating remote URL to andrews-plugin..."
+    echo "Updating remote URL to claudesync..."
     git remote set-url origin https://github.com/Folly-Partners/claudesync.git
 fi
 
@@ -84,7 +84,7 @@ if [ "$NEEDS_MOVE" = true ]; then
     mkdir -p "$OLD_LOCATION"
 
     # Create symlink for backwards compatibility (optional)
-    ln -s "$NEW_LOCATION" "$OLD_LOCATION/andrews-plugin"
+    ln -s "$NEW_LOCATION" "$OLD_LOCATION/claudesync"
 
     echo "✓ Moved to $NEW_LOCATION"
 
@@ -117,7 +117,7 @@ chmod +x scripts/*.sh 2>/dev/null || true
 # Run setup
 ./scripts/setup.sh
 
-# Note: Marketplace config is in ~/andrews-plugin/settings.json
+# Note: Marketplace config is in ~/claudesync/settings.json
 # which setup.sh symlinked to ~/.claude/settings.json
 # No need to create settings.local.json (it would override the symlink)
 
@@ -143,10 +143,10 @@ echo ""
 echo "Location: $NEW_LOCATION"
 echo ""
 echo "What changed:"
-echo "  ✓ Repository moved to ~/andrews-plugin"
+echo "  ✓ Repository moved to ~/claudesync"
 echo "  ✓ SuperThings bundled into plugin (servers/super-things/)"
 echo "  ✓ Unifi server bundled into plugin (servers/unifi/)"
 echo "  ✓ Auto-sync LaunchAgent updated"
-echo "  ✓ Settings symlinked: ~/.claude/settings.json → ~/andrews-plugin/settings.json"
+echo "  ✓ Settings symlinked: ~/.claude/settings.json → ~/claudesync/settings.json"
 echo ""
 echo "Next: Restart Claude Code for changes to take effect"

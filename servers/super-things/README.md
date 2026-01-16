@@ -75,7 +75,7 @@ npm run build
 
 ### 3. Configure Claude Code
 
-Add to your `~/andrews-plugin/claude.json`:
+Add to your `~/claudesync/claude.json`:
 
 ```json
 {
@@ -98,9 +98,9 @@ Replace `/path/to/SuperThings` with the actual path and add your auth token.
 Create symlinks in your Claude commands directory:
 
 ```bash
-mkdir -p ~/andrews-plugin/commands
-ln -sf /path/to/SuperThings/commands/thingsinbox.md ~/andrews-plugin/commands/thingsinbox.md
-ln -sf /path/to/SuperThings/commands/gtd.md ~/andrews-plugin/commands/gtd.md
+mkdir -p ~/claudesync/commands
+ln -sf /path/to/SuperThings/commands/thingsinbox.md ~/claudesync/commands/thingsinbox.md
+ln -sf /path/to/SuperThings/commands/gtd.md ~/claudesync/commands/gtd.md
 ```
 
 ### 5. Initialize Learning Data

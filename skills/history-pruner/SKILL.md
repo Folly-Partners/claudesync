@@ -12,13 +12,13 @@ Automatically prunes old Claude Code conversation history files to prevent them 
 Invoke this skill when:
 - User mentions disk space issues with Claude Code
 - User asks to clean up or prune conversation history
-- Project files in `~/andrews-plugin/projects/` exceed 50MB
+- Project files in `~/claudesync/projects/` exceed 50MB
 - User wants to do maintenance on Claude Code storage
 - Before syncing if files are getting too large for GitHub
 
 ## How It Works
 
-Project files (`~/andrews-plugin/projects/**/*.jsonl`) store full conversation history including:
+Project files (`~/claudesync/projects/**/*.jsonl`) store full conversation history including:
 - Messages (keep)
 - Summaries (keep)
 - Tool results with full output (PRUNE - this is the bulk of the data)
@@ -42,17 +42,17 @@ Project files (`~/andrews-plugin/projects/**/*.jsonl`) store full conversation h
 
 ### Check current sizes
 ```bash
-du -sh ~/andrews-plugin/projects/-Users-andrewwilkinson/*.jsonl | sort -hr | head -10
+du -sh ~/claudesync/projects/-Users-andrewwilkinson/*.jsonl | sort -hr | head -10
 ```
 
 ### Run pruning script
 ```bash
-~/andrews-plugin/skills/history-pruner/prune-history.sh [conservative|aggressive]
+~/claudesync/skills/history-pruner/prune-history.sh [conservative|aggressive]
 ```
 
 ### Dry run (see what would be pruned)
 ```bash
-~/andrews-plugin/skills/history-pruner/prune-history.sh --dry-run
+~/claudesync/skills/history-pruner/prune-history.sh --dry-run
 ```
 
 ## Manual Pruning Steps
@@ -61,7 +61,7 @@ If the script isn't available, prune manually:
 
 1. **Identify large files:**
    ```bash
-   du -sh ~/andrews-plugin/projects/**/*.jsonl | sort -hr | head -5
+   du -sh ~/claudesync/projects/**/*.jsonl | sort -hr | head -5
    ```
 
 2. **Backup before pruning:**
@@ -87,7 +87,7 @@ If the script isn't available, prune manually:
 To run weekly, add to the sync launchd job or create a separate one:
 ```bash
 # Add to crontab for weekly Sunday 3am cleanup
-0 3 * * 0 ~/andrews-plugin/skills/history-pruner/prune-history.sh conservative
+0 3 * * 0 ~/claudesync/skills/history-pruner/prune-history.sh conservative
 ```
 
 ## Important Notes

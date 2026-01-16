@@ -89,7 +89,7 @@ Complete list in [MCP-SERVERS.md](MCP-SERVERS.md):
 ### Plugin Structure
 
 ```
-~/andrews-plugin/
+~/claudesync/
 ├── .claude-plugin/           # Plugin metadata
 ├── agents/                   # Custom AI agents
 ├── commands/                 # Slash commands
@@ -125,8 +125,8 @@ Complete list in [MCP-SERVERS.md](MCP-SERVERS.md):
 
 ```bash
 # Clone the repo
-git clone https://github.com/Folly-Partners/claudesync.git ~/andrews-plugin
-cd ~/andrews-plugin
+git clone https://github.com/Folly-Partners/claudesync.git ~/claudesync
+cd ~/claudesync
 
 # Run setup script
 ./scripts/setup.sh
@@ -144,19 +144,19 @@ If you prefer manual setup:
 
 ```bash
 # 1. Clone repo
-git clone https://github.com/Folly-Partners/claudesync.git ~/andrews-plugin
+git clone https://github.com/Folly-Partners/claudesync.git ~/claudesync
 
 # 2. Set git identity
-cd ~/andrews-plugin
+cd ~/claudesync
 git config user.name "Andrew Wilkinson"
 git config user.email "andrew@tiny.com"
 
 # 3. Build SuperThings server
-cd ~/andrews-plugin/servers/super-things
+cd ~/claudesync/servers/super-things
 npm install && npm run build
 
 # 4. Setup Python for Unifi server
-cd ~/andrews-plugin/servers/unifi
+cd ~/claudesync/servers/unifi
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
@@ -177,7 +177,7 @@ Defines all MCP servers with portable paths using `${VAR}` expansion:
 {
   "SuperThings": {
     "command": "node",
-    "args": ["${HOME}/andrews-plugin/servers/super-things/dist/index.js"]
+    "args": ["${HOME}/claudesync/servers/super-things/dist/index.js"]
   }
 }
 ```
@@ -185,7 +185,7 @@ Defines all MCP servers with portable paths using `${VAR}` expansion:
 ### CLAUDE.md
 
 Project-level instructions stored in:
-- `~/andrews-plugin/CLAUDE.md` - Instructions for working on the plugin itself
+- `~/claudesync/CLAUDE.md` - Instructions for working on the plugin itself
 - `~/CLAUDE.md` - Global instructions for Claude Code (copied from plugin)
 - `~/.claude/CLAUDE.md` - User-level instructions (synced across all projects)
 
@@ -214,13 +214,13 @@ Automatically discovers and checks all git repos in home directory:
 
 ```bash
 # Manual check (daily auto-check via CLAUDE.md)
-~/andrews-plugin/skills/github-sync/git-sync-check.sh
+~/claudesync/skills/github-sync/git-sync-check.sh
 
 # Force check
-~/andrews-plugin/skills/github-sync/git-sync-check.sh --force
+~/claudesync/skills/github-sync/git-sync-check.sh --force
 
 # Sync all repos
-~/andrews-plugin/skills/github-sync/git-sync-all.sh
+~/claudesync/skills/github-sync/git-sync-all.sh
 ```
 
 ---
@@ -250,21 +250,21 @@ claude mcp list
 
 Verify SuperThings is built:
 ```bash
-ls ~/andrews-plugin/servers/super-things/dist/index.js
+ls ~/claudesync/servers/super-things/dist/index.js
 ```
 
 ### Git sync not working
 
 Check git status:
 ```bash
-cd ~/andrews-plugin
+cd ~/claudesync
 git status
 git log --oneline -5
 ```
 
 Verify github-sync skill is working:
 ```bash
-~/andrews-plugin/skills/github-sync/git-sync-check.sh --force
+~/claudesync/skills/github-sync/git-sync-check.sh --force
 ```
 
 ### Credentials not syncing
@@ -291,7 +291,7 @@ deep-env pull  # Pull from iCloud
 When working with this plugin:
 
 1. **Git identity** - Always use Andrew Wilkinson <andrew@tiny.com>
-2. **Path references** - Use `~/andrews-plugin/` for the repo
+2. **Path references** - Use `~/claudesync/` for the repo
 3. **Plugin name** - `claudesync@Folly`
 4. **Credentials** - Use deep-env for storing API keys and secrets
 

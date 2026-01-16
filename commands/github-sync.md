@@ -8,11 +8,11 @@ description: Sync ALL projects and credentials - auto-commit, push, pull everyth
 Run the full sync to make sure all projects and credentials are up to date across all Macs:
 
 ```bash
-~/andrews-plugin/skills/github-sync/git-sync-all.sh
+~/claudesync/skills/github-sync/git-sync-all.sh
 ```
 
 This syncs:
-- **andrews-plugin** - Claude Code configuration and plugins
+- **claudesync** - Claude Code configuration and plugins
 - **Deep-Personality** - Deep Personality project
 - **deep-env credentials** - All API keys and secrets to iCloud
 

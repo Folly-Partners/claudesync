@@ -3,7 +3,7 @@
     "trmnl": {
       "type": "stdio",
       "command": "node",
-      "args": ["${HOME}/andrews-plugin/servers/trmnl/dist/index.js"],
+      "args": ["${HOME}/claudesync/servers/trmnl/dist/index.js"],
       "env": {
         "TRMNL_API_KEY": "${TRMNL_API_KEY}"
       }
@@ -11,7 +11,7 @@
     "SuperThings": {
       "type": "stdio",
       "command": "node",
-      "args": ["${HOME}/andrews-plugin/servers/super-things/dist/index.js"],
+      "args": ["${HOME}/claudesync/servers/super-things/dist/index.js"],
       "env": {
         "THINGS_AUTH_TOKEN": "${THINGS_AUTH_TOKEN}"
       }

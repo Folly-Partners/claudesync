@@ -11,7 +11,7 @@ Run the setup wizard to ensure this Mac is fully configured.
 
 1. First, run the setup check to see current status:
 ```bash
-~/andrews-plugin/hooks/setup-wizard.sh --force
+~/claudesync/hooks/setup-wizard.sh --force
 ```
 
 2. Based on the output, guide the user through fixing any issues interactively.
@@ -53,7 +53,7 @@ Add with: `deep-env store KEY_NAME "value"`
 Push to iCloud: `deep-env push`
 
 ### 5. Marketplace Registration
-- **Check:** `ls ~/.claude/plugins/marketplaces/andrews-plugin.json`
+- **Check:** `ls ~/.claude/plugins/marketplaces/claudesync.json`
 - **Add:** `claude plugin marketplace add https://raw.githubusercontent.com/Folly-Partners/claudesync/main/marketplace.json`
 
 ## Interactive Flow

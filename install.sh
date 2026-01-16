@@ -139,7 +139,7 @@ CURRENT_STEP="installing Andrews Plugin"
 echo "3. Installing Andrews Plugin..."
 
 install_output=""
-if install_output=$(claude plugin install andrews-plugin 2>&1); then
+if install_output=$(claude plugin install claudesync 2>&1); then
     install_success=true
 else
     install_success=false
@@ -148,7 +148,7 @@ fi
 
 if [ "$install_success" = "true" ]; then
     echo "   Andrews Plugin installed"
-elif claude plugin list 2>/dev/null | grep -qi "andrews-plugin"; then
+elif claude plugin list 2>/dev/null | grep -qi "claudesync"; then
     echo "   Andrews Plugin already installed"
 else
     echo "   Failed to install Andrews Plugin"
@@ -186,8 +186,8 @@ echo "----------------------------------------------------"
 echo "  Verifying Installation"
 echo "----------------------------------------------------"
 
-# Verify andrews-plugin is installed
-if ! claude plugin list 2>/dev/null | grep -qi "andrews-plugin"; then
+# Verify claudesync is installed
+if ! claude plugin list 2>/dev/null | grep -qi "claudesync"; then
     echo "   Andrews Plugin verification failed"
     echo "   Plugin may not be properly installed"
     exit 1

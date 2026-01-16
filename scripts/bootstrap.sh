@@ -25,15 +25,15 @@ deep-env pull
 
 # 3. Clone plugin
 echo "Cloning plugin..."
-git clone git@github.com:Folly-Partners/claudesync.git ~/andrews-plugin
+git clone git@github.com:Folly-Partners/claudesync.git ~/claudesync
 
 # 4. Run setup
 echo "Running setup..."
-cd ~/andrews-plugin
+cd ~/claudesync
 ./scripts/setup.sh
 
 # 5. Add deep-env to shell if not present
-# Note: Plugin marketplace config is already in ~/andrews-plugin/settings.json
+# Note: Plugin marketplace config is already in ~/claudesync/settings.json
 # which setup.sh symlinks to ~/.claude/settings.json
 if ! grep -q "deep-env export" ~/.zshrc 2>/dev/null; then
     echo "" >> ~/.zshrc
@@ -44,4 +44,4 @@ fi
 
 echo ""
 echo "Done! Run 'source ~/.zshrc' then 'claude' to start."
-echo "Verify with: ~/andrews-plugin/scripts/doctor.sh"
+echo "Verify with: ~/claudesync/scripts/doctor.sh"

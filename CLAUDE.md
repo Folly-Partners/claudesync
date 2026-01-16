@@ -13,7 +13,7 @@ When making commits, use:
 **Once per day**, run the git sync check at session start:
 
 ```bash
-~/andrews-plugin/skills/github-sync/git-sync-check.sh
+~/claudesync/skills/github-sync/git-sync-check.sh
 ```
 
 The script self-limits to once every 24 hours. To force a check: `git-sync-check.sh --force`
@@ -31,7 +31,7 @@ This automatically finds all git repos in your home directory and checks them fo
 
 ## Skills Available
 
-See `~/andrews-plugin/skills/` for available skills:
+See `~/claudesync/skills/` for available skills:
 - **deep-env** - Credential management for environment variables
 - **github-sync** - Git synchronization at session start (this document)
 - **history-pruner** - Prune old conversation history
@@ -40,7 +40,7 @@ See `~/andrews-plugin/skills/` for available skills:
 
 ## Enhanced Planning Mode
 
-**For non-trivial features**, use the enhanced planning workflow from `~/andrews-plugin/skills/enhanced-planning/SKILL.md`:
+**For non-trivial features**, use the enhanced planning workflow from `~/claudesync/skills/enhanced-planning/SKILL.md`:
 
 1. **Parallel Research** - Launch 3 simultaneous Task agents:
    - Codebase pattern analysis (similar implementations, conventions)

@@ -10,7 +10,7 @@ SuperThings learns from your corrections to get better at suggesting titles and 
 ## Learning System
 
 ### Pattern Storage
-Learned patterns are stored in `~/andrews-plugin/servers/super-things/data/patterns.json`:
+Learned patterns are stored in `~/claudesync/servers/super-things/data/patterns.json`:
 
 ```json
 {
@@ -35,7 +35,7 @@ Learned patterns are stored in `~/andrews-plugin/servers/super-things/data/patte
 
 **Before triaging inbox**, load patterns:
 ```bash
-cat ~/andrews-plugin/servers/super-things/data/patterns.json
+cat ~/claudesync/servers/super-things/data/patterns.json
 ```
 
 **When suggesting titles/projects:**
@@ -51,7 +51,7 @@ cat ~/andrews-plugin/servers/super-things/data/patterns.json
 
 ### Logging Corrections
 
-After user confirms/modifies suggestions, log to `~/andrews-plugin/servers/super-things/data/history.jsonl`:
+After user confirms/modifies suggestions, log to `~/claudesync/servers/super-things/data/history.jsonl`:
 
 ```json
 {"ts": "2025-12-30T10:00:00Z", "original": "Fix fireplace", "suggested_title": "Delegate to Brianna: Fix fireplace", "final_title": "Delegate to Brianna: Fix fireplace", "suggested_project": "Computer", "final_project": "Computer", "title_accepted": true, "project_accepted": true}
@@ -158,7 +158,7 @@ SuperThings uses three external MCP tools for research and actions:
 
 ## Research Cache System
 
-GTD research results are cached to `~/andrews-plugin/servers/super-things/data/research-cache.json`:
+GTD research results are cached to `~/claudesync/servers/super-things/data/research-cache.json`:
 
 ```json
 {
