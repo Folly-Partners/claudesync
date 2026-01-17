@@ -7,7 +7,6 @@
   },
   "repository": "https://github.com/Folly-Partners/claudesync",
   "license": "MIT",
-  "claudeCodeVersion": ">=2.0.0",
   "hooks": ["./hooks/hooks.json"],
   "commands": ["./commands/setup.md"]
 }
