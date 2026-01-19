@@ -37,7 +37,7 @@
     "linear": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "linear-mcp"],
+      "args": ["-y", "@mseep/linear-mcp"],
       "env": {
         "LINEAR_ACCESS_TOKEN": "${LINEAR_ACCESS_TOKEN}"
       }
