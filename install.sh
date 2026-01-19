@@ -79,7 +79,6 @@ echo "  Adding Marketplaces"
 echo "----------------------------------------------------"
 
 ANDREWS_MARKETPLACE="https://raw.githubusercontent.com/Folly-Partners/claudesync/main/marketplace.json"
-EVERY_MARKETPLACE="https://github.com/EveryInc/every-marketplace"
 
 # Add Andrews Plugin marketplace
 CURRENT_STEP="adding Andrews marketplace"
@@ -104,27 +103,6 @@ else
     exit 1
 fi
 
-# Add Every Inc marketplace (for Compound Engineering)
-CURRENT_STEP="adding Every Inc marketplace"
-echo "2. Adding Every Inc marketplace..."
-
-add_output=""
-if add_output=$(claude plugin marketplace add "$EVERY_MARKETPLACE" 2>&1); then
-    add_success=true
-else
-    add_success=false
-fi
-[ -n "$add_output" ] && log_verbose "$add_output"
-
-if [ "$add_success" = "true" ]; then
-    echo "   Every Inc marketplace added"
-elif claude plugin marketplace list 2>/dev/null | grep -qi "every"; then
-    echo "   Every Inc marketplace already registered"
-else
-    echo "   Failed to add Every Inc marketplace (non-critical)"
-    log_verbose "Continuing without Every Inc marketplace"
-fi
-
 # ============================================================================
 #  Install Plugins
 # ============================================================================
@@ -136,7 +114,7 @@ echo "----------------------------------------------------"
 
 # Install Andrews Plugin
 CURRENT_STEP="installing Andrews Plugin"
-echo "3. Installing Andrews Plugin..."
+echo "2. Installing Andrews Plugin..."
 
 install_output=""
 if install_output=$(claude plugin install claudesync 2>&1); then
@@ -153,27 +131,6 @@ elif claude plugin list 2>/dev/null | grep -qi "claudesync"; then
 else
     echo "   Failed to install Andrews Plugin"
     exit 1
-fi
-
-# Install Compound Engineering Plugin
-CURRENT_STEP="installing Compound Engineering"
-echo "4. Installing Compound Engineering..."
-
-install_output=""
-if install_output=$(claude plugin install compound-engineering 2>&1); then
-    install_success=true
-else
-    install_success=false
-fi
-[ -n "$install_output" ] && log_verbose "$install_output"
-
-if [ "$install_success" = "true" ]; then
-    echo "   Compound Engineering installed"
-elif claude plugin list 2>/dev/null | grep -qi "compound"; then
-    echo "   Compound Engineering already installed"
-else
-    echo "   Compound Engineering not available (non-critical)"
-    log_verbose "Every Inc marketplace may not have been added"
 fi
 
 # ============================================================================
@@ -204,13 +161,20 @@ echo "----------------------------------------------------"
 echo "  Installation Complete!"
 echo "----------------------------------------------------"
 echo ""
-echo "Installed Plugins:"
+echo "Installed:"
 echo "  - Andrews Plugin - 11 MCP servers (API key auth, no OAuth)"
-echo "  - Compound Engineering - Advanced workflows"
 echo ""
 echo "MCP Servers included (all API key based):"
 echo "  SuperThings, Playwright, Hunter, Browserbase, Tavily,"
 echo "  Zapier, Linear, Unifi, GitHub, Supabase, Vercel"
+echo ""
+echo "Recommended Plugins:"
+echo "  Run /plugin in Claude Code to browse and install:"
+echo "  - compound-engineering (from every-marketplace) - Advanced workflows"
+echo ""
+echo "  Or install directly:"
+echo "    claude plugin marketplace add https://github.com/EveryInc/every-marketplace"
+echo "    claude plugin install compound-engineering"
 echo ""
 echo "Next: Start Claude Code - the plugin will guide you through setup."
 echo ""

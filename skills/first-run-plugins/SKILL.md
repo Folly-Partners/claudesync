@@ -7,7 +7,7 @@ triggers:
 
 # First-Run Plugin Recommendations
 
-When you detect `CLAUDESYNC_FIRST_RUN=true` in the session start output, offer the user recommended plugins to install.
+When you detect `CLAUDESYNC_FIRST_RUN=true` in the session start output, show the user how to install recommended plugins using the `/plugin` command.
 
 ## Trigger
 
@@ -15,28 +15,34 @@ The `first-run-plugins.sh` hook outputs `CLAUDESYNC_FIRST_RUN=true` when the fla
 
 ## Action
 
-Use `AskUserQuestion` with `multiSelect: true` to offer these plugins:
-
-### Plugins to Offer
-
-| Plugin | Marketplace | Description |
-|--------|-------------|-------------|
-| compound-engineering | every-marketplace | Advanced workflows, code review, planning |
+**Always ask before installing.** Show the user the commands and let them choose whether to install or skip.
 
 ### Implementation Steps
 
-1. **Show welcome message**: "Welcome to claudesync! Would you like to install recommended plugins?"
+1. **Show welcome message with plugin recommendation**:
 
-2. **Use AskUserQuestion** with multi-select to let user choose plugins
+```
+Welcome to claudesync!
 
-3. **For selected plugins**:
-   - If compound-engineering selected:
-     ```
-     /plugin marketplace add https://github.com/EveryInc/compound-engineering-plugin
-     /plugin install compound-engineering
-     ```
+I recommend the **compound-engineering** plugin for advanced workflows,
+code review skills, and planning tools.
 
-4. **After installation**, delete the flag file:
+**Quick install** (run these commands in terminal):
+```bash
+claude plugin marketplace add https://github.com/EveryInc/every-marketplace
+claude plugin install compound-engineering
+```
+
+**Or use the plugin manager UI**: Run `/plugin` to browse and install interactively.
+
+Would you like me to install it now, or skip for now?
+```
+
+2. **Use AskUserQuestion** to let user choose:
+   - "Install it" - run the two CLI commands above
+   - "Skip for now" - continue without installing
+
+3. **After showing the recommendation**, delete the flag file:
    ```bash
    rm ~/.claude/.claudesync-first-run
    touch ~/.claude/.claudesync-first-run.done
@@ -47,16 +53,21 @@ Use `AskUserQuestion` with `multiSelect: true` to offer these plugins:
 ```
 Welcome to claudesync!
 
-I noticed this is your first session after setup.
-Would you like to install the recommended compound-engineering plugin?
+I noticed this is your first session after setup. I recommend installing
+the **compound-engineering** plugin for advanced workflows and planning tools.
 
-It provides advanced workflows, code review skills, and planning tools.
+**Quick install** (run in terminal):
+  claude plugin marketplace add https://github.com/EveryInc/every-marketplace
+  claude plugin install compound-engineering
 
-[Yes, install it] [No, skip for now]
+Or run `/plugin` to browse and install via the UI.
+
+[Install it] [Skip for now]
 ```
 
 ## Notes
 
-- Only show this once (delete flag after showing)
+- **Always ask first** - never install without user consent
+- Only show this recommendation once (delete flag after showing)
 - The `.done` file prevents showing again
-- Keep it simple - just offer compound-engineering for now
+- Keep it simple - just recommend compound-engineering for now
