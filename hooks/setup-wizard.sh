@@ -545,7 +545,29 @@ report_status() {
             CREDENTIALS_MISSING:*)
                 local creds="${issue#CREDENTIALS_MISSING:}"
                 step_warn "Missing credentials: $creds"
-                echo -e "       ${GREEN}-> Run: deep-env pull (if synced) or deep-env store KEY VALUE${NC}"
+                echo -e "       ${GREEN}-> Attempting to pull from iCloud...${NC}"
+
+                # Try to pull credentials automatically
+                if deep-env pull 2>&1 | grep -q "Pulled [1-9]"; then
+                    step_ok "Credentials synced successfully"
+
+                    # Verify specific credentials are now available
+                    local still_missing=()
+                    for key in $creds; do
+                        if ! deep-env get "$key" &>/dev/null; then
+                            still_missing+=("$key")
+                        fi
+                    done
+
+                    if [ ${#still_missing[@]} -gt 0 ]; then
+                        step_warn "Some credentials still missing: ${still_missing[*]}"
+                        echo -e "       ${GREEN}-> Run: deep-env store KEY VALUE${NC}"
+                    fi
+                else
+                    step_warn "Auto-sync failed - manual setup required"
+                    echo -e "       ${GREEN}-> Try: deep-env pull${NC}"
+                    echo -e "       ${GREEN}-> Or: deep-env store KEY VALUE${NC}"
+                fi
                 ;;
             MARKETPLACE_NOT_REGISTERED)
                 step_warn "claudesync not registered in settings"

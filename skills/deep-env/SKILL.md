@@ -191,6 +191,86 @@ deep-env sync /path/to/project
 6. [ ] Verify: `deep-env list` (should show all credentials)
 7. [ ] Test sync: `cd ~/some-project && deep-env sync .`
 
+## Common Issues and Fixes
+
+### "Pulled 0 credentials" But iCloud Has Data
+
+**Symptoms:**
+- `deep-env pull` reports success
+- Says "Pulled 0 credentials from iCloud"
+- `deep-env list` shows "No credentials stored yet"
+- But `credentials.enc` exists in iCloud
+
+**Diagnosis:**
+```bash
+# Check if encrypted file exists
+ls -lh ~/Library/Mobile\ Documents/com~apple~CloudDocs/.deep-env/credentials.enc
+
+# Try manual decryption (replace PASSWORD)
+openssl enc -d -aes-256-cbc -pbkdf2 \
+  -in ~/Library/Mobile\ Documents/com~apple~CloudDocs/.deep-env/credentials.enc \
+  -pass pass:PASSWORD | wc -c
+```
+
+If the manual decryption shows a large number (>15000 bytes), the payload is too large for a single keychain entry.
+
+**Fix:**
+1. **Split credentials by project:**
+   ```bash
+   # Move project-specific credentials
+   deep-env store CRON_SECRET "value" --project
+   deep-env store SESSION_SECRET "value" --project
+   ```
+
+2. **Use environment-specific credentials:**
+   Keep global API keys (Anthropic, OpenAI) global, but store app-specific secrets per project.
+
+3. **Manual recovery (if needed):**
+   ```bash
+   # Decrypt and store manually
+   openssl enc -d -aes-256-cbc -pbkdf2 \
+     -in ~/Library/Mobile\ Documents/com~apple~CloudDocs/.deep-env/credentials.enc \
+     -pass pass:YOUR_PASSWORD | \
+     security add-generic-password -s "deep-env-credentials" -a "deep-env" -w /dev/stdin
+   ```
+
+### iCloud Sync Not Working
+
+**Diagnosis:**
+```bash
+# Check iCloud Drive status
+ls ~/Library/Mobile\ Documents/com~apple~CloudDocs/.deep-env/
+
+# Check file modification time
+stat ~/Library/Mobile\ Documents/com~apple~CloudDocs/.deep-env/credentials.enc
+```
+
+**Fix:**
+1. Open System Settings → Apple ID → iCloud Drive
+2. Ensure iCloud Drive is enabled
+3. Wait 2-3 minutes for sync to complete
+4. Try `deep-env pull` again
+
+### Large Credential Sets (80+ keys)
+
+If you have many credentials, the JSON payload may exceed macOS Keychain's limit (~16KB per entry).
+
+**Solution: Use Project-Specific Storage**
+
+Instead of storing everything globally:
+```bash
+# Global (shared across all projects)
+deep-env store ANTHROPIC_API_KEY "sk-ant-..." --global
+deep-env store OPENAI_API_KEY "sk-..." --global
+
+# Project-specific (only for this project)
+cd ~/my-project
+deep-env store CRON_SECRET "abc123" --project
+deep-env store SESSION_SECRET "xyz789" --project
+```
+
+This splits the credentials into smaller chunks that fit within Keychain limits.
+
 ## Troubleshooting
 
 ### "No credentials stored" but you had credentials
