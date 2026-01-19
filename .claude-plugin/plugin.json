@@ -1,12 +1,12 @@
 {
   "name": "claudesync",
   "description": "Sync Claude Code config, MCP servers, skills, and credentials across all your Macs",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "author": {
     "name": "Andrew Wilkinson"
   },
   "repository": "https://github.com/Folly-Partners/claudesync",
   "license": "MIT",
   "hooks": ["./hooks/hooks.json"],
-  "commands": ["./commands/setup.md"]
+  "commands": ["./commands/setup.md", "./commands/sync.md"]
 }

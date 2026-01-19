@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "runtime": {
+    "node": "20",
+    "python": "3.11"
+  },
+  "created_at": "",
+  "created_by": "",
+  "components": {
+    "skills": {},
+    "servers": {},
+    "commands": {
+      "hash": "",
+      "updated_at": 0,
+      "updated_by": ""
+    },
+    "hooks": {
+      "hash": "",
+      "updated_at": 0,
+      "updated_by": ""
+    },
+    "agents": {
+      "hash": "",
+      "updated_at": 0,
+      "updated_by": ""
+    },
+    "mcp-config": {
+      "hash": "",
+      "updated_at": 0,
+      "updated_by": "",
+      "encrypted": false
+    }
+  }
+}
