@@ -146,6 +146,15 @@ for REPO in "${REPOS[@]}"; do
                 echo "$UNCOMMITTED" | head -10 | sed 's/^/    /'
             fi
         else
+            # Check for secrets before adding files
+            if command -v gitleaks &> /dev/null; then
+                if ! gitleaks detect --no-git --no-banner 2>/dev/null; then
+                    echo -e "${RED}SECRETS DETECTED! Skipping this repo.${NC}"
+                    ERRORS=$((ERRORS + 1))
+                    echo ""
+                    continue
+                fi
+            fi
             git add -A
             if git commit -m "$MESSAGE" 2>/dev/null; then
                 echo -e "${GREEN}done${NC}"

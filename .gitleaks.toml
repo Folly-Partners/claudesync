@@ -1,0 +1,8 @@
+[extend]
+useDefault = true
+
+[[rules]]
+id = "anthropic-api-key"
+description = "Anthropic API Key"
+regex = '''sk-ant-api[a-zA-Z0-9-_]{20,}'''
+tags = ["key", "anthropic"]
