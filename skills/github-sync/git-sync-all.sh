@@ -148,8 +148,11 @@ for REPO in "${REPOS[@]}"; do
         else
             # Check for secrets before adding files
             if command -v gitleaks &> /dev/null; then
-                if ! gitleaks detect --no-git --no-banner 2>/dev/null; then
-                    echo -e "${RED}SECRETS DETECTED! Skipping this repo.${NC}"
+                GITLEAKS_OUTPUT=$(gitleaks detect --no-git --no-banner 2>&1)
+                if [ $? -ne 0 ]; then
+                    echo -e "${RED}SECRETS DETECTED!${NC}"
+                    echo "$GITLEAKS_OUTPUT" | sed 's/^/    /'
+                    echo -e "  ${YELLOW}Fix: Remove secrets from these files, or add to .gitleaks.toml allowlist${NC}"
                     ERRORS=$((ERRORS + 1))
                     echo ""
                     continue
