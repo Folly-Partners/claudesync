@@ -2,16 +2,31 @@
   "hooks": {
     "SessionStart": [
       {
-        "type": "command",
-        "command": "$CLAUDE_PLUGIN_ROOT/hooks/setup-wizard.sh"
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PLUGIN_ROOT/hooks/setup-wizard.sh"
+          }
+        ]
       },
       {
-        "type": "command",
-        "command": "$CLAUDE_PLUGIN_ROOT/skills/component-sync/component-sync.sh"
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PLUGIN_ROOT/skills/component-sync/component-sync.sh"
+          }
+        ]
       },
       {
-        "type": "command",
-        "command": "$CLAUDE_PLUGIN_ROOT/hooks/first-run-plugins.sh"
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PLUGIN_ROOT/hooks/first-run-plugins.sh"
+          }
+        ]
       }
     ],
     "UserPromptSubmit": [

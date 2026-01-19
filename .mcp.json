@@ -34,10 +34,6 @@
       "command": "npx",
       "args": ["mcp-remote", "https://mcp.tavily.com/mcp/?tavilyApiKey=${TAVILY_API_KEY}"]
     },
-    "pipedream": {
-      "type": "http",
-      "url": "https://mcp.pipedream.com/mcp/${PIPEDREAM_API_KEY}"
-    },
     "linear": {
       "type": "stdio",
       "command": "npx",
