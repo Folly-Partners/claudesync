@@ -56,9 +56,19 @@ find "$PROJECTS_DIR" -name "*.jsonl" -size +10M 2>/dev/null | while read -r FILE
     log "Processing: $FILENAME (${ORIGINAL_SIZE}MB)"
 
     if [[ "$DRY_RUN" == true ]]; then
-        # Count what would be pruned (tool_results are nested in user messages)
-        OLD_TOOL_RESULTS=$(jq -c "select(.timestamp and .timestamp < \"$CUTOFF_DATE\" and .type == \"user\") | .message.content[]? | select(.type == \"tool_result\")" "$FILE" 2>/dev/null | wc -l | tr -d ' ')
-        OLD_THINKING=$(jq -c "select(.timestamp and .timestamp < \"$THINKING_CUTOFF_DATE\" and .type == \"assistant\") | .message.content[]? | select(.type == \"thinking\")" "$FILE" 2>/dev/null | wc -l | tr -d ' ')
+        # P2-PERF-003: Count both in a single jq pass
+        read -r OLD_TOOL_RESULTS OLD_THINKING < <(jq -r --arg cutoff "$CUTOFF_DATE" --arg thinking_cutoff "$THINKING_CUTOFF_DATE" '
+            reduce inputs as $item (
+                {"tool_results": 0, "thinking": 0};
+                if $item.timestamp then
+                    if $item.timestamp < $cutoff and $item.type == "user" then
+                        .tool_results += ([$item.message.content[]? | select(.type == "tool_result")] | length)
+                    elif $item.timestamp < $thinking_cutoff and $item.type == "assistant" then
+                        .thinking += ([$item.message.content[]? | select(.type == "thinking")] | length)
+                    else . end
+                else . end
+            ) | "\(.tool_results) \(.thinking)"
+        ' -n "$FILE" 2>/dev/null || echo "0 0")
         log "  Would truncate $OLD_TOOL_RESULTS tool_results, $OLD_THINKING thinking blocks"
         continue
     fi

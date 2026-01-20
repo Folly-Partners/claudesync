@@ -6,35 +6,39 @@
 # iCloud Sync Waiting
 # ============================================================================
 
-# Wait for iCloud to finish syncing a file
+# Wait for iCloud to finish syncing a file (uses exponential backoff)
 wait_for_icloud_sync() {
     local file="$1"
-    local timeout="${2:-30}"
-    local elapsed=0
+    local max_wait="${2:-30}"
+    local delay=0.1
+    local max_delay=2
+    local total_wait=0
 
     # Check for iCloud placeholder (file not downloaded yet)
     # iCloud placeholders have .icloud extension
     local icloud_placeholder="${file%/*}/.${file##*/}.icloud"
 
-    while [ -f "$icloud_placeholder" ] && [ $elapsed -lt $timeout ]; do
+    # Exponential backoff while waiting for iCloud download
+    while [ -f "$icloud_placeholder" ]; do
+        # Check timeout using integer comparison (multiply by 10 to avoid bc)
+        local total_int=${total_wait%.*}
+        [ "${total_int:-0}" -ge "$max_wait" ] && return 1
+
         # Try to trigger download by reading the placeholder
         cat "$icloud_placeholder" > /dev/null 2>&1 || true
-        sleep 1
-        ((elapsed++))
+        sleep "$delay"
+        total_wait=$(awk "BEGIN {print $total_wait + $delay}")
+        delay=$(awk "BEGIN {d=$delay*2; print (d>$max_delay)?$max_delay:d}")
     done
-
-    # If still a placeholder, give up
-    if [ -f "$icloud_placeholder" ]; then
-        return 1
-    fi
 
     # Verify file exists and is stable (not being written)
     if [ ! -f "$file" ]; then
         return 1
     fi
 
+    # Quick stability check with shorter initial delay
     local size1=$(stat -f%z "$file" 2>/dev/null || echo 0)
-    sleep 1
+    sleep 0.2
     local size2=$(stat -f%z "$file" 2>/dev/null || echo 0)
 
     [ "$size1" = "$size2" ] && [ "$size1" -gt 0 ]
@@ -100,116 +104,98 @@ restore_from_backup() {
 }
 
 # ============================================================================
-# Pull Functions
+# Pull Functions (P1-PAT-002: Consolidated to reduce duplication)
 # ============================================================================
 
-# Pull a skill from the registry
-pull_skill() {
-    local plugin_dir="$1"
-    local skill_name="$2"
+# Generic function to pull a tarball-based component (skills, servers)
+# Usage: pull_tarball_component <tarball_path> <target_dir> <component_key> <name> [preserve_deps]
+pull_tarball_component() {
+    local tarball="$1"
+    local target_dir="$2"
+    local component_key="$3"
+    local name="$4"
+    local preserve_deps="${5:-false}"
 
-    local tarball="$REGISTRY/components/skills/${skill_name}.tar.gz"
-    local target_dir="$plugin_dir/skills/$skill_name"
     local temp_dir=$(mktemp -d)
 
     # Wait for iCloud sync
     if ! wait_for_icloud_sync "$tarball"; then
-        log_debug "iCloud sync timeout for skill: $skill_name"
+        log_debug "iCloud sync timeout for $component_key: $name"
         rm -rf "$temp_dir"
         return 1
     fi
 
     # Validate tarball
     if ! validate_tarball "$tarball"; then
-        log_debug "Invalid tarball for skill: $skill_name"
+        log_debug "Invalid tarball for $component_key: $name"
         rm -rf "$temp_dir"
         return 1
     fi
 
     # Backup current state
-    backup_component "$target_dir" "skills/$skill_name"
+    backup_component "$target_dir" "$component_key/$name"
 
     # Extract to temp directory
     if ! tar -xzf "$tarball" -C "$temp_dir" 2>/dev/null; then
-        log_debug "Extraction failed for skill: $skill_name"
+        log_debug "Extraction failed for $component_key: $name"
         rm -rf "$temp_dir"
         return 1
+    fi
+
+    # Handle dependency preservation for servers
+    local old_node_modules=""
+    local old_venv=""
+
+    if [ "$preserve_deps" = "true" ]; then
+        if [ -d "$target_dir/node_modules" ]; then
+            old_node_modules=$(mktemp -d)
+            mv "$target_dir/node_modules" "$old_node_modules/"
+        fi
+        if [ -d "$target_dir/venv" ]; then
+            old_venv=$(mktemp -d)
+            mv "$target_dir/venv" "$old_venv/"
+        fi
     fi
 
     # Atomic replace
     rm -rf "$target_dir"
     mkdir -p "$(dirname "$target_dir")"
-    mv "$temp_dir/$skill_name" "$target_dir"
-    rm -rf "$temp_dir"
+    mv "$temp_dir/$name" "$target_dir"
 
-    return 0
-}
-
-# Pull a server from the registry
-pull_server() {
-    local plugin_dir="$1"
-    local server_name="$2"
-
-    local tarball="$REGISTRY/components/servers/${server_name}.tar.gz"
-    local target_dir="$plugin_dir/servers/$server_name"
-    local temp_dir=$(mktemp -d)
-
-    # Wait for iCloud sync
-    if ! wait_for_icloud_sync "$tarball"; then
-        log_debug "iCloud sync timeout for server: $server_name"
-        rm -rf "$temp_dir"
-        return 1
-    fi
-
-    # Validate tarball
-    if ! validate_tarball "$tarball"; then
-        log_debug "Invalid tarball for server: $server_name"
-        rm -rf "$temp_dir"
-        return 1
-    fi
-
-    # Backup current state (including node_modules/venv for rollback)
-    backup_component "$target_dir" "servers/$server_name"
-
-    # Extract to temp directory
-    if ! tar -xzf "$tarball" -C "$temp_dir" 2>/dev/null; then
-        log_debug "Extraction failed for server: $server_name"
-        rm -rf "$temp_dir"
-        return 1
-    fi
-
-    # Atomic replace (preserve node_modules/venv if they exist and extraction succeeded)
-    local old_node_modules=""
-    local old_venv=""
-
-    if [ -d "$target_dir/node_modules" ]; then
-        old_node_modules=$(mktemp -d)
-        mv "$target_dir/node_modules" "$old_node_modules/"
-    fi
-
-    if [ -d "$target_dir/venv" ]; then
-        old_venv=$(mktemp -d)
-        mv "$target_dir/venv" "$old_venv/"
-    fi
-
-    rm -rf "$target_dir"
-    mkdir -p "$(dirname "$target_dir")"
-    mv "$temp_dir/$server_name" "$target_dir"
-
-    # Restore dependencies (will be rebuilt by build.sh anyway)
+    # Restore dependencies if preserved
     if [ -n "$old_node_modules" ] && [ -d "$old_node_modules/node_modules" ]; then
         mv "$old_node_modules/node_modules" "$target_dir/"
         rm -rf "$old_node_modules"
     fi
-
     if [ -n "$old_venv" ] && [ -d "$old_venv/venv" ]; then
         mv "$old_venv/venv" "$target_dir/"
         rm -rf "$old_venv"
     fi
 
     rm -rf "$temp_dir"
-
     return 0
+}
+
+# Convenience wrappers for backward compatibility
+pull_skill() {
+    local plugin_dir="$1"
+    local skill_name="$2"
+    pull_tarball_component \
+        "$REGISTRY/components/skills/${skill_name}.tar.gz" \
+        "$plugin_dir/skills/$skill_name" \
+        "skills" \
+        "$skill_name"
+}
+
+pull_server() {
+    local plugin_dir="$1"
+    local server_name="$2"
+    pull_tarball_component \
+        "$REGISTRY/components/servers/${server_name}.tar.gz" \
+        "$plugin_dir/servers/$server_name" \
+        "servers" \
+        "$server_name" \
+        "true"  # Preserve node_modules/venv
 }
 
 # Pull commands from the registry

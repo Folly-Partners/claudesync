@@ -750,6 +750,8 @@ cmd_push() {
 
     # Build env file content
     local temp_file=$(mktemp)
+    # P2-SEC-004: Ensure temp file is removed even on unexpected exit
+    trap "rm -f '$temp_file' 2>/dev/null" EXIT
     while IFS= read -r key; do
         [ -z "$key" ] && continue
         local value=$(json_get "$json" "$key")
@@ -785,6 +787,7 @@ cmd_push() {
 
         if [ "$password" != "$password2" ]; then
             rm "$temp_file"
+            trap - EXIT  # Clear the trap since we cleaned up
             print_error "Passwords don't match"
             exit 1
         fi
@@ -801,8 +804,10 @@ cmd_push() {
         fi
     fi
 
-    if openssl enc -aes-256-cbc -salt -pbkdf2 -in "$temp_file" -out "$ENCRYPTED_FILE" -pass pass:"$password" 2>/dev/null; then
+    # Use env var to pass password (prevents exposure in process listing)
+    if DEEP_ENV_PASS="$password" openssl enc -aes-256-cbc -salt -pbkdf2 -in "$temp_file" -out "$ENCRYPTED_FILE" -pass env:DEEP_ENV_PASS 2>/dev/null; then
         rm "$temp_file"
+        trap - EXIT  # Clear the trap since we cleaned up
         chmod 600 "$ENCRYPTED_FILE"
         print_success "Pushed $count credentials to iCloud"
 
@@ -816,6 +821,7 @@ cmd_push() {
         print_info "iCloud will sync this automatically to your other Macs"
     else
         rm "$temp_file"
+        trap - EXIT  # Clear the trap since we cleaned up
         print_error "Encryption failed"
         exit 1
     fi
@@ -845,9 +851,13 @@ cmd_pull() {
     fi
 
     local temp_file=$(mktemp)
+    # P2-SEC-004: Ensure temp file is removed even on unexpected exit
+    trap "rm -f '$temp_file' 2>/dev/null" EXIT
 
-    if ! openssl enc -aes-256-cbc -d -salt -pbkdf2 -in "$ENCRYPTED_FILE" -out "$temp_file" -pass pass:"$password" 2>/dev/null; then
+    # Use env var to pass password (prevents exposure in process listing)
+    if ! DEEP_ENV_PASS="$password" openssl enc -aes-256-cbc -d -salt -pbkdf2 -in "$ENCRYPTED_FILE" -out "$temp_file" -pass env:DEEP_ENV_PASS 2>/dev/null; then
         rm "$temp_file" 2>/dev/null || true
+        trap - EXIT  # Clear trap since we cleaned up
         print_error "Decryption failed - wrong password?"
         exit 1
     fi
@@ -870,6 +880,7 @@ cmd_pull() {
     done < "$temp_file"
 
     rm "$temp_file"
+    trap - EXIT  # Clear the trap since we cleaned up
 
     # Write all at once!
     if ! keychain_write_all "$json"; then

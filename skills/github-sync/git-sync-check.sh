@@ -6,7 +6,10 @@ set -e
 
 # Daily rate limiting - only run once per 24 hours unless forced
 LAST_RUN_FILE="$HOME/.claude/.git-sync-last-run"
+REPO_CACHE_FILE="$HOME/.claude/.git-repos-cache"
+REPO_CACHE_MAX_AGE=604800  # 7 days in seconds
 COOLDOWN_SECONDS=86400  # 24 hours
+MAX_PARALLEL_FETCH=5  # P2-PERF-001: Limit parallel git fetches
 
 # Check if --force flag is passed
 FORCE=false
@@ -27,6 +30,7 @@ if [ "$FORCE" = false ] && [ -f "$LAST_RUN_FILE" ]; then
 fi
 
 # Record this run
+mkdir -p "$HOME/.claude"
 date +%s > "$LAST_RUN_FILE"
 
 # ANSI colors
@@ -36,32 +40,71 @@ GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Find all git repos in home directory (excluding common non-project directories)
+# P2-PERF-002: Use cached repo list if available and fresh
+find_git_repos() {
+    find "$HOME" -maxdepth 4 -name ".git" -type d 2>/dev/null | \
+        grep -v "/Library/" | \
+        grep -v "/.Trash/" | \
+        grep -v "/node_modules/" | \
+        grep -v "/.npm/" | \
+        grep -v "/.cache/" | \
+        grep -v "/.local/" | \
+        grep -v "/.cargo/" | \
+        grep -v "/.rustup/" | \
+        grep -v "/vendor/" | \
+        grep -v "/.gem/" | \
+        grep -v "/go/pkg/" | \
+        grep -v "/.cocoapods/" | \
+        grep -v "/Pods/" | \
+        grep -v "/.claude/" | \
+        sort
+}
+
+# Check if cache is fresh (less than 7 days old)
+cache_is_fresh() {
+    if [ ! -f "$REPO_CACHE_FILE" ]; then
+        return 1
+    fi
+    local cache_mtime
+    cache_mtime=$(stat -f %m "$REPO_CACHE_FILE" 2>/dev/null || stat -c %Y "$REPO_CACHE_FILE" 2>/dev/null || echo 0)
+    local now=$(date +%s)
+    local age=$((now - cache_mtime))
+    [ "$age" -lt "$REPO_CACHE_MAX_AGE" ]
+}
+
+# Get repos from cache or rebuild
 REPOS=()
+if [ "$FORCE" = true ] || ! cache_is_fresh; then
+    # Rebuild cache
+    find_git_repos > "$REPO_CACHE_FILE"
+fi
+
 while IFS= read -r repo; do
     # Get the parent directory (the actual repo, not .git)
     repo_dir=$(dirname "$repo")
-    REPOS+=("$repo_dir")
-done < <(find "$HOME" -maxdepth 4 -name ".git" -type d 2>/dev/null | \
-    grep -v "/Library/" | \
-    grep -v "/.Trash/" | \
-    grep -v "/node_modules/" | \
-    grep -v "/.npm/" | \
-    grep -v "/.cache/" | \
-    grep -v "/.local/" | \
-    grep -v "/.cargo/" | \
-    grep -v "/.rustup/" | \
-    grep -v "/vendor/" | \
-    grep -v "/.gem/" | \
-    grep -v "/go/pkg/" | \
-    grep -v "/.cocoapods/" | \
-    grep -v "/Pods/" | \
-    grep -v "/.claude/" | \
-    sort)
+    # Verify repo still exists (cache might be stale)
+    [ -d "$repo_dir/.git" ] && REPOS+=("$repo_dir")
+done < "$REPO_CACHE_FILE"
 
 echo "========================================"
 echo "Git Sync Status Check"
 echo "========================================"
+echo ""
+
+# P2-PERF-001: Parallel git fetch with limited concurrency
+echo "Fetching updates from remotes..."
+running=0
+for REPO in "${REPOS[@]}"; do
+    if [ -d "$REPO/.git" ]; then
+        (cd "$REPO" && git fetch origin 2>/dev/null) &
+        ((running++))
+        if [ "$running" -ge "$MAX_PARALLEL_FETCH" ]; then
+            wait -n 2>/dev/null || wait  # wait -n not available on older bash
+            ((running--))
+        fi
+    fi
+done
+wait  # Wait for remaining fetches
 echo ""
 
 ISSUES_FOUND=false
@@ -75,9 +118,6 @@ for REPO in "${REPOS[@]}"; do
     echo -e "${BLUE}[$REPO_NAME]${NC} $REPO"
 
     cd "$REPO"
-
-    # Fetch quietly to update remote tracking
-    git fetch origin 2>/dev/null || true
 
     # Get default branch
     DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@' || echo "main")

@@ -56,37 +56,8 @@ compute_dir_hash() {
 
 # ============================================================================
 # Component Hash Functions
+# P2-PAT-001: Removed trivial wrappers, using compute_dir_hash directly
 # ============================================================================
-
-# Compute hash for a skill directory
-compute_skill_hash() {
-    local skill_dir="$1"
-    compute_dir_hash "$skill_dir"
-}
-
-# Compute hash for a server directory
-compute_server_hash() {
-    local server_dir="$1"
-    compute_dir_hash "$server_dir"
-}
-
-# Compute hash for commands directory
-compute_commands_hash() {
-    local commands_dir="$1"
-    compute_dir_hash "$commands_dir"
-}
-
-# Compute hash for hooks directory
-compute_hooks_hash() {
-    local hooks_dir="$1"
-    compute_dir_hash "$hooks_dir"
-}
-
-# Compute hash for agents directory
-compute_agents_hash() {
-    local agents_dir="$1"
-    compute_dir_hash "$agents_dir"
-}
 
 # Compute hash for MCP config file
 compute_mcp_config_hash() {
@@ -135,7 +106,7 @@ compute_all_local_hashes() {
         for skill_path in "$plugin_dir/skills"/*; do
             if [ -d "$skill_path" ]; then
                 local skill_name=$(basename "$skill_path")
-                local skill_hash=$(compute_skill_hash "$skill_path")
+                local skill_hash=$(compute_dir_hash "$skill_path")
                 if [ -n "$skill_hash" ]; then
                     [ -n "$skills_json" ] && skills_json+=","
                     skills_json+="\"skills/$skill_name\":\"$skill_hash\""
@@ -150,7 +121,7 @@ compute_all_local_hashes() {
         for server_path in "$plugin_dir/servers"/*; do
             if [ -d "$server_path" ]; then
                 local server_name=$(basename "$server_path")
-                local server_hash=$(compute_server_hash "$server_path")
+                local server_hash=$(compute_dir_hash "$server_path")
                 if [ -n "$server_hash" ]; then
                     [ -n "$servers_json" ] && servers_json+=","
                     servers_json+="\"servers/$server_name\":\"$server_hash\""
@@ -162,19 +133,19 @@ compute_all_local_hashes() {
     # Commands - entire directory tracked as one
     local commands_hash=""
     if [ -d "$plugin_dir/commands" ]; then
-        commands_hash=$(compute_commands_hash "$plugin_dir/commands")
+        commands_hash=$(compute_dir_hash "$plugin_dir/commands")
     fi
 
     # Hooks - entire directory tracked as one
     local hooks_hash=""
     if [ -d "$plugin_dir/hooks" ]; then
-        hooks_hash=$(compute_hooks_hash "$plugin_dir/hooks")
+        hooks_hash=$(compute_dir_hash "$plugin_dir/hooks")
     fi
 
     # Agents - entire directory tracked as one
     local agents_hash=""
     if [ -d "$plugin_dir/agents" ]; then
-        agents_hash=$(compute_agents_hash "$plugin_dir/agents")
+        agents_hash=$(compute_dir_hash "$plugin_dir/agents")
     fi
 
     # MCP config
@@ -263,7 +234,7 @@ diff_components() {
     DIFF_TO_PUSH=()
     DIFF_TO_PULL=()
 
-    # Read local hashes
+    # Read local hashes once (P1-PERF-001: cache to avoid repeated parsing)
     local local_hashes=$(cat "$local_hashes_file")
 
     # Check if remote manifest exists

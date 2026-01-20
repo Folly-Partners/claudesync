@@ -67,7 +67,8 @@ fi
 
 # Get the current username for the plist
 USERNAME=$(whoami)
-HOME_DIR=$(eval echo ~$USERNAME)
+# Use $HOME directly instead of eval to avoid command injection risks
+HOME_DIR="$HOME"
 
 # Create launch agent directory if it doesn't exist
 mkdir -p "$HOME/Library/LaunchAgents"

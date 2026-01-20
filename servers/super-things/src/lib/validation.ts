@@ -17,14 +17,16 @@ export function validateAppleScriptArg(arg: string, fieldName: string): string {
     throw new ThingsValidationError(`${fieldName} is too long (max ${maxLength} characters)`);
   }
 
-  // Block only characters that could cause shell/AppleScript injection
+  // Block characters that could cause shell/AppleScript injection
   // Single quotes are handled by the caller (replaced with '\"'\"')
-  // Block: backticks, $(), null bytes, and other shell metacharacters
-  const dangerousPattern = /[`$\x00]/;
+  // Block: backticks, $, null bytes, and control characters (newlines, etc.)
+  // Control chars could potentially break out of quoted strings in edge cases
+  // eslint-disable-next-line no-control-regex
+  const dangerousPattern = /[`$\x00-\x1f\x7f]/;
 
   if (dangerousPattern.test(arg)) {
     throw new ThingsValidationError(
-      `${fieldName} contains invalid characters (backticks, $, or null bytes not allowed)`,
+      `${fieldName} contains invalid characters (backticks, $, null bytes, or control characters not allowed)`,
       fieldName
     );
   }

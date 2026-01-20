@@ -3,7 +3,8 @@
 # Automatically syncs skills, servers, commands, hooks, agents across Macs via iCloud
 # Runs at SessionStart, completely invisible unless action needed
 
-set -e
+# P2-PAT-002: Standardized error handling
+set -eo pipefail  # Exit on error, pipe failures
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 CLAUDE_DIR="$HOME/.claude"
@@ -25,6 +26,7 @@ CONFLICT_WINDOW=300     # 5 minutes
 # Track if we need to notify about restart
 NEEDS_RESTART=false
 SYNCED_COMPONENTS=()
+DRY_RUN=0  # P3-ARCH-004: Preview mode
 
 # Source library functions
 source "$SCRIPT_DIR/lib/detect.sh"
@@ -51,6 +53,12 @@ log_error() {
     echo "[ERROR] $*" >&2
 }
 
+# P2-PAT-002: Helper for fatal errors
+die() {
+    log_error "$1"
+    exit "${2:-1}"
+}
+
 get_machine_id() {
     if [ ! -f "$MACHINE_ID_FILE" ]; then
         hostname -s > "$MACHINE_ID_FILE"
@@ -58,21 +66,35 @@ get_machine_id() {
     cat "$MACHINE_ID_FILE"
 }
 
+# P2-ARCH-002: Check required dependencies before running
+check_dependencies() {
+    local missing=()
+    command -v jq >/dev/null 2>&1 || missing+=("jq")
+    command -v tar >/dev/null 2>&1 || missing+=("tar")
+    command -v rsync >/dev/null 2>&1 || missing+=("rsync")
+    command -v shasum >/dev/null 2>&1 || missing+=("shasum")
+
+    if [ ${#missing[@]} -gt 0 ]; then
+        log_error "Missing required dependencies: ${missing[*]}"
+        log_error "Install with: brew install ${missing[*]}"
+        return 1
+    fi
+    return 0
+}
+
 # ============================================================================
-# Lock Management
+# Lock Management (P2-SEC-002: Use flock for atomic locking)
 # ============================================================================
 
 acquire_lock() {
-    if [ -f "$LOCK_FILE" ]; then
-        local pid=$(cat "$LOCK_FILE" 2>/dev/null)
-        if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
-            log_debug "Another sync is running (PID $pid)"
-            return 1
-        fi
-        # Stale lock file, remove it
-        rm -f "$LOCK_FILE"
+    # Use flock for atomic lock acquisition (avoids TOCTOU race condition)
+    exec 200>"$LOCK_FILE"
+    if ! flock -n 200; then
+        log_debug "Another sync is running"
+        return 1
     fi
-    echo $$ > "$LOCK_FILE"
+    # Lock acquired - write PID for debugging purposes
+    echo $$ >&200
     trap 'rm -f "$LOCK_FILE" "$IN_PROGRESS_FILE"' EXIT
     return 0
 }
@@ -205,10 +227,45 @@ do_rollback() {
         exit 1
     fi
 
+    # P2-SEC-003: Validate component name to prevent path traversal
+    if [[ "$component" == *".."* ]] || [[ "$component" == /* ]]; then
+        log_error "Invalid component name: path traversal not allowed"
+        exit 1
+    fi
+
+    # Validate component follows expected pattern (type/name)
+    if ! [[ "$component" =~ ^(skills|servers|commands|hooks|agents)/[a-zA-Z0-9_-]+$ ]] && \
+       ! [[ "$component" =~ ^(mcp-config|global-commands|user-claude-md)$ ]]; then
+        log_error "Invalid component format. Expected: skills/name, servers/name, etc."
+        exit 1
+    fi
+
     local backup_path="$BACKUPS_DIR/$component"
     local target_path="$PLUGIN_DIR/$component"
 
-    if [ ! -d "$backup_path" ]; then
+    # Additional safety: verify resolved paths are within expected directories
+    local resolved_backup
+    local resolved_target
+    resolved_backup=$(cd "$(dirname "$backup_path")" 2>/dev/null && pwd)/$(basename "$backup_path") || {
+        log_error "Invalid backup path"
+        exit 1
+    }
+    resolved_target=$(cd "$(dirname "$target_path")" 2>/dev/null && pwd)/$(basename "$target_path") || {
+        log_error "Invalid target path"
+        exit 1
+    }
+
+    if [[ "$resolved_backup" != "$BACKUPS_DIR"/* ]]; then
+        log_error "Backup path escapes backup directory"
+        exit 1
+    fi
+
+    if [[ "$resolved_target" != "$PLUGIN_DIR"/* ]]; then
+        log_error "Target path escapes plugin directory"
+        exit 1
+    fi
+
+    if [ ! -d "$backup_path" ] && [ ! -f "$backup_path" ]; then
         log_error "No backup found for: $component"
         echo "Available backups:"
         find "$BACKUPS_DIR" -mindepth 1 -maxdepth 2 -type d 2>/dev/null | sed "s|$BACKUPS_DIR/||" | sort
@@ -244,9 +301,12 @@ do_sync() {
     # Mark sync in progress
     mark_sync_start
 
-    # Compute local hashes
+    # Compute local hashes (use secure temp file)
     log_debug "Computing local hashes..."
-    compute_all_local_hashes "$PLUGIN_DIR" > /tmp/component-sync-local-$$.json
+    local temp_hashes
+    temp_hashes=$(mktemp) || { log_error "Failed to create temp file"; return 1; }
+    trap "rm -f '$temp_hashes'" EXIT
+    compute_all_local_hashes "$PLUGIN_DIR" > "$temp_hashes"
 
     # Load remote manifest
     local remote_manifest="$REGISTRY/manifest.json"
@@ -256,50 +316,65 @@ do_sync() {
     local now=$(date +%s)
 
     # Get lists of what needs pushing and pulling (uses global arrays)
-    diff_components /tmp/component-sync-local-$$.json "$remote_manifest"
+    diff_components "$temp_hashes" "$remote_manifest"
 
     # Push local changes (from global DIFF_TO_PUSH array)
     for component in "${DIFF_TO_PUSH[@]}"; do
-        log_debug "Pushing: $component"
-        if push_component "$PLUGIN_DIR" "$component" "$machine_id"; then
-            log_debug "Pushed: $component"
+        if [ "$DRY_RUN" = "1" ]; then
+            log_info "[DRY-RUN] Would push: $component"
+        else
+            log_debug "Pushing: $component"
+            if push_component "$PLUGIN_DIR" "$component" "$machine_id"; then
+                log_debug "Pushed: $component"
+            fi
         fi
     done
 
     # Pull remote changes (from global DIFF_TO_PULL array)
     for component in "${DIFF_TO_PULL[@]}"; do
-        log_debug "Pulling: $component"
-        if pull_component "$PLUGIN_DIR" "$component"; then
-            SYNCED_COMPONENTS+=("$component")
+        if [ "$DRY_RUN" = "1" ]; then
+            log_info "[DRY-RUN] Would pull: $component"
+        else
+            log_debug "Pulling: $component"
+            if pull_component "$PLUGIN_DIR" "$component"; then
+                SYNCED_COMPONENTS+=("$component")
 
-            # Check if this component needs restart
-            case "$component" in
-                mcp-config|hooks)
-                    NEEDS_RESTART=true
-                    ;;
-            esac
+                # Check if this component needs restart
+                case "$component" in
+                    mcp-config|hooks)
+                        NEEDS_RESTART=true
+                        ;;
+                esac
 
-            # Rebuild if it's a server
-            if [[ "$component" == servers/* ]]; then
-                local server_name="${component#servers/}"
-                if build_server_safe "$server_name"; then
-                    log_debug "Built: $server_name"
-                else
-                    log_error "Build failed: $server_name (check $BUILD_LOG)"
+                # Rebuild if it's a server
+                if [[ "$component" == servers/* ]]; then
+                    local server_name="${component#servers/}"
+                    if build_server_safe "$server_name"; then
+                        log_debug "Built: $server_name"
+                    else
+                        log_error "Build failed: $server_name (check $BUILD_LOG)"
+                    fi
                 fi
             fi
         fi
     done
 
-    # Update local state
-    mv /tmp/component-sync-local-$$.json "$STATE_FILE"
+    # Update local state (skip in dry-run mode)
+    if [ "$DRY_RUN" != "1" ]; then
+        mv "$temp_hashes" "$STATE_FILE"
+        trap - EXIT  # Remove trap since we moved the file
 
-    # Update machine state in registry
-    update_machine_state "$machine_id" "$now"
+        # Update machine state in registry
+        update_machine_state "$machine_id" "$now"
 
-    # Mark sync complete
-    mark_sync_complete
-    update_last_run
+        # Mark sync complete
+        mark_sync_complete
+        update_last_run
+    else
+        rm -f "$temp_hashes"
+        trap - EXIT
+        log_info "[DRY-RUN] Skipped state updates"
+    fi
 
     # Output summary if anything changed
     if [ ${#SYNCED_COMPONENTS[@]} -gt 0 ]; then
@@ -314,8 +389,7 @@ do_sync() {
         echo "  Claude Code restart required for changes to take effect"
     fi
 
-    # Cleanup
-    rm -f /tmp/component-sync-local-$$.json
+    # Cleanup handled by mv above (temp_hashes moved to STATE_FILE)
 }
 
 # ============================================================================
@@ -343,6 +417,11 @@ main() {
                 rollback_target="$2"
                 shift 2
                 ;;
+            --dry-run|-n)
+                # P3-ARCH-004: Preview mode
+                DRY_RUN=1
+                shift
+                ;;
             --debug|-d)
                 DEBUG=1
                 shift
@@ -354,6 +433,7 @@ main() {
                 echo "  --force, -f           Force sync (ignore 24h cooldown)"
                 echo "  --status, -s          Show sync status"
                 echo "  --rollback, -r <comp> Rollback a component"
+                echo "  --dry-run, -n         Preview changes without applying"
                 echo "  --debug, -d           Enable debug output"
                 echo "  --help, -h            Show this help"
                 exit 0
@@ -368,6 +448,11 @@ main() {
     # Ensure .claude directory exists
     mkdir -p "$CLAUDE_DIR"
     mkdir -p "$BACKUPS_DIR"
+
+    # Check dependencies (except for help which already exited)
+    if ! check_dependencies; then
+        exit 1
+    fi
 
     # Execute action
     case "$action" in

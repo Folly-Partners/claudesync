@@ -66,167 +66,107 @@ atomic_copy() {
 }
 
 # ============================================================================
-# Component Push Functions
+# Component Push Functions (P1-PAT-002: Consolidated to reduce duplication)
 # ============================================================================
 
-# Push a skill to the registry
+# Generic function to push a tarball-based component (skills, servers)
+# Usage: push_tarball_component <source_dir> <dest_subdir> <name> <machine_id>
+push_tarball_component() {
+    local source_dir="$1"
+    local dest_subdir="$2"
+    local name="$3"
+    local machine_id="$4"
+
+    local dest_dir="$REGISTRY/components/$dest_subdir"
+    local tarball="$dest_dir/${name}.tar.gz"
+    local temp_tarball="$tarball.${machine_id}.tmp"
+
+    mkdir -p "$dest_dir"
+
+    if ! create_component_tarball "$source_dir" "$temp_tarball"; then
+        rm -f "$temp_tarball"
+        return 1
+    fi
+
+    mv "$temp_tarball" "$tarball"
+    return 0
+}
+
+# Generic function to push a directory (commands, hooks, agents, global-commands)
+# Usage: push_directory_component <source_dir> <dest_subdir>
+push_directory_component() {
+    local source_dir="$1"
+    local dest_subdir="$2"
+
+    local dest_dir="$REGISTRY/components/$dest_subdir"
+
+    rm -rf "$dest_dir"
+    mkdir -p "$dest_dir"
+
+    if [ -d "$source_dir" ]; then
+        cp -r "$source_dir"/* "$dest_dir/" 2>/dev/null || true
+    fi
+
+    return 0
+}
+
+# Generic function to push a single file (mcp-config, user-claude-md)
+# Usage: push_file_component <source_file> <dest_file> <machine_id>
+push_file_component() {
+    local source_file="$1"
+    local dest_file="$2"
+    local machine_id="$3"
+
+    if [ -f "$source_file" ]; then
+        atomic_copy "$source_file" "$dest_file" "$machine_id"
+    fi
+
+    return 0
+}
+
+# Convenience wrappers for backward compatibility
 push_skill() {
     local plugin_dir="$1"
     local skill_name="$2"
     local machine_id="$3"
-
-    local skill_dir="$plugin_dir/skills/$skill_name"
-    local dest_dir="$REGISTRY/components/skills"
-    local tarball="$dest_dir/${skill_name}.tar.gz"
-    local temp_tarball="$tarball.${machine_id}.tmp"
-
-    # Ensure destination directory exists
-    mkdir -p "$dest_dir"
-
-    # Create tarball
-    if ! create_component_tarball "$skill_dir" "$temp_tarball"; then
-        rm -f "$temp_tarball"
-        return 1
-    fi
-
-    # Atomic rename
-    mv "$temp_tarball" "$tarball"
-
-    return 0
+    push_tarball_component "$plugin_dir/skills/$skill_name" "skills" "$skill_name" "$machine_id"
 }
 
-# Push a server to the registry
 push_server() {
     local plugin_dir="$1"
     local server_name="$2"
     local machine_id="$3"
-
-    local server_dir="$plugin_dir/servers/$server_name"
-    local dest_dir="$REGISTRY/components/servers"
-    local tarball="$dest_dir/${server_name}.tar.gz"
-    local temp_tarball="$tarball.${machine_id}.tmp"
-
-    # Ensure destination directory exists
-    mkdir -p "$dest_dir"
-
-    # Create tarball (excluding dependencies)
-    if ! create_component_tarball "$server_dir" "$temp_tarball"; then
-        rm -f "$temp_tarball"
-        return 1
-    fi
-
-    # Atomic rename
-    mv "$temp_tarball" "$tarball"
-
-    return 0
+    push_tarball_component "$plugin_dir/servers/$server_name" "servers" "$server_name" "$machine_id"
 }
 
-# Push commands directory to the registry
 push_commands() {
     local plugin_dir="$1"
-    local machine_id="$2"
-
-    local commands_dir="$plugin_dir/commands"
-    local dest_dir="$REGISTRY/components/commands"
-
-    # Ensure destination exists and is clean
-    rm -rf "$dest_dir"
-    mkdir -p "$dest_dir"
-
-    # Copy all command files
-    if [ -d "$commands_dir" ]; then
-        cp -r "$commands_dir"/* "$dest_dir/" 2>/dev/null || true
-    fi
-
-    return 0
+    push_directory_component "$plugin_dir/commands" "commands"
 }
 
-# Push hooks directory to the registry
 push_hooks() {
     local plugin_dir="$1"
-    local machine_id="$2"
-
-    local hooks_dir="$plugin_dir/hooks"
-    local dest_dir="$REGISTRY/components/hooks"
-
-    # Ensure destination exists and is clean
-    rm -rf "$dest_dir"
-    mkdir -p "$dest_dir"
-
-    # Copy all hook files
-    if [ -d "$hooks_dir" ]; then
-        cp -r "$hooks_dir"/* "$dest_dir/" 2>/dev/null || true
-    fi
-
-    return 0
+    push_directory_component "$plugin_dir/hooks" "hooks"
 }
 
-# Push agents directory to the registry
 push_agents() {
     local plugin_dir="$1"
-    local machine_id="$2"
-
-    local agents_dir="$plugin_dir/agents"
-    local dest_dir="$REGISTRY/components/agents"
-
-    # Ensure destination exists and is clean
-    rm -rf "$dest_dir"
-    mkdir -p "$dest_dir"
-
-    # Copy all agent files
-    if [ -d "$agents_dir" ]; then
-        cp -r "$agents_dir"/* "$dest_dir/" 2>/dev/null || true
-    fi
-
-    return 0
+    push_directory_component "$plugin_dir/agents" "agents"
 }
 
-# Push MCP config to the registry
 push_mcp_config() {
     local plugin_dir="$1"
     local machine_id="$2"
-
-    local mcp_file="$plugin_dir/.mcp.json"
-    local dest_file="$REGISTRY/components/mcp-config.json"
-
-    if [ -f "$mcp_file" ]; then
-        atomic_copy "$mcp_file" "$dest_file" "$machine_id"
-    fi
-
-    return 0
+    push_file_component "$plugin_dir/.mcp.json" "$REGISTRY/components/mcp-config.json" "$machine_id"
 }
 
-# Push global commands directory (~/.claude/commands) to the registry
 push_global_commands() {
-    local machine_id="$1"
-
-    local commands_dir="$HOME/.claude/commands"
-    local dest_dir="$REGISTRY/components/global-commands"
-
-    # Ensure destination exists and is clean
-    rm -rf "$dest_dir"
-    mkdir -p "$dest_dir"
-
-    # Copy all command files (typically .md files)
-    if [ -d "$commands_dir" ]; then
-        cp -r "$commands_dir"/* "$dest_dir/" 2>/dev/null || true
-    fi
-
-    return 0
+    push_directory_component "$HOME/.claude/commands" "global-commands"
 }
 
-# Push user CLAUDE.md file (~/.claude/CLAUDE.md) to the registry
 push_user_claude_md() {
     local machine_id="$1"
-
-    local claude_md="$HOME/.claude/CLAUDE.md"
-    local dest_file="$REGISTRY/components/user-claude-md.md"
-
-    if [ -f "$claude_md" ]; then
-        atomic_copy "$claude_md" "$dest_file" "$machine_id"
-    fi
-
-    return 0
+    push_file_component "$HOME/.claude/CLAUDE.md" "$REGISTRY/components/user-claude-md.md" "$machine_id"
 }
 
 # ============================================================================
@@ -239,7 +179,6 @@ push_component() {
     local component="$2"
     local machine_id="$3"
 
-    local hash=$(echo "$component" | jq -R -s 'rtrimstr("\n")' 2>/dev/null)
     local now=$(date +%s)
     local result=0
 
