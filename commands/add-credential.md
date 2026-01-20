@@ -1,3 +1,9 @@
+---
+name: add-credential
+description: Store a new API key or credential securely and sync to iCloud
+argument-hint: "[KEY] [VALUE]"
+---
+
 # Add a new credential
 
 Store a new API key or credential securely and sync to iCloud.

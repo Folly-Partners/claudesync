@@ -1,3 +1,8 @@
+---
+name: spush
+description: Commit and push only specific files you select from this session
+---
+
 # Session Push
 
 Commit and push only specific files from this session (you select which ones).

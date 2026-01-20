@@ -1,3 +1,8 @@
+---
+name: sync-env
+description: Sync credentials from Keychain to generate .env.local for the current project
+---
+
 # Sync environment variables to current project
 
 Sync credentials from Keychain to generate .env.local for the current project.

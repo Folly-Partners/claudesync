@@ -1,3 +1,8 @@
+---
+name: commit
+description: Commit all uncommitted changes in the current repository with auto-generated message
+---
+
 # Commit All Changes
 
 Commit all uncommitted changes in the current repository.

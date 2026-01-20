@@ -1,3 +1,9 @@
+---
+name: test
+description: Run all e2e tests, identify and fix bugs automatically, then generate a bug report
+argument-hint: "[project-name]"
+---
+
 # Test Command
 
 Switch to Sonnet 1M context model, run all e2e tests, identify and fix bugs automatically, then generate a comprehensive bug report.

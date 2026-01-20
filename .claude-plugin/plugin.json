@@ -8,5 +8,8 @@
   "repository": "https://github.com/Folly-Partners/claudesync",
   "license": "MIT",
   "hooks": ["./hooks/hooks.json"],
-  "commands": ["./commands/setup.md", "./commands/sync.md"]
+  "commands": [
+    "./commands/",
+    "./servers/super-things/commands/"
+  ]
 }

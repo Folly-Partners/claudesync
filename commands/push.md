@@ -1,3 +1,8 @@
+---
+name: push
+description: Commit all uncommitted changes and push to remote
+---
+
 # Commit and Push All Changes
 
 Commit all uncommitted changes and push to remote.

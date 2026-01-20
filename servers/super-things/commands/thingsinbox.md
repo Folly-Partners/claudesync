@@ -1,4 +1,6 @@
 ---
+name: thingsinbox
+description: Triage and organize Things inbox with learned patterns that improve from corrections over time
 model: haiku
 ---
 

@@ -1,3 +1,8 @@
+---
+name: scommit
+description: Commit only specific files you select from this session
+---
+
 # Session Commit
 
 Commit only specific files from this session (you select which ones).

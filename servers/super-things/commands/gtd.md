@@ -1,3 +1,8 @@
+---
+name: gtd
+description: Research and execute tasks from Computer and Deep Work projects with intelligent caching and delegation
+---
+
 # GTD - Get Things Done
 
 Research and execute tasks from Computer and Deep Work projects with intelligent caching and delegation.
