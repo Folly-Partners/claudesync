@@ -63,6 +63,11 @@ init_registry_if_needed() {
       "hash": "",
       "updated_at": 0,
       "updated_by": ""
+    },
+    "user-claude-md": {
+      "hash": "",
+      "updated_at": 0,
+      "updated_by": ""
     }
   }
 }
@@ -229,6 +234,40 @@ update_manifest_mcp_config() {
     mv "$temp_manifest" "$manifest"
 }
 
+# Update manifest for a single file component (e.g., user-claude-md)
+update_manifest_file() {
+    local component_type="$1"  # e.g., user-claude-md
+    local machine_id="$2"
+    local timestamp="$3"
+    local source_file="$4"
+
+    local manifest="$REGISTRY/manifest.json"
+
+    if [ ! -f "$manifest" ]; then
+        log_error "Manifest not found"
+        return 1
+    fi
+
+    # Compute hash
+    local hash=$(compute_file_hash "$source_file")
+
+    # Update manifest using jq
+    local temp_manifest=$(mktemp)
+
+    jq --arg type "$component_type" \
+       --arg hash "$hash" \
+       --argjson updated_at "$timestamp" \
+       --arg updated_by "$machine_id" \
+       '.components[$type] = {
+         "hash": $hash,
+         "updated_at": $updated_at,
+         "updated_by": $updated_by
+       }' "$manifest" > "$temp_manifest"
+
+    # Atomic update
+    mv "$temp_manifest" "$manifest"
+}
+
 # ============================================================================
 # Machine State Management
 # ============================================================================
@@ -297,6 +336,9 @@ check_for_conflict() {
             ;;
         global-commands)
             remote_updated_by=$(jq -r '.components."global-commands".updated_by // empty' "$manifest" 2>/dev/null)
+            ;;
+        user-claude-md)
+            remote_updated_by=$(jq -r '.components."user-claude-md".updated_by // empty' "$manifest" 2>/dev/null)
             ;;
     esac
 
@@ -378,6 +420,14 @@ handle_conflict() {
             if [ -f "$remote_tarball" ]; then
                 cp "$remote_tarball" "$conflict_tarball"
             fi
+            ;;
+        global-commands)
+            remote_machine=$(jq -r '.components."global-commands".updated_by // empty' "$manifest" 2>/dev/null)
+            remote_hash=$(jq -r '.components."global-commands".hash // empty' "$manifest" 2>/dev/null)
+            ;;
+        user-claude-md)
+            remote_machine=$(jq -r '.components."user-claude-md".updated_by // empty' "$manifest" 2>/dev/null)
+            remote_hash=$(jq -r '.components."user-claude-md".hash // empty' "$manifest" 2>/dev/null)
             ;;
         *)
             # For simple components, just log the conflict

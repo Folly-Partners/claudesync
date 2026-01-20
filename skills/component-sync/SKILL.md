@@ -18,10 +18,11 @@ This skill runs automatically at SessionStart (via hook) and:
 | Skills | All skill directories (SKILL.md + scripts) |
 | Servers | Custom MCP servers (source only, rebuilt on pull) |
 | Commands | Plugin slash command markdown files |
-| Global Commands | User slash commands from `~/.claude/commands/` |
 | Hooks | Hook scripts + hooks.json |
 | Agents | Agent definitions |
 | MCP Config | `.mcp.json` (contains credential references) |
+| Global Commands | User's `~/.claude/commands/` directory |
+| User CLAUDE.md | User's `~/.claude/CLAUDE.md` personal instructions |
 
 ## iCloud Registry Location
 
@@ -34,9 +35,10 @@ This skill runs automatically at SessionStart (via hook) and:
     ├── skills/*.tar.gz        # Compressed skill directories
     ├── servers/*.tar.gz       # Compressed server source (no deps)
     ├── commands/              # Plugin command markdown files
-    ├── global-commands/       # User commands from ~/.claude/commands/
     ├── hooks/                 # Hook scripts + hooks.json
-    └── agents/                # Agent definitions
+    ├── agents/                # Agent definitions
+    ├── global-commands/       # User's ~/.claude/commands/ files
+    └── user-claude-md.md      # User's ~/.claude/CLAUDE.md
 ```
 
 ## Usage

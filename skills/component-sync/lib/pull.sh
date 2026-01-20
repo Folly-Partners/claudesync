@@ -331,6 +331,34 @@ pull_global_commands() {
     return 0
 }
 
+# Pull user CLAUDE.md from the registry to ~/.claude/CLAUDE.md
+pull_user_claude_md() {
+    local source_file="$REGISTRY/components/user-claude-md.md"
+    local target_file="$HOME/.claude/CLAUDE.md"
+
+    if [ ! -f "$source_file" ]; then
+        log_debug "No user CLAUDE.md in registry"
+        return 1
+    fi
+
+    # Wait for iCloud sync
+    if ! wait_for_icloud_sync "$source_file"; then
+        log_debug "iCloud sync timeout for user CLAUDE.md"
+        return 1
+    fi
+
+    # Backup current state
+    backup_component "$target_file" "user-claude-md"
+
+    # Create parent directory if doesn't exist
+    mkdir -p "$(dirname "$target_file")"
+
+    # Copy new
+    cp "$source_file" "$target_file"
+
+    return 0
+}
+
 # ============================================================================
 # Main Pull Function
 # ============================================================================
@@ -377,6 +405,11 @@ pull_component() {
             ;;
         global-commands)
             if ! pull_global_commands; then
+                result=1
+            fi
+            ;;
+        user-claude-md)
+            if ! pull_user_claude_md; then
                 result=1
             fi
             ;;

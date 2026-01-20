@@ -215,6 +215,20 @@ push_global_commands() {
     return 0
 }
 
+# Push user CLAUDE.md file (~/.claude/CLAUDE.md) to the registry
+push_user_claude_md() {
+    local machine_id="$1"
+
+    local claude_md="$HOME/.claude/CLAUDE.md"
+    local dest_file="$REGISTRY/components/user-claude-md.md"
+
+    if [ -f "$claude_md" ]; then
+        atomic_copy "$claude_md" "$dest_file" "$machine_id"
+    fi
+
+    return 0
+}
+
 # ============================================================================
 # Main Push Function
 # ============================================================================
@@ -283,6 +297,13 @@ push_component() {
                 result=1
             fi
             ;;
+        user-claude-md)
+            if push_user_claude_md "$machine_id"; then
+                update_manifest_file "user-claude-md" "$machine_id" "$now" "$HOME/.claude/CLAUDE.md"
+            else
+                result=1
+            fi
+            ;;
         *)
             log_error "Unknown component type: $component"
             result=1
@@ -323,4 +344,5 @@ push_all_components() {
     push_component "$plugin_dir" "agents" "$machine_id"
     push_component "$plugin_dir" "mcp-config" "$machine_id"
     push_component "$plugin_dir" "global-commands" "$machine_id"
+    push_component "$plugin_dir" "user-claude-md" "$machine_id"
 }

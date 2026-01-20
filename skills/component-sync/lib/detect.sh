@@ -108,6 +108,16 @@ compute_global_commands_hash() {
     fi
 }
 
+# Compute hash for user CLAUDE.md file (~/.claude/CLAUDE.md)
+compute_user_claude_md_hash() {
+    local claude_md="$HOME/.claude/CLAUDE.md"
+    if [ -f "$claude_md" ]; then
+        compute_file_hash "$claude_md"
+    else
+        echo ""
+    fi
+}
+
 # ============================================================================
 # Main Hash Collection
 # ============================================================================
@@ -177,6 +187,10 @@ compute_all_local_hashes() {
     local global_commands_hash=""
     global_commands_hash=$(compute_global_commands_hash)
 
+    # User CLAUDE.md - ~/.claude/CLAUDE.md
+    local user_claude_md_hash=""
+    user_claude_md_hash=$(compute_user_claude_md_hash)
+
     # Build output JSON
     local output=""
 
@@ -219,6 +233,12 @@ compute_all_local_hashes() {
     if [ -n "$global_commands_hash" ]; then
         [ -n "$output" ] && output+=","
         output+="\"global-commands\":\"$global_commands_hash\""
+    fi
+
+    # Add user CLAUDE.md
+    if [ -n "$user_claude_md_hash" ]; then
+        [ -n "$output" ] && output+=","
+        output+="\"user-claude-md\":\"$user_claude_md_hash\""
     fi
 
     echo "$output"
@@ -271,7 +291,8 @@ diff_components() {
             (if .hooks.hash and .hooks.hash != "" then ["hooks"] else [] end) +
             (if .agents.hash and .agents.hash != "" then ["agents"] else [] end) +
             (if ."mcp-config".hash and ."mcp-config".hash != "" then ["mcp-config"] else [] end) +
-            (if ."global-commands".hash and ."global-commands".hash != "" then ["global-commands"] else [] end)
+            (if ."global-commands".hash and ."global-commands".hash != "" then ["global-commands"] else [] end) +
+            (if ."user-claude-md".hash and ."user-claude-md".hash != "" then ["user-claude-md"] else [] end)
         )[]
     ' 2>/dev/null)
 
@@ -314,6 +335,10 @@ diff_components() {
             global-commands)
                 remote_hash=$(echo "$remote_manifest" | jq -r '.components."global-commands".hash // empty' 2>/dev/null)
                 remote_updated_at=$(echo "$remote_manifest" | jq -r '.components."global-commands".updated_at // 0' 2>/dev/null)
+                ;;
+            user-claude-md)
+                remote_hash=$(echo "$remote_manifest" | jq -r '.components."user-claude-md".hash // empty' 2>/dev/null)
+                remote_updated_at=$(echo "$remote_manifest" | jq -r '.components."user-claude-md".updated_at // 0' 2>/dev/null)
                 ;;
         esac
 
@@ -377,6 +402,9 @@ get_remote_hash() {
         global-commands)
             jq -r '.components."global-commands".hash // empty' "$manifest_file" 2>/dev/null
             ;;
+        user-claude-md)
+            jq -r '.components."user-claude-md".hash // empty' "$manifest_file" 2>/dev/null
+            ;;
         *)
             echo ""
             ;;
@@ -416,6 +444,9 @@ get_remote_updated_at() {
             ;;
         global-commands)
             jq -r '.components."global-commands".updated_at // 0' "$manifest_file" 2>/dev/null
+            ;;
+        user-claude-md)
+            jq -r '.components."user-claude-md".updated_at // 0' "$manifest_file" 2>/dev/null
             ;;
         *)
             echo "0"
