@@ -7,10 +7,35 @@ description: Use when triaging Things inbox, creating tasks, or managing todos. 
 
 SuperThings learns from your corrections to get better at suggesting titles and projects for Things tasks.
 
-## Learning System
+## Learning System (Agent-Native)
+
+The learning system is fully agent-native via MCP tools. Agents can read, write, and query learned patterns programmatically.
+
+### MCP Tools for Learning
+
+| Tool | Purpose |
+|------|---------|
+| `things_list_patterns` | List all learned patterns (title_transforms, project_hints, exact_overrides) |
+| `things_suggest_for_task` | Get suggestion + confidence for a task title |
+| `things_log_correction` | Log a single correction to teach the system |
+| `things_update_pattern` | Adjust pattern confidence manually |
+| `things_remove_pattern` | Remove a bad or outdated pattern |
+| `things_learn_batch` | Process multiple triage decisions at once |
+
+### Example Agent Workflow
+
+An agent can now triage inbox programmatically:
+
+1. `things_get_inbox` - Get inbox items
+2. For each item: `things_suggest_for_task` - Get suggestions with confidence
+3. If confidence < 3: Use AskUserQuestion with context
+4. If confidence >= 3: Auto-apply with `[learned: Nx]` indicator
+5. `things_learn_batch` - Update patterns from decisions
+6. `things_update_todo` - Apply changes to Things
 
 ### Pattern Storage
-Learned patterns are stored in `~/claudesync/servers/super-things/data/patterns.json`:
+
+Patterns stored in `~/claudesync/servers/super-things/data/patterns.json`:
 
 ```json
 {
@@ -19,7 +44,8 @@ Learned patterns are stored in `~/claudesync/servers/super-things/data/patterns.
       "match": "^Fix ",
       "transform": "Delegate to Brianna: {original}",
       "confidence": 12,
-      "examples": ["Fix fireplace", "Fix garage door"]
+      "examples": ["Fix fireplace", "Fix garage door"],
+      "last_used": "2026-01-15T10:00:00Z"
     }
   ],
   "project_hints": {
@@ -27,189 +53,178 @@ Learned patterns are stored in `~/claudesync/servers/super-things/data/patterns.
     "research": {"Computer": 23, "Deep Work": 1},
     "call": {"Call": 18}
   },
-  "exact_overrides": {}
-}
-```
-
-### How to Use Learned Patterns
-
-**Before triaging inbox**, load patterns:
-```bash
-cat ~/claudesync/servers/super-things/data/patterns.json
-```
-
-**When suggesting titles/projects:**
-1. Check `exact_overrides` for exact title matches (highest priority)
-2. Apply `title_transforms` if regex pattern matches
-3. Extract keywords from title and check `project_hints` for weighted suggestions
-4. Fall back to hardcoded defaults if no pattern matches
-
-**Show learning indicator** when a suggestion comes from learned patterns:
-```
-"Fix dishwasher" → "Delegate to Brianna: Fix dishwasher" [learned: 12x]
-```
-
-### Logging Corrections
-
-After user confirms/modifies suggestions, log to `~/claudesync/servers/super-things/data/history.jsonl`:
-
-```json
-{"ts": "2025-12-30T10:00:00Z", "original": "Fix fireplace", "suggested_title": "Delegate to Brianna: Fix fireplace", "final_title": "Delegate to Brianna: Fix fireplace", "suggested_project": "Computer", "final_project": "Computer", "title_accepted": true, "project_accepted": true}
-```
-
-### Updating Patterns
-
-After logging, update `patterns.json`:
-
-**If suggestion accepted:** Increment confidence
-```json
-// Before: "confidence": 12
-// After:  "confidence": 13
-```
-
-**If title corrected:** Learn new transform pattern
-- Extract the transformation (what changed?)
-- Add new `title_transforms` entry or update existing
-- Add example to `examples` array
-
-**If project corrected:** Update project_hints
-```json
-// User changed "Build X" from Computer to Deep Work
-"project_hints": {
-  "build": {"Deep Work": 16, "Computer": 2}  // +1 to Deep Work
-}
-```
-
-## Confidence Thresholds
-
-- **confidence < 3**: Show suggestion, ask for confirmation
-- **confidence >= 3**: Auto-apply but show `[learned: Nx]` indicator
-- **confidence >= 10**: High confidence, apply silently
-
-## Projects Reference
-
-Current Things projects:
-- `5LwYiPJAkWGSCMHML8xaXb` - Out and About
-- `7n14Jusf7nCrLADfAANabW` - Kids/Activities
-- `EZ5uJWRtcrvJ4U852NkNQ8` - Someday
-- `Er67bc9YAur6ZeKTCBLC4c` - Call
-- `LDhUsibk3dp2ZPioQySSiu` - Computer
-- `NsSR9HR3pd2bVi2z4QHFfM` - Home
-- `WamuBi2sFwbUwpXz9NZetP` - Deep Work
-
-## External Tools
-
-SuperThings uses three external MCP tools for research and actions:
-
-### Firecrawl - Quick Research / URL Scraping
-**When to use**: URL tasks, single-page reads, video metadata
-**MCP Function**: `mcp__firecrawl-mcp__firecrawl_scrape`
-**Best for**:
-- Scraping URLs from Things tasks
-- YouTube video summaries
-- GitHub repos, articles, product pages
-- Quick single-source lookups
-
-### Tavily - Deep Research
-**When to use**: "Research X" tasks, DD (Deep Dive), competitive analysis
-**MCP Function**: `mcp__tavily__tavily_search`
-**Best for**:
-- Multi-source comprehensive research
-- Company research, market analysis
-- Current events and news
-- When you need synthesis from multiple sources
-
-### BrowserBase - Browser Automation
-**When to use**: Login-required sites, JavaScript-heavy pages, interactive tasks, screenshots
-**MCP Functions**: `mcp__browserbase__*` (navigate, click, type, screenshot, etc.)
-**Best for**:
-- Tasks requiring authentication/login
-- JavaScript-heavy or dynamic pages
-- Form filling and submissions
-- Taking screenshots for verification
-- Social media monitoring
-- Complex web apps that don't scrape well
-
-### Zapier Gmail - Email Operations
-**When to use**: Email tasks, intro tasks, delegation
-**MCP Functions**:
-- `mcp__zapier__gmail_send_email` - Send drafted emails
-- `mcp__zapier__gmail_create_draft` - Save as draft for review
-- `mcp__zapier__gmail_find_email` - Search inbox for context
-**Best for**:
-- "Email X" tasks
-- "Intro X to Y" tasks
-- "D [person]" delegation commands
-- Finding prior conversation context
-
-### Tool Selection Logic
-
-| Task Type | Tool | Action |
-|-----------|------|--------|
-| URL in task | Firecrawl | Scrape and summarize |
-| "Research X" | Tavily | Deep multi-source search |
-| "DD" command | Tavily | Expanded deep research |
-| Login-required site | BrowserBase | Navigate, authenticate, interact |
-| "Screenshot X" | BrowserBase | Capture visual state |
-| Dashboard/analytics | BrowserBase | Navigate and extract data |
-| "Email X" | Zapier | Find context → Draft → Send |
-| "Intro X to Y" | Zapier | Draft intro email → Send |
-| "D [person]" | Zapier | Draft delegation email → Send |
-
-## Research Cache System
-
-GTD research results are cached to `~/claudesync/servers/super-things/data/research-cache.json`:
-
-```json
-{
-  "last_updated": "ISO-timestamp",
-  "sessions": {
-    "session-id": {
-      "started_at": "ISO-timestamp",
-      "tasks_researched": 32,
-      "results": [
-        {
-          "task_id": "Things-UUID",
-          "task_title": "Research competitor pricing",
-          "researched_at": "ISO-timestamp",
-          "findings": "Full research text...",
-          "sources": ["url1", "url2"],
-          "user_decision": "complete|delegate|deepdive|pending",
-          "notes_updated": true
-        }
-      ]
-    }
+  "exact_overrides": {
+    "Call mom": {"title": "Call: Mom", "project": "Call", "confidence": 8}
+  },
+  "stats": {
+    "sessions_completed": 47,
+    "items_processed": 892,
+    "patterns_learned": 23,
+    "accuracy_trend": [0.60, 0.72, 0.85]
   }
 }
 ```
 
-### Cache Behavior
+### History Logging
+
+All corrections logged to `~/claudesync/servers/super-things/data/history.jsonl`:
+
+```json
+{"ts": "2026-01-20T10:00:00Z", "original": "Fix fireplace", "suggested_title": "Delegate to Brianna: Fix fireplace", "final_title": "Delegate to Brianna: Fix fireplace", "suggested_project": "Computer", "final_project": "Computer", "title_accepted": true, "project_accepted": true}
+```
+
+## Confidence Thresholds
+
+| Confidence | Behavior |
+|------------|----------|
+| < 3 | Use AskUserQuestion with context (pattern, examples) |
+| >= 3 | Auto-apply with `[learned: Nx]` indicator |
+| >= 10 | Apply silently (trusted pattern) |
+
+### AskUserQuestion for Low Confidence
+
+When confidence is below 3, present options with full context:
+
+```
+question: "Title suggestion for 'Fix fireplace'?"
+header: "2x"
+options:
+  - label: "Delegate to Brianna: Fix fireplace"
+    description: "Pattern: ^Fix → Delegate | 2x confidence | Examples: Fix garage, Fix dishwasher"
+  - label: "Fix fireplace"
+    description: "Keep original unchanged"
+```
+
+## Using the Learning Tools
+
+### Reading Patterns
+
+```
+things_list_patterns
+→ Returns all title_transforms, project_hints, exact_overrides with counts
+```
+
+### Getting Suggestions
+
+```
+things_suggest_for_task({ title: "Fix dishwasher" })
+→ {
+    original: "Fix dishwasher",
+    suggested_title: "Delegate to Brianna: Fix dishwasher",
+    suggested_project: "Computer",
+    confidence: 12,
+    pattern_source: "title_transform",
+    pattern_rule: "^Fix ",
+    examples: ["Fix fireplace", "Fix garage door"]
+  }
+```
+
+### Logging Corrections
+
+Single correction:
+```
+things_log_correction({
+  original_title: "Fix fireplace",
+  suggested_title: "Delegate to Brianna: Fix fireplace",
+  final_title: "Delegate to Brianna: Fix fireplace",
+  title_accepted: true,
+  project_accepted: true
+})
+```
+
+Batch of corrections:
+```
+things_learn_batch({
+  decisions: [
+    { original_title: "Fix X", final_title: "Delegate: Fix X", title_accepted: true },
+    { original_title: "Research Y", final_project: "Computer", project_accepted: true }
+  ]
+})
+```
+
+### Managing Patterns
+
+Update confidence:
+```
+things_update_pattern({
+  pattern_type: "title_transform",
+  key: "^Fix ",
+  confidence_delta: 1  // or set absolute with confidence: 10
+})
+```
+
+Remove bad pattern:
+```
+things_remove_pattern({
+  pattern_type: "title_transform",
+  key: "^Fix "
+})
+```
+
+## Projects Reference
+
+| Project | ID |
+|---------|-----|
+| Computer | `LDhUsibk3dp2ZPioQySSiu` |
+| Deep Work | `WamuBi2sFwbUwpXz9NZetP` |
+| Call | `Er67bc9YAur6ZeKTCBLC4c` |
+| Home | `NsSR9HR3pd2bVi2z4QHFfM` |
+| Out and About | `5LwYiPJAkWGSCMHML8xaXb` |
+| Kids/Activities | `7n14Jusf7nCrLADfAANabW` |
+| Someday | `EZ5uJWRtcrvJ4U852NkNQ8` |
+
+## External Tools
+
+SuperThings uses external MCP tools for research and actions:
+
+### Firecrawl - Quick Research / URL Scraping
+**When to use**: URL tasks, single-page reads, video metadata
+**MCP Function**: `mcp__firecrawl-mcp__firecrawl_scrape`
+**Best for**: URLs in tasks, YouTube videos, GitHub repos, articles
+
+### Tavily - Deep Research
+**When to use**: "Research X" tasks, DD (Deep Dive), competitive analysis
+**MCP Function**: `mcp__tavily__tavily_search`
+**Best for**: Multi-source research, company analysis, current events
+
+### BrowserBase - Browser Automation
+**When to use**: Login-required sites, JavaScript-heavy pages, screenshots
+**MCP Functions**: `mcp__browserbase__*`
+**Best for**: Authenticated sites, form filling, dynamic pages
+
+### Zapier Gmail - Email Operations
+**When to use**: Email tasks, intro tasks, delegation
+**MCP Functions**: `mcp__zapier__gmail_*`
+**Best for**: Email tasks, intro emails, delegation
+
+### Tool Selection
+
+| Task Type | Tool |
+|-----------|------|
+| URL in task | Firecrawl |
+| "Research X" | Tavily |
+| Login-required site | BrowserBase |
+| "Email X" | Zapier |
+
+## Research Cache System
+
+GTD research results cached to `~/claudesync/servers/super-things/data/research-cache.json`.
+
 - Results persist for 7 days
 - Use `/gtd resume` to continue a previous session
 - Say "details N" to expand cached findings
 
-### URL Task Handling (Firecrawl)
-When a task contains a URL, use `mcp__firecrawl-mcp__firecrawl_scrape`:
-1. Scrape the URL to get page content
-2. Extract title, description, key content
-3. Summarize with TLDR bullets
-4. Mark source as "Firecrawl (visited link)"
-
 ## GTD Triage Commands
 
-After research display, respond with commands:
+| Command | Action |
+|---------|--------|
+| `C` | Complete task |
+| `C [note]` | Complete with note |
+| `D [person]` | Delegate via email |
+| `DD` | Deep Dive - more research |
+| `DD [focus]` | Deep Dive with focus |
 
-| Command | Action | Example |
-|---------|--------|---------|
-| `C` | Complete task | `1: C` |
-| `C [note]` | Complete with note | `1: C already handled` |
-| `D [person]` | Delegate via Zapier email | `2: D Brianna` |
-| `D [person] [modifier]` | Delegate with context | `2: D Brianna within the next week` |
-| `DD` | Deep Dive - more research | `3: DD` |
-| `DD [focus]` | Deep Dive with focus | `3: DD focus on enterprise pricing` |
+## Slash Commands
 
-## Commands
-
-This plugin provides these slash commands:
-- `/thingsinbox` - Triage inbox with learning-based suggestions
+- `/thingsinbox` - Triage inbox with learning-based suggestions and AskUserQuestion for low confidence
 - `/gtd` - Get Things Done workflow with research caching

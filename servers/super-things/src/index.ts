@@ -12,6 +12,7 @@ import { statusToolHandler } from './tools/status.js';
 import { deleteToolHandler } from './tools/delete.js';
 import { statsToolHandler } from './tools/stats.js';
 import { bulkToolHandler } from './tools/bulk.js';
+import { learningToolHandler } from './tools/learning.js';
 import { testThingsAvailable } from './lib/applescript.js';
 import { toolRegistry } from './lib/tool-registry.js';
 
@@ -25,6 +26,7 @@ toolRegistry.registerToolHandler(statusToolHandler);
 toolRegistry.registerToolHandler(deleteToolHandler);
 toolRegistry.registerToolHandler(statsToolHandler);
 toolRegistry.registerToolHandler(bulkToolHandler);
+toolRegistry.registerToolHandler(learningToolHandler);
 
 // Create MCP server
 const server = new Server(
