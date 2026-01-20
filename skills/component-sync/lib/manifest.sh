@@ -22,6 +22,7 @@ init_registry_if_needed() {
     mkdir -p "$REGISTRY/components/commands"
     mkdir -p "$REGISTRY/components/hooks"
     mkdir -p "$REGISTRY/components/agents"
+    mkdir -p "$REGISTRY/components/global-commands"
     mkdir -p "$REGISTRY/machines"
 
     # Create initial manifest
@@ -57,6 +58,11 @@ init_registry_if_needed() {
       "updated_at": 0,
       "updated_by": "",
       "encrypted": false
+    },
+    "global-commands": {
+      "hash": "",
+      "updated_at": 0,
+      "updated_by": ""
     }
   }
 }
@@ -288,6 +294,9 @@ check_for_conflict() {
             ;;
         mcp-config)
             remote_updated_by=$(jq -r '.components."mcp-config".updated_by // empty' "$manifest" 2>/dev/null)
+            ;;
+        global-commands)
+            remote_updated_by=$(jq -r '.components."global-commands".updated_by // empty' "$manifest" 2>/dev/null)
             ;;
     esac
 

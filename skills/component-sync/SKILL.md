@@ -17,7 +17,8 @@ This skill runs automatically at SessionStart (via hook) and:
 |-----------|-------------|
 | Skills | All skill directories (SKILL.md + scripts) |
 | Servers | Custom MCP servers (source only, rebuilt on pull) |
-| Commands | Slash command markdown files |
+| Commands | Plugin slash command markdown files |
+| Global Commands | User slash commands from `~/.claude/commands/` |
 | Hooks | Hook scripts + hooks.json |
 | Agents | Agent definitions |
 | MCP Config | `.mcp.json` (contains credential references) |
@@ -32,7 +33,8 @@ This skill runs automatically at SessionStart (via hook) and:
 └── components/
     ├── skills/*.tar.gz        # Compressed skill directories
     ├── servers/*.tar.gz       # Compressed server source (no deps)
-    ├── commands/              # Command markdown files
+    ├── commands/              # Plugin command markdown files
+    ├── global-commands/       # User commands from ~/.claude/commands/
     ├── hooks/                 # Hook scripts + hooks.json
     └── agents/                # Agent definitions
 ```

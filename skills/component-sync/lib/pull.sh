@@ -308,6 +308,29 @@ pull_mcp_config() {
     return 0
 }
 
+# Pull global commands from the registry to ~/.claude/commands
+pull_global_commands() {
+    local source_dir="$REGISTRY/components/global-commands"
+    local target_dir="$HOME/.claude/commands"
+
+    if [ ! -d "$source_dir" ]; then
+        log_debug "No global commands in registry"
+        return 1
+    fi
+
+    # Backup current state
+    backup_component "$target_dir" "global-commands"
+
+    # Create target if doesn't exist
+    mkdir -p "$target_dir"
+
+    # Remove old and copy new
+    rm -rf "$target_dir"
+    cp -r "$source_dir" "$target_dir"
+
+    return 0
+}
+
 # ============================================================================
 # Main Pull Function
 # ============================================================================
@@ -349,6 +372,11 @@ pull_component() {
             ;;
         mcp-config)
             if ! pull_mcp_config "$plugin_dir"; then
+                result=1
+            fi
+            ;;
+        global-commands)
+            if ! pull_global_commands; then
                 result=1
             fi
             ;;

@@ -98,6 +98,16 @@ compute_mcp_config_hash() {
     fi
 }
 
+# Compute hash for global commands directory (~/.claude/commands)
+compute_global_commands_hash() {
+    local commands_dir="$HOME/.claude/commands"
+    if [ -d "$commands_dir" ]; then
+        compute_dir_hash "$commands_dir"
+    else
+        echo ""
+    fi
+}
+
 # ============================================================================
 # Main Hash Collection
 # ============================================================================
@@ -163,6 +173,10 @@ compute_all_local_hashes() {
         mcp_hash=$(compute_mcp_config_hash "$plugin_dir/.mcp.json")
     fi
 
+    # Global commands - ~/.claude/commands (separate from plugin commands)
+    local global_commands_hash=""
+    global_commands_hash=$(compute_global_commands_hash)
+
     # Build output JSON
     local output=""
 
@@ -199,6 +213,12 @@ compute_all_local_hashes() {
     if [ -n "$mcp_hash" ]; then
         [ -n "$output" ] && output+=","
         output+="\"mcp-config\":\"$mcp_hash\""
+    fi
+
+    # Add global commands
+    if [ -n "$global_commands_hash" ]; then
+        [ -n "$output" ] && output+=","
+        output+="\"global-commands\":\"$global_commands_hash\""
     fi
 
     echo "$output"
@@ -250,7 +270,8 @@ diff_components() {
             (if .commands.hash and .commands.hash != "" then ["commands"] else [] end) +
             (if .hooks.hash and .hooks.hash != "" then ["hooks"] else [] end) +
             (if .agents.hash and .agents.hash != "" then ["agents"] else [] end) +
-            (if ."mcp-config".hash and ."mcp-config".hash != "" then ["mcp-config"] else [] end)
+            (if ."mcp-config".hash and ."mcp-config".hash != "" then ["mcp-config"] else [] end) +
+            (if ."global-commands".hash and ."global-commands".hash != "" then ["global-commands"] else [] end)
         )[]
     ' 2>/dev/null)
 
@@ -289,6 +310,10 @@ diff_components() {
             mcp-config)
                 remote_hash=$(echo "$remote_manifest" | jq -r '.components."mcp-config".hash // empty' 2>/dev/null)
                 remote_updated_at=$(echo "$remote_manifest" | jq -r '.components."mcp-config".updated_at // 0' 2>/dev/null)
+                ;;
+            global-commands)
+                remote_hash=$(echo "$remote_manifest" | jq -r '.components."global-commands".hash // empty' 2>/dev/null)
+                remote_updated_at=$(echo "$remote_manifest" | jq -r '.components."global-commands".updated_at // 0' 2>/dev/null)
                 ;;
         esac
 
@@ -349,6 +374,9 @@ get_remote_hash() {
         mcp-config)
             jq -r '.components."mcp-config".hash // empty' "$manifest_file" 2>/dev/null
             ;;
+        global-commands)
+            jq -r '.components."global-commands".hash // empty' "$manifest_file" 2>/dev/null
+            ;;
         *)
             echo ""
             ;;
@@ -385,6 +413,9 @@ get_remote_updated_at() {
             ;;
         mcp-config)
             jq -r '.components."mcp-config".updated_at // 0' "$manifest_file" 2>/dev/null
+            ;;
+        global-commands)
+            jq -r '.components."global-commands".updated_at // 0' "$manifest_file" 2>/dev/null
             ;;
         *)
             echo "0"

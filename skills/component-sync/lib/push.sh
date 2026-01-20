@@ -196,6 +196,25 @@ push_mcp_config() {
     return 0
 }
 
+# Push global commands directory (~/.claude/commands) to the registry
+push_global_commands() {
+    local machine_id="$1"
+
+    local commands_dir="$HOME/.claude/commands"
+    local dest_dir="$REGISTRY/components/global-commands"
+
+    # Ensure destination exists and is clean
+    rm -rf "$dest_dir"
+    mkdir -p "$dest_dir"
+
+    # Copy all command files (typically .md files)
+    if [ -d "$commands_dir" ]; then
+        cp -r "$commands_dir"/* "$dest_dir/" 2>/dev/null || true
+    fi
+
+    return 0
+}
+
 # ============================================================================
 # Main Push Function
 # ============================================================================
@@ -257,6 +276,13 @@ push_component() {
                 result=1
             fi
             ;;
+        global-commands)
+            if push_global_commands "$machine_id"; then
+                update_manifest_simple "global-commands" "$machine_id" "$now" "$HOME/.claude/commands"
+            else
+                result=1
+            fi
+            ;;
         *)
             log_error "Unknown component type: $component"
             result=1
@@ -296,4 +322,5 @@ push_all_components() {
     push_component "$plugin_dir" "hooks" "$machine_id"
     push_component "$plugin_dir" "agents" "$machine_id"
     push_component "$plugin_dir" "mcp-config" "$machine_id"
+    push_component "$plugin_dir" "global-commands" "$machine_id"
 }
