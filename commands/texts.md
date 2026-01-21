@@ -13,6 +13,16 @@ Andrew's phone: +12508845375
 
 ## Phase 1: Prep
 
+### Step 0: Load Beeper Tools
+
+Load the required MCP tools (they are deferred):
+```
+ToolSearch (query: "select:mcp__beeper__search_messages")
+ToolSearch (query: "select:mcp__beeper__list_messages")
+ToolSearch (query: "select:mcp__beeper__send_message")
+ToolSearch (query: "select:mcp__beeper__archive_chat")
+```
+
 ### Step 1: Fetch Inbox
 
 **PARALLEL:** Call both together:
@@ -102,7 +112,16 @@ Options:
 - Draft selected → store (chatID, message)
 - Archive selected → store (chatID, archive-only)
 - Skip selected → store nothing, move on
-- Custom → prompt for text, store (chatID, custom-message)
+- Custom → AskUserQuestion for text, store (chatID, custom-message)
+
+**State structure (in-memory):**
+```javascript
+queued_actions = [
+  { chatID: "abc123", action: "send", message: "Sounds great!" },
+  { chatID: "def456", action: "archive_only" },
+  // skip actions are NOT stored
+]
+```
 
 **DO NOT EXECUTE ANYTHING. Just record and move to next.**
 
@@ -119,18 +138,7 @@ TRIAGE COMPLETE
 
 AskUserQuestion: "Execute all {X+Y} actions?"
 - "Yes, send and archive"
-- "Review list first"
 - "Cancel (discard all)"
-
-If "Review list first":
-```
-QUEUED ACTIONS:
-1. Mom → Send: "Sounds great, see you Sunday!"
-2. John S. → Archive (no reply)
-3. Work Group → Send: "Thanks for the heads up"
-...
-```
-Then re-ask execute confirmation.
 
 ---
 
@@ -159,13 +167,20 @@ More in inbox? Ask to fetch another batch.
 
 ---
 
-## Notes
+## Error Handling
 
-**Beeper quirks:** `search_chats` returns empty (don't use), `search_messages` limit capped at 20, 404 errors happen (retry).
+| Error | Action |
+|-------|--------|
+| Beeper 404 | Retry once after 1 second, then skip chat |
+| Beeper 429 (rate limit) | Wait 60 seconds, retry |
+| Beeper down/5xx | Stop workflow, report to user |
+| Send fails | Note failure, don't archive that chat, show in summary |
+| Haiku timeout (>30s) | Use fallback draft: "Thanks!" |
+| No contact found | Use phone number as display name |
+
+**Beeper quirks:** `search_chats` returns empty (don't use), `search_messages` limit capped at 20.
 
 **Interruptions:** Don't enter plan mode. Ask: "Execute {X} queued, or discard?"
-
-**Errors:** Beeper down → stop. Send fails → note it, don't archive that chat, show in summary.
 
 ---
 
