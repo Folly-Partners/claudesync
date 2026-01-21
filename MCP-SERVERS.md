@@ -17,6 +17,7 @@ This document describes each MCP server included in Andrews Plugin, their requir
 | GitHub | stdio | PAT | `GITHUB_PERSONAL_ACCESS_TOKEN` |
 | Supabase | stdio | API Key | `SUPABASE_ACCESS_TOKEN` |
 | Vercel | stdio | API Token | `VERCEL_API_TOKEN` |
+| Gmail | stdio | App Password | `GMAIL_EMAIL_ADDRESS`, `GMAIL_APP_PASSWORD`, `GMAIL_FULL_NAME` |
 | updike-social-api | stdio | OAuth 2.0 | (stored in keychain) |
 | updike-image-gen | stdio | API Key | `GEMINI_API_KEY` |
 | updike-audio-gen | stdio | API Key | (stored in keychain) |
@@ -261,6 +262,54 @@ deep-env store VERCEL_API_TOKEN "your-token"
 **Common Errors**:
 - `Unauthorized`: Token expired or invalid
 - `Forbidden`: Token doesn't have required permissions
+
+---
+
+### Gmail
+
+**Purpose**: Read, send, and manage Gmail emails via IMAP/SMTP.
+
+**Requirements**:
+- Gmail account with 2FA enabled
+- App Password (not your regular Gmail password)
+- IMAP enabled in Gmail settings
+
+**Setup**:
+
+1. **Enable IMAP** in Gmail: Settings → See all settings → Forwarding and POP/IMAP → Enable IMAP
+
+2. **Create App Password** at https://myaccount.google.com/apppasswords
+   - Enter name like "Claude Code"
+   - Copy the 16-character password (shown only once)
+
+3. **Store credentials**:
+```bash
+deep-env store GMAIL_EMAIL_ADDRESS "your-email@gmail.com"
+deep-env store GMAIL_APP_PASSWORD "xxxx xxxx xxxx xxxx"
+deep-env store GMAIL_FULL_NAME "Your Name"
+deep-env push  # Sync to other Macs
+```
+
+**Tools Provided**:
+| Tool | Description |
+|------|-------------|
+| `list_emails_metadata` | List emails with filtering (date, subject, sender, read status) |
+| `get_emails_content` | Get full email content by ID |
+| `send_email` | Send email with CC, BCC, HTML, attachments, reply threading |
+| `delete_emails` | Delete emails by ID |
+| `download_attachment` | Download attachments (if enabled) |
+
+**Common Errors**:
+- `Authentication failed`: Wrong password - must use App Password, not regular Gmail password
+- `App Password option missing`: Enable 2FA on your Google account first
+- `IMAP not enabled`: Enable IMAP in Gmail settings
+- `Connection refused`: Check if IMAP is blocked by corporate policy (Google Workspace)
+
+**On a New Mac**:
+```bash
+deep-env pull  # Get credentials from iCloud
+# Restart Claude Code - Gmail MCP will work automatically
+```
 
 ---
 
