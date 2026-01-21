@@ -34,18 +34,32 @@ MCPSearch (query: "select:mcp__beeper__archive_chat")
 ### Step 1: Fetch Inbox
 
 **PARALLEL:** Call both together:
-- `mcp__beeper__search_messages` (sender: "others", limit: 20, chatType: "single")
-- `mcp__beeper__search_messages` (sender: "others", limit: 20, chatType: "group")
+- `mcp__beeper__search_messages` (limit: 50, chatType: "single", excludeLowPriority: true)
+- `mcp__beeper__search_messages` (limit: 50, chatType: "group", excludeLowPriority: true)
 
-### Step 2: Filter (Relaxed)
+**CRITICAL: Do NOT use `sender: "others"`.** Include all recent messages regardless of who sent last. The API returns individual messages, not conversations—we need to over-fetch to get enough unique chats.
 
-**Only skip if:**
-- Last message is ONLY a reaction/emoji with no text (👍, ❤️, 😂 alone)
+### Step 2: Dedupe, Filter, and Cap
+
+1. **Combine** results from both calls
+2. **Dedupe by chatID** - Keep only the most recent message per unique chatID
+3. **Filter** - Only skip if last message is ONLY a reaction/emoji with no text (👍, ❤️, 😂 alone)
+4. **Sort** - By timestamp, most recent first
+5. **Cap at 10** - Take first 10 unique chats (cognitive load optimal: 4-8 items)
 
 **KEEP even if:**
 - Andrew sent last (may want to follow up or archive)
 
-**Dedupe:** By chatID if same chat appears in both results.
+**Target: 8-10 unique conversations per batch.**
+
+If fewer than 1 chat after filtering:
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+INBOX CLEAR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+No conversations need attention.
+```
+Then stop—do not proceed to Phase 2.
 
 ### Step 3: Get Details
 
@@ -53,9 +67,11 @@ MCPSearch (query: "select:mcp__beeper__archive_chat")
 - `~/.claude/scripts/contacts/search_by_phones_batch.sh "+1xxx" "+1yyy"...`
 - `mcp__beeper__list_messages` for each chat (all in same message)
 
+If `list_messages` returns empty for a chat, mark that chat with `messages: []` and display as "(no recent messages)" in Phase 2.
+
 ### Step 4: Generate Drafts
 
-**PARALLEL:** Launch ALL Haiku tasks in ONE message:
+**PARALLEL:** Launch ALL Haiku tasks in ONE message (30 second timeout each):
 
 ```
 Task (model: "haiku", subagent_type: "general-purpose", prompt: "...")
@@ -70,14 +86,16 @@ SENDER: {name}
 CONTEXT:
 {last 3-5 messages}
 
-4 options (shortest to longest):
-1. Quick (1-5 words)
-2. Brief (1 sentence)
-3. Standard (1-2 sentences)
-4. Engaged (2-3 sentences)
+2 options:
+1. Quick (1-5 words) - e.g., "Sounds great!", "Thanks!", "On it"
+2. Full (1-2 sentences) - a more complete response
 
-Skip options that don't fit the context.
+Return ONLY the two drafts, one per line. No labels, no explanations.
 ```
+
+**If Haiku times out (>30s):** Use fallback drafts:
+- Quick: "Thanks!"
+- Full: "Let me get back to you on this."
 
 ### Step 5: Prepare Display Data
 
@@ -90,7 +108,7 @@ For each chat, prepare these fields:
   - `sender`: Contact name, phone, or "You" for Andrew's messages
   - `text`: Message body (truncate to 120 chars if longer)
   - `hasMedia`: If attachment, format as `[Image]`, `[Video]`, `[File]`, `[Link]`
-- `drafts`: Array of 4 generated responses
+- `drafts`: Array of 2 generated responses (Quick and Full)
 
 ### Step 6: Announce
 
@@ -106,7 +124,34 @@ BATCH READY - {N} chats
 
 **ZERO COMPUTATION. All context is PRE-GENERATED and EMBEDDED in AskUserQuestion.**
 
-For each chat, call AskUserQuestion with context INSIDE the question field:
+---
+
+### CRITICAL: Message Display Requirements
+
+**The question field MUST include the conversation messages.**
+
+DO NOT simplify to "Response for {name}?" - this is **WRONG** and defeats the purpose. The user cannot make a decision without seeing what the other person said.
+
+**WRONG (never do this):**
+```
+Response for John Smith?
+```
+
+**CORRECT (always do this):**
+```
+**[1/10] John Smith** (iMessage)
+
+John: "Hey, want to grab dinner tonight?"
+John: "I was thinking that new Thai place"
+
+Response?
+```
+
+---
+
+### Required Question Format
+
+For each chat, call AskUserQuestion with this **EXACT** format:
 
 ```javascript
 AskUserQuestion({
@@ -119,10 +164,8 @@ Response?`,
     header: `${queuedCount}q`,
     multiSelect: false,
     options: [
-      { label: "1", description: truncate(draft1, 80) },
-      { label: "2", description: truncate(draft2, 80) },
-      { label: "3", description: truncate(draft3, 80) },
-      { label: "4", description: truncate(draft4, 80) },
+      { label: "Quick", description: truncate(quickDraft, 80) },
+      { label: "Full", description: truncate(fullDraft, 80) },
       { label: "Archive", description: "No reply, mark done" },
       { label: "Skip", description: "Leave in inbox" }
     ]
@@ -130,32 +173,38 @@ Response?`,
 })
 ```
 
-**Message Formatting Rules:**
+### Message Formatting Instructions
 
-```javascript
-function formatMessages(messages) {
-  const toShow = messages.slice(-3); // Last 3 messages
-  const earlier = messages.length - 3;
+Build the message display by following these steps exactly:
 
-  let result = '';
-  if (earlier > 0) {
-    result += `... (${earlier} earlier)\n`;
-  }
+1. Take the last 3 messages from the `messages` array
+2. If there were more than 3 messages total, prepend `... ({N} earlier)\n` where N is the count of earlier messages
+3. For each message to display:
+   - If the message has media (`hasMedia`), use that value (e.g., `[Image]`)
+   - Otherwise, use the text content (truncate to 120 chars if longer)
+   - Format as: `{sender}: "{content}"\n`
+4. Combine all lines, trim trailing whitespace
 
-  for (const m of toShow) {
-    const content = m.hasMedia ? m.hasMedia : truncate(m.text, 120);
-    result += `${m.sender}: "${content}"\n`;
-  }
+**Example transformation:**
 
-  return result.trim();
-}
+Input messages array (5 messages):
+```
+[msg1, msg2, msg3, msg4, msg5]  // msg5 is most recent
 ```
 
-**Example outputs:**
-
-Single DM:
+Output string:
 ```
-**[1/8] John Smith** (iMessage)
+... (2 earlier)
+Sarah: "Where should we go?"
+Mike: "How about Thai?"
+Sarah: "1pm?"
+```
+
+### Format Examples
+
+**Single DM:**
+```
+**[1/10] John Smith** (iMessage)
 
 John: "Hey, want to grab dinner tonight?"
 John: "I was thinking that new Thai place"
@@ -163,21 +212,20 @@ John: "I was thinking that new Thai place"
 Response?
 ```
 
-Group chat:
+**Group chat:**
 ```
-**[3/8] Team Lunch** (WhatsApp - 4 people)
+**[3/10] Team Lunch** (WhatsApp - 4 people)
 
 Sarah: "Where should we go?"
 Mike: "How about Thai?"
-You: "Works for me"
 Sarah: "1pm?"
 
 Response?
 ```
 
-With media:
+**With media:**
 ```
-**[5/8] Sarah** (iMessage)
+**[5/10] Sarah** (iMessage)
 
 Sarah: "[Image]"
 Sarah: "What do you think of this design?"
@@ -185,9 +233,9 @@ Sarah: "What do you think of this design?"
 Response?
 ```
 
-Long thread:
+**Long thread:**
 ```
-**[7/8] Project Chat** (Slack - 6 people)
+**[7/10] Project Chat** (Slack - 6 people)
 
 ... (4 earlier)
 Alex: "We need to decide on the database schema..."
@@ -197,20 +245,32 @@ Alex: "What about the scaling concerns?"
 Response?
 ```
 
-Unknown contact:
+**Unknown contact:**
 ```
-**[8/8] +1 415 555-0123** (SMS)
+**[8/10] +1 415 555-0123** (SMS)
 
 +1 415 555-0123: "Hi, this is Mike from the conference..."
 
 Response?
 ```
 
-**Recording selections:**
-- Draft selected → store (chatID, message)
-- Archive → store (chatID, archive-only)
-- Skip → don't record, move on
-- Custom (Other) → ask for message text, store (chatID, custom-message)
+**Empty messages (rare edge case):**
+```
+**[9/10] Jane Doe** (iMessage)
+
+(no recent messages)
+
+Response?
+```
+
+---
+
+### Recording Selections
+
+- **Quick or Full** → store `{ chatID, action: "send", message: selectedDraft }`
+- **Archive** → store `{ chatID, action: "archive_only" }`
+- **Skip** → don't record, move to next
+- **Other (custom)** → ask for message text, store `{ chatID, action: "send", message: customText }`
 
 **State structure (in-memory):**
 ```javascript
@@ -222,6 +282,27 @@ queued_actions = [
 ```
 
 **DO NOT EXECUTE ANYTHING. Just record and move to next.**
+
+---
+
+### Checkpoint Every 5 Chats
+
+After processing chat 5 (and 10, 15, etc.), show a checkpoint:
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CHECKPOINT - {processed}/{total}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Replies queued: {X}
+Archives queued: {Y}
+```
+
+Then AskUserQuestion:
+- "Continue" - proceed with next 5
+- "Execute now" - go to batch confirmation
+- "Stop" - discard all and exit
+
+---
 
 ### End of Rapid-Fire: Batch Confirmation
 
@@ -273,10 +354,11 @@ More in inbox? Ask to fetch another batch.
 | Beeper 429 (rate limit) | Wait 60 seconds, retry |
 | Beeper down/5xx | Stop workflow, report to user |
 | Send fails | Note failure, don't archive that chat, show in summary |
-| Haiku timeout (>30s) | Use fallback draft: "Thanks!" |
+| Haiku timeout (>30s) | Use fallback drafts: "Thanks!" and "Let me get back to you on this." |
 | No contact found | Use phone number as display name |
+| Empty messages | Show "(no recent messages)" in question |
 
-**Beeper quirks:** `search_chats` returns empty (don't use), `search_messages` limit capped at 20.
+**Beeper quirks:** `search_chats` returns empty (don't use), `search_messages` returns individual messages (over-fetch and dedupe).
 
 **Interruptions:** Don't enter plan mode. Ask: "Execute {X} queued, or discard?"
 
@@ -284,7 +366,7 @@ More in inbox? Ask to fetch another batch.
 
 ## Voice Examples
 
-Good: "Sounds great!" / "Let me check." / "Thanks!"
+Good: "Sounds great!" / "Let me check." / "Thanks!" / "On my way"
 Avoid: "That sounds great to me!" / "I'll definitely look into that for you!"
 
 ---
