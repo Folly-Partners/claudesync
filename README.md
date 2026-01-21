@@ -273,7 +273,7 @@ deep-env pull      # Pull from iCloud
 
 | Version | Changes |
 |---------|---------|
-| **1.9.0** | Migrated web-design-guidelines, vercel-react-best-practices skills; /lfg command; 5 safety/productivity hooks |
+| **2.0.0** | Migrated web-design-guidelines, vercel-react-best-practices skills; /lfg command; 5 safety/productivity hooks |
 | **1.8.0** | Added Updike social engine, /email and /texts commands, 5 MCP servers |
 | **1.4.0** | Fixed marketplace schema, cleaned up sensitive files |
 | **1.3.0** | Major cleanup, improved documentation |
