@@ -35,6 +35,41 @@
     "browserbase": {
       "type": "http",
       "url": "https://server.smithery.ai/@browserbasehq/mcp-browserbase/mcp"
+    },
+    "updike-social-api": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["tsx", "${HOME}/claudesync/servers/updike-social-api/src/index.ts"],
+      "env": {}
+    },
+    "updike-image-gen": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["tsx", "${HOME}/claudesync/servers/updike-image-gen/src/index.ts"],
+      "env": {
+        "GEMINI_API_KEY": "${GEMINI_API_KEY}"
+      }
+    },
+    "updike-audio-gen": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["tsx", "${HOME}/claudesync/servers/updike-audio-gen/src/index.ts"],
+      "env": {}
+    },
+    "updike-content-archive": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["tsx", "${HOME}/claudesync/servers/updike-content-archive/src/index.ts"],
+      "env": {
+        "PINECONE_API_KEY": "${PINECONE_API_KEY}",
+        "ANTHROPIC_API_KEY": "${ANTHROPIC_API_KEY}"
+      }
+    },
+    "updike-webflow": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["${HOME}/claudesync/servers/updike-webflow/dist/index.js"],
+      "env": {}
     }
   }
 }
