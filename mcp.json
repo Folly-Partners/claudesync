@@ -73,7 +73,7 @@
     },
     "gmail": {
       "type": "stdio",
-      "command": "uvx",
+      "command": "${HOME}/.local/bin/uvx",
       "args": ["mcp-email-server@latest", "stdio"],
       "env": {
         "MCP_EMAIL_SERVER_ACCOUNT_NAME": "gmail",
