@@ -75,6 +75,22 @@
       "env": {
         "VERCEL_API_TOKEN": "${VERCEL_API_TOKEN}"
       }
+    },
+    "gmail": {
+      "type": "stdio",
+      "command": "${HOME}/.local/bin/uvx",
+      "args": ["mcp-email-server@latest", "stdio"],
+      "env": {
+        "MCP_EMAIL_SERVER_ACCOUNT_NAME": "gmail",
+        "MCP_EMAIL_SERVER_FULL_NAME": "${GMAIL_FULL_NAME}",
+        "MCP_EMAIL_SERVER_EMAIL_ADDRESS": "${GMAIL_EMAIL_ADDRESS}",
+        "MCP_EMAIL_SERVER_USER_NAME": "${GMAIL_EMAIL_ADDRESS}",
+        "MCP_EMAIL_SERVER_PASSWORD": "${GMAIL_APP_PASSWORD}",
+        "MCP_EMAIL_SERVER_IMAP_HOST": "imap.gmail.com",
+        "MCP_EMAIL_SERVER_IMAP_PORT": "993",
+        "MCP_EMAIL_SERVER_SMTP_HOST": "smtp.gmail.com",
+        "MCP_EMAIL_SERVER_SMTP_PORT": "465"
+      }
     }
   }
 }
