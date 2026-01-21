@@ -80,7 +80,7 @@
         ]
       }
     ],
-    "PreStop": [
+    "Stop": [
       {
         "matcher": "",
         "hooks": [
