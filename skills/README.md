@@ -14,6 +14,7 @@ Skills extend Claude Code with specialized capabilities that trigger automatical
 | Auto-commit at milestones | [commit-milestones](commit-milestones/SKILL.md) |
 | First-run plugin recommendations | [first-run-plugins](first-run-plugins/SKILL.md) |
 | MCP config management | [mcp-sync](mcp-sync/SKILL.md) |
+| Post to social, search content, generate images | [updike](updike/SKILL.md) |
 
 ## Available Skills
 
@@ -40,6 +41,9 @@ Shows plugin recommendations on first run after claudesync setup. Offers to inst
 
 ### [mcp-sync](mcp-sync/)
 Manages MCP server configuration with `${VAR}` expansion for credentials stored in deep-env.
+
+### [updike](updike/)
+Social content engine for Andrew Wilkinson. Post to X/LinkedIn/Instagram/Threads, search 6,600+ content archive pieces, generate quote cards and carousels, create voice narration.
 
 ## How Skills Work
 

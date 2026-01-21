@@ -17,6 +17,11 @@ This document describes each MCP server included in Andrews Plugin, their requir
 | GitHub | stdio | PAT | `GITHUB_PERSONAL_ACCESS_TOKEN` |
 | Supabase | stdio | API Key | `SUPABASE_ACCESS_TOKEN` |
 | Vercel | stdio | API Token | `VERCEL_API_TOKEN` |
+| updike-social-api | stdio | OAuth 2.0 | (stored in keychain) |
+| updike-image-gen | stdio | API Key | `GEMINI_API_KEY` |
+| updike-audio-gen | stdio | API Key | (stored in keychain) |
+| updike-content-archive | stdio | API Key | `PINECONE_API_KEY`, `ANTHROPIC_API_KEY` |
+| updike-webflow | stdio | API Key | (stored in keychain) |
 
 ---
 
@@ -256,6 +261,69 @@ deep-env store VERCEL_API_TOKEN "your-token"
 **Common Errors**:
 - `Unauthorized`: Token expired or invalid
 - `Forbidden`: Token doesn't have required permissions
+
+---
+
+### updike-social-api
+
+**Purpose**: Post to X/Twitter, LinkedIn, Instagram, Threads.
+
+**Requirements**:
+- OAuth credentials stored in macOS Keychain
+
+**Setup**: Credentials managed via OAuth flows, no manual setup needed.
+
+---
+
+### updike-image-gen
+
+**Purpose**: Generate branded images with Gemini AI.
+
+**Requirements**:
+- `GEMINI_API_KEY` from Google AI Studio
+
+**Setup**:
+```bash
+deep-env store GEMINI_API_KEY "your-api-key"
+```
+
+---
+
+### updike-audio-gen
+
+**Purpose**: Generate voice narration using ElevenLabs.
+
+**Requirements**:
+- ElevenLabs account with cloned voice
+
+**Setup**: Voice ID stored in keychain, no manual config needed.
+
+---
+
+### updike-content-archive
+
+**Purpose**: Semantic search across content archive.
+
+**Requirements**:
+- `PINECONE_API_KEY` from Pinecone
+- `ANTHROPIC_API_KEY` for embeddings
+
+**Setup**:
+```bash
+deep-env store PINECONE_API_KEY "your-api-key"
+deep-env store ANTHROPIC_API_KEY "sk-ant-..."
+```
+
+---
+
+### updike-webflow
+
+**Purpose**: Webflow CMS management with 63 tools.
+
+**Requirements**:
+- Webflow API token
+
+**Setup**: Token stored in keychain via deep-env.
 
 ---
 

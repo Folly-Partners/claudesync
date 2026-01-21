@@ -18,6 +18,8 @@ Slash commands for common tasks. Type `/command-name` in Claude Code to invoke.
 | `/github-sync` | Check git status across repositories |
 | `/test` | Run tests for current project |
 | `/deepcodereview` | Deep code review with AI analysis |
+| `/email` | Rapid-fire email processing with AI drafts |
+| `/texts` | Process text messages with AI responses |
 
 ## Categories
 
@@ -52,6 +54,13 @@ Slash commands for common tasks. Type `/command-name` in Claude Code to invoke.
 |---------|------|-------------|
 | `/test` | [test.md](test.md) | Run test suite for current project |
 | `/deepcodereview` | [deepcodereview.md](deepcodereview.md) | Comprehensive code review |
+
+### Communication Commands
+
+| Command | File | Description |
+|---------|------|-------------|
+| `/email` | [email.md](email.md) | Parallel prep email triage with learning system |
+| `/texts` | [texts.md](texts.md) | Rapid-fire text message processing via Beeper |
 
 ## Usage
 

@@ -39,13 +39,13 @@ Now do it again on your other Mac. And again. And keep them all in sync when you
 /plugin install claudesync@Folly
 ```
 
-That's it. You now have access to 11 MCP servers, 11 commands, 5 skills, and 3 custom agents.
+That's it. You now have access to 16 MCP servers, 13 commands, 6 skills, and 3 custom agents.
 
 ---
 
 ## What You Get
 
-### MCP Servers (11)
+### MCP Servers (16)
 
 | Server | What it does |
 |--------|--------------|
@@ -60,10 +60,15 @@ That's it. You now have access to 11 MCP servers, 11 commands, 5 skills, and 3 c
 | **Unifi** | Manage your UniFi network |
 | **GitHub** | Repository operations without OAuth hassle |
 | **Supabase** | Database queries and management |
+| **updike-social-api** | Post to X, LinkedIn, Instagram, Threads |
+| **updike-image-gen** | Generate quote cards, carousels, branded images |
+| **updike-audio-gen** | Generate voice narration with ElevenLabs |
+| **updike-content-archive** | Search 6,600+ pieces of content via Pinecone |
+| **updike-webflow** | Manage Webflow CMS with 63 tools |
 
 Full setup guide: [MCP-SERVERS.md](MCP-SERVERS.md)
 
-### Commands (11)
+### Commands (13)
 
 **Git shortcuts:**
 - `/commit` — Stage everything, generate a smart commit message, done
@@ -81,7 +86,11 @@ Full setup guide: [MCP-SERVERS.md](MCP-SERVERS.md)
 - `/test [project]` — Run tests, find bugs, fix them automatically
 - `/deepcodereview [project]` — Hours-long autonomous code review
 
-### Skills (5)
+**Communication:**
+- `/email` — Rapid-fire email processing with AI-generated drafts
+- `/texts` — Process text messages with AI responses
+
+### Skills (6)
 
 **deep-env** — The secret sauce. Stores all your API keys in macOS Keychain, syncs them encrypted via iCloud. One password prompt. Ever.
 
@@ -98,6 +107,8 @@ deep-env sync .                       # Generate .env.local
 **history-pruner** — Conversation history getting huge? This cleans it up while keeping what matters.
 
 **mcp-sync** — Validates your MCP config. Catches broken `${VAR}` expansions before they bite you.
+
+**updike** — Social content engine. Post to platforms, search content archives, generate images and audio.
 
 ### Agents (3)
 
@@ -207,13 +218,14 @@ deep-env sync .
 
 ```
 ~/claudesync/
-├── commands/        # 11 slash commands
-├── skills/          # 5 reusable workflows
+├── commands/        # 13 slash commands
+├── skills/          # 6 reusable workflows
 ├── agents/          # 3 custom AI agents
 ├── servers/         # Custom MCP servers
 │   ├── super-things/   # Things 3 (TypeScript)
 │   ├── trmnl/          # TRMNL display (TypeScript)
-│   └── unifi/          # Network management (Python)
+│   ├── unifi/          # Network management (Python)
+│   └── updike-*/       # Updike social engine (5 servers)
 ├── hooks/           # Session start & prompt hooks
 ├── mcp.json         # MCP server configuration
 └── CLAUDE.md        # Instructions for Claude
@@ -256,6 +268,7 @@ deep-env pull      # Pull from iCloud
 
 | Version | Changes |
 |---------|---------|
+| **1.8.0** | Added Updike social engine, /email and /texts commands, 5 MCP servers |
 | **1.4.0** | Fixed marketplace schema, cleaned up sensitive files |
 | **1.3.0** | Major cleanup, improved documentation |
 | **1.2.0** | Auto-discovery for git repos |
