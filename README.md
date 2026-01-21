@@ -39,7 +39,7 @@ Now do it again on your other Mac. And again. And keep them all in sync when you
 /plugin install claudesync@Folly
 ```
 
-That's it. You now have access to 16 MCP servers, 14 commands, 11 skills, and 3 custom agents.
+That's it. You now have access to 16 MCP servers, 15 commands, 11 skills, and 3 custom agents.
 
 ---
 
@@ -223,8 +223,8 @@ deep-env sync .
 
 ```
 ~/claudesync/
-├── commands/        # 13 slash commands
-├── skills/          # 6 reusable workflows
+├── commands/        # 15 slash commands
+├── skills/          # 11 reusable workflows
 ├── agents/          # 3 custom AI agents
 ├── servers/         # Custom MCP servers
 │   ├── super-things/   # Things 3 (TypeScript)
