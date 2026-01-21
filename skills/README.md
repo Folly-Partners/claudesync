@@ -15,6 +15,8 @@ Skills extend Claude Code with specialized capabilities that trigger automatical
 | First-run plugin recommendations | [first-run-plugins](first-run-plugins/SKILL.md) |
 | MCP config management | [mcp-sync](mcp-sync/SKILL.md) |
 | Post to social, search content, generate images | [updike](updike/SKILL.md) |
+| Review UI for accessibility/design compliance | [web-design-guidelines](web-design-guidelines/SKILL.md) |
+| React/Next.js performance optimization | [vercel-react-best-practices](vercel-react-best-practices/SKILL.md) |
 
 ## Available Skills
 
@@ -44,6 +46,12 @@ Manages MCP server configuration with `${VAR}` expansion for credentials stored 
 
 ### [updike](updike/)
 Social content engine for Andrew Wilkinson. Post to X/LinkedIn/Instagram/Threads, search 6,600+ content archive pieces, generate quote cards and carousels, create voice narration.
+
+### [web-design-guidelines](web-design-guidelines/)
+Reviews UI code for compliance with Web Interface Guidelines. Fetches fresh guidelines from Vercel Labs GitHub and checks files against all rules. Triggers on "review my UI", "check accessibility", "audit design".
+
+### [vercel-react-best-practices](vercel-react-best-practices/)
+45 prioritized React/Next.js performance optimization rules from Vercel Engineering. Covers eliminating waterfalls, bundle optimization, server-side performance, re-render optimization, and more.
 
 ## How Skills Work
 

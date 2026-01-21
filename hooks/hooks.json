@@ -27,6 +27,15 @@
             "command": "$CLAUDE_PLUGIN_ROOT/hooks/first-run-plugins.sh"
           }
         ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PLUGIN_ROOT/hooks/merge-permissions.sh"
+          }
+        ]
       }
     ],
     "UserPromptSubmit": [
@@ -36,6 +45,48 @@
           {
             "type": "command",
             "command": "$CLAUDE_PLUGIN_ROOT/hooks/set-tab-title.sh"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PLUGIN_ROOT/hooks/blast-radius-guard.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PLUGIN_ROOT/hooks/auto-format.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PLUGIN_ROOT/hooks/show-plan.sh"
+          }
+        ]
+      }
+    ],
+    "PreStop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PLUGIN_ROOT/hooks/stop-guard.sh"
           }
         ]
       }

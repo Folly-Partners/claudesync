@@ -39,7 +39,7 @@ Now do it again on your other Mac. And again. And keep them all in sync when you
 /plugin install claudesync@Folly
 ```
 
-That's it. You now have access to 16 MCP servers, 13 commands, 6 skills, and 3 custom agents.
+That's it. You now have access to 16 MCP servers, 14 commands, 11 skills, and 3 custom agents.
 
 ---
 
@@ -68,7 +68,7 @@ That's it. You now have access to 16 MCP servers, 13 commands, 6 skills, and 3 c
 
 Full setup guide: [MCP-SERVERS.md](MCP-SERVERS.md)
 
-### Commands (13)
+### Commands (14)
 
 **Git shortcuts:**
 - `/commit` — Stage everything, generate a smart commit message, done
@@ -85,12 +85,13 @@ Full setup guide: [MCP-SERVERS.md](MCP-SERVERS.md)
 **Power tools:**
 - `/test [project]` — Run tests, find bugs, fix them automatically
 - `/deepcodereview [project]` — Hours-long autonomous code review
+- `/lfg [feature]` — Full autonomous engineering workflow (plan → build → review → test)
 
 **Communication:**
 - `/email` — Rapid-fire email processing with AI-generated drafts
 - `/texts` — Process text messages with AI responses
 
-### Skills (6)
+### Skills (11)
 
 **deep-env** — The secret sauce. Stores all your API keys in macOS Keychain, syncs them encrypted via iCloud. One password prompt. Ever.
 
@@ -109,6 +110,10 @@ deep-env sync .                       # Generate .env.local
 **mcp-sync** — Validates your MCP config. Catches broken `${VAR}` expansions before they bite you.
 
 **updike** — Social content engine. Post to platforms, search content archives, generate images and audio.
+
+**web-design-guidelines** — Reviews UI code for Web Interface Guidelines compliance. Fetches fresh rules from Vercel Labs.
+
+**vercel-react-best-practices** — 45 prioritized React/Next.js performance rules covering waterfalls, bundles, server/client patterns.
 
 ### Agents (3)
 
@@ -268,6 +273,7 @@ deep-env pull      # Pull from iCloud
 
 | Version | Changes |
 |---------|---------|
+| **1.9.0** | Migrated web-design-guidelines, vercel-react-best-practices skills; /lfg command; 5 safety/productivity hooks |
 | **1.8.0** | Added Updike social engine, /email and /texts commands, 5 MCP servers |
 | **1.4.0** | Fixed marketplace schema, cleaned up sensitive files |
 | **1.3.0** | Major cleanup, improved documentation |
