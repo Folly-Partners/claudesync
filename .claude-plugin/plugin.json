@@ -1,6 +1,6 @@
 {
   "name": "claudesync",
-  "description": "Sync Claude Code config, MCP servers, skills, and credentials across all your Macs. Now includes Updike social engine, /email, and /texts commands.",
+  "description": "Sync Claude Code config, MCP servers, skills, and credentials across all your Macs. Now includes Updike social engine and /email command.",
   "version": "2.3.0",
   "author": {
     "name": "Andrew Wilkinson"

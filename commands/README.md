@@ -20,7 +20,6 @@ Slash commands for common tasks. Type `/command-name` in Claude Code to invoke.
 | `/deepcodereview` | Deep code review with AI analysis |
 | `/lfg` | Full autonomous engineering workflow |
 | `/email` | Rapid-fire email processing with AI drafts |
-| `/texts` | Process text messages with AI responses |
 
 ## Categories
 
@@ -62,7 +61,6 @@ Slash commands for common tasks. Type `/command-name` in Claude Code to invoke.
 | Command | File | Description |
 |---------|------|-------------|
 | `/email` | [email.md](email.md) | Parallel prep email triage with learning system |
-| `/texts` | [texts.md](texts.md) | Rapid-fire text message processing via Beeper |
 
 ## Usage
 
