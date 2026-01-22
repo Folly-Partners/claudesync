@@ -174,7 +174,11 @@ It'll walk you through:
 # 2. Pull your credentials from iCloud
 deep-env pull
 
-# 3. Done. Everything's synced.
+# 3. Set up Updike servers (if using social/content features)
+git clone https://github.com/Folly-Partners/updike.git ~/updike
+cd ~/updike/mcp-servers/webflow && npm install && npm run build
+
+# 4. Done. Everything's synced.
 ```
 
 ### Manual Setup (if you prefer)
@@ -229,11 +233,18 @@ deep-env sync .
 ├── servers/         # Custom MCP servers
 │   ├── super-things/   # Things 3 (TypeScript)
 │   ├── trmnl/          # TRMNL display (TypeScript)
-│   ├── unifi/          # Network management (Python)
-│   └── updike-*/       # Updike social engine (5 servers)
+│   └── unifi/          # Network management (Python)
 ├── hooks/           # Session start & prompt hooks
 ├── mcp.json         # MCP server configuration
 └── CLAUDE.md        # Instructions for Claude
+
+~/updike/            # Updike social engine (separate repo)
+└── mcp-servers/
+    ├── social-api/     # Post to X, LinkedIn, etc.
+    ├── image-gen/      # Quote cards, carousels
+    ├── audio-gen/      # Voice narration
+    ├── content-archive/ # Pinecone search
+    └── webflow/        # Webflow CMS (63 tools)
 ```
 
 ---
@@ -265,6 +276,17 @@ deep-env pull      # Pull from iCloud
 **Git sync issues?**
 ```bash
 ~/claudesync/skills/github-sync/git-sync-check.sh --force
+```
+
+**Updike servers not working?**
+```bash
+# Clone the updike repo if missing
+git clone https://github.com/Folly-Partners/updike.git ~/updike
+
+# Build the webflow server (required)
+cd ~/updike/mcp-servers/webflow && npm install && npm run build
+
+# Restart Claude Code to reload MCP servers
 ```
 
 ---

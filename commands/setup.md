@@ -114,7 +114,31 @@ For each selected server that needs credentials:
 3. Store: `deep-env store KEY_NAME "value"`
 4. After all credentials: `deep-env push`
 
-### 7. Marketplace Registration
+### 7. Updike MCP Servers
+
+The 5 updike MCP servers require the `~/updike` repository to be cloned and built.
+
+- **Check:** `ls ~/updike/mcp-servers/social-api/src/index.ts`
+- **Clone if missing:**
+```bash
+git clone https://github.com/Folly-Partners/updike.git ~/updike
+```
+- **Build webflow server** (only server requiring compilation):
+```bash
+cd ~/updike/mcp-servers/webflow && npm install && npm run build
+```
+
+**Verification:**
+```bash
+# Check all 5 servers exist
+ls ~/updike/mcp-servers/social-api/src/index.ts
+ls ~/updike/mcp-servers/image-gen/src/index.ts
+ls ~/updike/mcp-servers/audio-gen/src/index.ts
+ls ~/updike/mcp-servers/content-archive/src/index.ts
+ls ~/updike/mcp-servers/webflow/dist/index.js
+```
+
+### 8. Marketplace Registration
 - **Check:** `ls ~/.claude/plugins/marketplaces/claudesync.json`
 - **Add:** `claude plugin marketplace add https://raw.githubusercontent.com/Folly-Partners/claudesync/main/marketplace.json`
 
