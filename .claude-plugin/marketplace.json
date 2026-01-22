@@ -3,7 +3,7 @@
   "name": "Folly",
   "metadata": {
     "description": "Folly Partners plugin collection",
-    "version": "2.2.0"
+    "version": "2.3.0"
   },
   "owner": {
     "name": "Andrew Wilkinson"
@@ -12,7 +12,7 @@
     {
       "name": "claudesync",
       "description": "Sync Claude Code config, MCP servers, skills, and credentials across all your Macs",
-      "version": "2.2.0",
+      "version": "2.3.0",
       "author": {
         "name": "Andrew Wilkinson"
       },
