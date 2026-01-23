@@ -131,9 +131,11 @@ source_url: https://...
 
 ### Make Visuals
 
+**Always use model: `gemini-3-pro-image-preview` (Nano Banana Pro)** - other models have cropping/quality issues.
+
 | Tool | What it does |
 |------|--------------|
-| `generate_quote_card` | Branded quote card with Gemini AI |
+| `generate_quote_card` | Branded quote card with Gemini AI (Nano Banana Pro) |
 | `generate_carousel` | Multi-slide carousel for Instagram/LinkedIn |
 | `resize_for_platform` | Resize image to exact platform specs |
 | `apply_brand_style` | Apply warm earthy palette to any image |
@@ -282,13 +284,14 @@ deep-env store UPDIKE_WEBFLOW_SITE_ID "your-site-id"
 - Text: `#F5F5F5` (near-white)
 - Font: Elegant high-contrast serif (Didot/Bodoni style)
 - Format: 9:16 aspect ratio, 4K resolution
-- Attribution: Same color, slightly muted
+- **NO self-attribution** - Andrew doesn't quote himself. No "—Andrew Wilkinson", no "@awilkinson", no quotation marks around his own thoughts. It should look like he's sharing a thought directly, not quoting himself.
+- Only use attribution for quotes from OTHER people (Munger, Buffett, etc.)
 
 **Visual Style:**
 - Simple, readable text
 - Warm earthy palette (for posts)
 - Dark forest green (for Stories)
-- Quote cards: one punchy line + attribution
+- Quote cards: one punchy line (no attribution for Andrew's own words)
 - Carousels: clear headlines, minimal text per slide
 
 ---
