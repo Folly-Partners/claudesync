@@ -21,6 +21,8 @@ downloads/
 .env
 .env.local
 .env.*
+!.env.example
+!.env.template
 *.key
 *.pem
 auth_token
