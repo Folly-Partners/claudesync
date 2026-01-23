@@ -11,6 +11,20 @@ allowed-tools: Read, Write, Bash, Task, AskUserQuestion, MCPSearch, Glob, Grep
 
 You are helping Andrew process his email inbox efficiently using a "Prep & Rip" architecture.
 
+## Gmail MCP Tools Available
+
+The Gmail MCP server (`plugin:claudesync:gmail`) provides these tools:
+
+| Tool | Description |
+|------|-------------|
+| `list_emails_metadata` | List/filter emails by date, subject, sender, read status |
+| `get_emails_content` | Fetch full email content by ID |
+| `send_email` | Send new email or reply (with CC, BCC, threading) |
+| `delete_emails` | Delete emails by ID |
+| `download_attachment` | Download email attachments |
+
+**Note**: Archive is not directly supported by this MCP server. Use Gmail labels for organization, or delete after processing if appropriate.
+
 ## Architecture Overview
 
 This workflow uses **parallel preparation** followed by **zero-delay rapid-fire** decisions:
@@ -53,14 +67,16 @@ Store session ID for later phases.
 
 ### 1.2 Fetch Email Metadata
 
-Use the Gmail MCP to fetch unread inbox messages (metadata only, not full content):
+Use the Gmail MCP `list_emails_metadata` tool to fetch unread inbox messages:
 
 ```
-gmail_list_messages with:
-  - query: "is:unread in:inbox"
-  - maxResults: 50
-  - format: "metadata"  # Only headers, not body
+list_emails_metadata with:
+  - query: "is:unread" (or filter by date/sender)
+  - limit: 50
+  - unread_only: true
 ```
+
+Then use `get_emails_content` to fetch full content for emails that need processing.
 
 ### 1.3 Classify and Filter
 
@@ -256,18 +272,26 @@ Continue? [Yes / Execute now / Stop]
 For each decision with `action: "send"`:
 
 ```
-gmail_send_reply with:
-  - threadId: decision.threadId
+send_email with:
+  - to: [recipient email]
+  - subject: "Re: [original subject]"
   - body: decision.draft
-  - inReplyTo: decision.emailId
+  - reply_to_message_id: decision.emailId  # For threading
 ```
 
-### 3.2 Archive All Processed
+### 3.2 Mark Processed Emails
 
-```
-gmail_batch_archive with:
-  - messageIds: [all processed email IDs]
-```
+**Note**: The Gmail MCP server does not support archiving directly. Options:
+
+1. **Delete processed emails** (if appropriate):
+   ```
+   delete_emails with:
+     - email_ids: [all processed email IDs]
+   ```
+
+2. **Leave in inbox** - user can archive manually in Gmail
+
+3. **Use Gmail labels** - processed emails can be labeled via Gmail web interface
 
 ### 3.3 Log for Learning
 

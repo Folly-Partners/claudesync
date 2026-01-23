@@ -269,6 +269,10 @@ deep-env store VERCEL_API_TOKEN "your-token"
 
 **Purpose**: Read, send, and manage Gmail emails via IMAP/SMTP.
 
+**Package**: `ai-zerolab/mcp-email-server` (via uvx)
+
+**Restart Required**: After changing Gmail credentials, restart Claude Code to reload the MCP server.
+
 **Requirements**:
 - Gmail account with 2FA enabled
 - App Password (not your regular Gmail password)
@@ -298,6 +302,12 @@ deep-env push  # Sync to other Macs
 | `send_email` | Send email with CC, BCC, HTML, attachments, reply threading |
 | `delete_emails` | Delete emails by ID |
 | `download_attachment` | Download attachments (if enabled) |
+
+**Tool Name Format**: In Claude Code, tools are prefixed as `mcp__plugin_claudesync_gmail__<tool_name>`. Skills should reference the base tool names above.
+
+**Limitations**:
+- No archive function - emails can only be deleted or left in inbox
+- No label management - use Gmail web interface for labels
 
 **Common Errors**:
 - `Authentication failed`: Wrong password - must use App Password, not regular Gmail password
