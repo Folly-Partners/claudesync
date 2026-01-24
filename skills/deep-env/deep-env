@@ -117,21 +117,23 @@ json_set() {
     local json="$1"
     local key="$2"
     local value="$3"
+    local escaped_key
     local escaped_value
+    escaped_key=$(json_escape "$key")
     escaped_value=$(json_escape "$value")
 
     if [ -z "$json" ] || [ "$json" = "{}" ]; then
-        echo "{\"$key\":\"$escaped_value\"}"
+        echo "{\"$escaped_key\":\"$escaped_value\"}"
         return
     fi
 
     # Check if key exists
-    if echo "$json" | grep -q "\"$key\"[[:space:]]*:"; then
+    if echo "$json" | grep -q "\"$escaped_key\"[[:space:]]*:"; then
         # Replace existing key
-        echo "$json" | sed "s|\"$key\"[[:space:]]*:[[:space:]]*\"[^\"]*\"|\"$key\":\"$escaped_value\"|"
+        echo "$json" | sed "s|\"$escaped_key\"[[:space:]]*:[[:space:]]*\"[^\"]*\"|\"$escaped_key\":\"$escaped_value\"|"
     else
         # Add new key (insert before closing brace)
-        echo "$json" | sed "s|}$|,\"$key\":\"$escaped_value\"}|"
+        echo "$json" | sed "s|}$|,\"$escaped_key\":\"$escaped_value\"}|"
     fi
 }
 
@@ -148,6 +150,16 @@ json_delete() {
 json_keys() {
     local json="$1"
     echo "$json" | grep -oE '"[^"]+":' | sed 's/"//g; s/://g' | sort -u
+}
+
+# Validate JSON structure using jq
+json_is_valid() {
+    local json="$1"
+    if echo "$json" | jq empty 2>/dev/null; then
+        return 0
+    else
+        return 1
+    fi
 }
 
 # ============================================================================
@@ -171,6 +183,15 @@ keychain_write_all() {
         print_error "Credential payload too large for keychain: $json_size bytes"
         print_info "macOS Keychain has a ~16KB limit per entry"
         print_info "Recommended: Split credentials using project-specific storage"
+        return 1
+    fi
+
+    # Validate JSON structure before writing
+    if ! json_is_valid "$json"; then
+        print_error "Invalid JSON structure detected - cannot write to keychain"
+        print_error "This may indicate corruption. Run 'deep-env validate' for details."
+        # Save corrupted JSON for debugging
+        echo "$json" > "$CONFIG_DIR/.last_corrupted.json"
         return 1
     fi
 
@@ -740,6 +761,18 @@ cmd_push() {
     local json
     json=$(keychain_read_all)
 
+    # Validate JSON before exporting
+    if ! json_is_valid "$json"; then
+        print_error "Corrupted JSON detected in keychain"
+        print_error "Cannot push corrupted data to iCloud"
+        echo ""
+        print_info "To recover:"
+        print_info "  1. Check ~/.config/deep-env/.last_corrupted.json"
+        print_info "  2. Try: deep-env pull  # Pull from iCloud"
+        print_info "  3. Or restore from backup: ls ~/.config/deep-env/backups/"
+        exit 1
+    fi
+
     local keys=$(json_keys "$json")
     local count=$(echo "$keys" | grep -c . || echo "0")
 
@@ -882,6 +915,19 @@ cmd_pull() {
     rm "$temp_file"
     trap - EXIT  # Clear the trap since we cleaned up
 
+    # Validate constructed JSON before writing
+    if ! json_is_valid "$json"; then
+        print_error "Decrypted data contains invalid JSON"
+        print_error "This may indicate:"
+        print_error "  - Corrupted iCloud data"
+        print_error "  - Wrong decryption password"
+        print_error "  - Manual tampering with credentials.enc"
+        echo ""
+        print_info "Decrypted data saved to: $CONFIG_DIR/.last_pull_attempt.json"
+        echo "$json" > "$CONFIG_DIR/.last_pull_attempt.json"
+        exit 1
+    fi
+
     # Write all at once!
     if ! keychain_write_all "$json"; then
         print_error "Failed to store credentials in keychain"
@@ -901,6 +947,18 @@ cmd_pull() {
         print_error "Keychain write verification failed"
         print_error "Credentials were not stored correctly"
         exit 1
+    fi
+
+    # Verify JSON is valid and has correct count
+    if ! json_is_valid "$verify"; then
+        print_error "Keychain contains invalid JSON after write"
+        print_error "This should not happen - please report this bug"
+        exit 1
+    fi
+
+    local verify_count=$(echo "$verify" | jq 'length' 2>/dev/null || echo "0")
+    if [ "$verify_count" -ne "$count" ]; then
+        print_warning "Expected $count credentials but found $verify_count in keychain"
     fi
 
     local password_file="$CONFIG_DIR/.master_pass"
@@ -1001,6 +1059,100 @@ cmd_assign() {
     fi
 }
 
+cmd_validate() {
+    print_header "deep-env Data Integrity Check"
+    echo ""
+
+    local errors=0
+
+    # 1. Check keychain JSON
+    print_info "Checking keychain..."
+    local json=$(keychain_read_all)
+
+    if [ -z "$json" ] || [ "$json" = "{}" ]; then
+        print_warning "Keychain is empty"
+    elif ! json_is_valid "$json"; then
+        print_error "✗ Keychain contains INVALID JSON"
+        echo "$json" > "$CONFIG_DIR/.corrupted_keychain.json"
+        print_info "Corrupted data saved to: $CONFIG_DIR/.corrupted_keychain.json"
+        ((errors++))
+    else
+        local key_count=$(echo "$json" | jq 'length')
+        print_success "✓ Keychain JSON is valid ($key_count credentials)"
+    fi
+
+    echo ""
+
+    # 2. Check iCloud file
+    print_info "Checking iCloud backup..."
+    if [ ! -f "$ENCRYPTED_FILE" ]; then
+        print_warning "No iCloud backup found"
+    else
+        local password=""
+        local stored_pass_file="$CONFIG_DIR/.sync_pass"
+
+        if [ -n "$DEEP_ENV_PASSWORD" ]; then
+            password="$DEEP_ENV_PASSWORD"
+        elif [ -f "$stored_pass_file" ]; then
+            password=$(cat "$stored_pass_file")
+        else
+            print_info "Skipping iCloud validation (no stored password)"
+            echo ""
+            print_info "Run with password: DEEP_ENV_PASSWORD=<pass> deep-env validate"
+            return
+        fi
+
+        local temp_file=$(mktemp)
+        trap "rm -f '$temp_file' 2>/dev/null" EXIT
+
+        if DEEP_ENV_PASS="$password" openssl enc -aes-256-cbc -d -salt -pbkdf2 -in "$ENCRYPTED_FILE" -out "$temp_file" -pass env:DEEP_ENV_PASS 2>/dev/null; then
+            # Build JSON from decrypted file
+            local icloud_json="{}"
+            while IFS= read -r line || [ -n "$line" ]; do
+                [[ -z "$line" ]] && continue
+                if [[ "$line" =~ ^([A-Za-z_][A-Za-z0-9_]*)=(.*)$ ]]; then
+                    local key="${BASH_REMATCH[1]}"
+                    local value="${BASH_REMATCH[2]}"
+                    icloud_json=$(json_set "$icloud_json" "$key" "$value")
+                fi
+            done < "$temp_file"
+
+            if ! json_is_valid "$icloud_json"; then
+                print_error "✗ iCloud backup contains INVALID JSON"
+                echo "$icloud_json" > "$CONFIG_DIR/.corrupted_icloud.json"
+                print_info "Corrupted data saved to: $CONFIG_DIR/.corrupted_icloud.json"
+                ((errors++))
+            else
+                local icloud_count=$(echo "$icloud_json" | jq 'length')
+                print_success "✓ iCloud backup is valid ($icloud_count credentials)"
+            fi
+        else
+            print_error "✗ Failed to decrypt iCloud backup"
+            ((errors++))
+        fi
+
+        rm -f "$temp_file"
+        trap - EXIT
+    fi
+
+    echo ""
+
+    # Summary
+    if [ $errors -eq 0 ]; then
+        print_success "All checks passed - no corruption detected"
+    else
+        print_error "Found $errors issue(s)"
+        echo ""
+        print_info "To recover from corruption:"
+        print_info "  1. If keychain is corrupted but iCloud is good:"
+        print_info "     deep-env pull"
+        print_info ""
+        print_info "  2. If iCloud is corrupted but keychain is good:"
+        print_info "     deep-env push"
+        exit 1
+    fi
+}
+
 cmd_doctor() {
     print_header "deep-env Diagnostics"
 
@@ -1087,6 +1239,7 @@ COMMANDS:
     export              Output shell export statements
     run <command>       Run command with env vars injected
     migrate             Migrate old individual keychain entries to new format
+    validate            Check data integrity (keychain + iCloud)
     doctor              Run diagnostics on deep-env installation
     help                Show this help message
 
@@ -1162,6 +1315,9 @@ main() {
             ;;
         migrate)
             cmd_migrate "$@"
+            ;;
+        validate)
+            cmd_validate "$@"
             ;;
         doctor)
             cmd_doctor "$@"

@@ -206,6 +206,62 @@ deep-env store SESSION_SECRET "xyz789" --project
 
 This splits the credentials into smaller chunks that fit within Keychain limits.
 
+### JSON Corruption Recovery
+
+**Symptoms:**
+- `deep-env pull` shows "Pulled 0 credentials" but iCloud file exists
+- `deep-env list` shows empty or fewer credentials than expected
+- Error: "Invalid JSON structure detected"
+
+**Diagnosis:**
+```bash
+deep-env validate
+```
+
+This checks both your local keychain and iCloud backup for JSON corruption.
+
+**Recovery Steps:**
+
+1. **If keychain is corrupted but iCloud is good:**
+   ```bash
+   deep-env pull  # Re-pull from iCloud
+   deep-env validate  # Confirm fix
+   ```
+
+2. **If iCloud is corrupted but keychain is good:**
+   ```bash
+   deep-env push  # Re-push from keychain
+   deep-env validate  # Confirm fix
+   ```
+
+3. **If both are corrupted:**
+   ```bash
+   # Check for debug files
+   ls ~/.config/deep-env/.corrupted_*.json
+   ls ~/.config/deep-env/.last_*.json
+
+   # Try to restore from backup
+   deep-env restore
+   # Select a recent backup from the list
+   ```
+
+**How Corruption Happens:**
+
+The encryption file in iCloud stores credentials as JSON. Corruption can occur if:
+- Manual editing of the encrypted file
+- Interruption during push/pull operations
+- Key names with special characters that weren't properly escaped
+- Concurrent writes from multiple Macs
+
+**Prevention:**
+
+The `validate` command (added in v2.1) now runs automatic checks:
+- Before pushing to iCloud
+- After pulling from iCloud
+- When writing to keychain
+
+This prevents corrupted data from spreading to other Macs.
+
 ## Sync Password
 
 Ask the user - they set it when first running `deep-env push`.

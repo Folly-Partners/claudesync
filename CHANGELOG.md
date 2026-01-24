@@ -2,6 +2,25 @@
 
 All notable changes to ClaudeSync will be documented in this file.
 
+## [2.5.0] - 2026-01-24
+
+### Added
+- `deep-env validate` command to check data integrity
+- Automatic JSON validation before push operations
+- Automatic JSON validation after pull operations
+- JSON structure validation before writing to keychain
+- Debug files saved when corruption is detected (`.corrupted_*.json`, `.last_*.json`)
+- Key escaping in `json_set()` to prevent injection
+
+### Fixed
+- JSON corruption issue where missing commas caused silent failures
+- Unescaped keys in JSON generation
+- Incomplete verification after pull (now validates structure + count)
+
+### Security
+- Prevents propagation of corrupted credentials across Macs
+- Adds validation checkpoints at all critical operations
+
 ## [2.4.0] - 2026-01-24
 
 ### Added

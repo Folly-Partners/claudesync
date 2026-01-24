@@ -268,10 +268,33 @@ cd ~/claudesync/servers/super-things && npm run build
 
 **Credentials not syncing?**
 ```bash
-deep-env list      # See what's stored
-deep-env validate  # Check for corruption
-deep-env pull      # Pull from iCloud
+# Check what's currently stored
+deep-env list
+
+# Validate data integrity (checks keychain + iCloud)
+deep-env validate
+
+# If validation fails:
+# 1. Keychain corrupted → deep-env pull
+# 2. iCloud corrupted → deep-env push
+# 3. Both corrupted → deep-env restore
+
+# Re-pull from iCloud
+deep-env pull
 ```
+
+**Credentials showing 0 or fewer than expected?**
+
+This indicates JSON corruption. The `validate` command will diagnose:
+```bash
+deep-env validate
+# Follow the recovery instructions it provides
+```
+
+Common causes:
+- Interrupted push/pull operation
+- Manual editing of iCloud encrypted file
+- Multiple Macs pushing simultaneously
 
 **Git sync issues?**
 ```bash
