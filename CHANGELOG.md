@@ -2,6 +2,11 @@
 
 All notable changes to ClaudeSync will be documented in this file.
 
+## [2.4.0] - 2026-01-24
+
+### Added
+- **Context7 MCP server** - Framework documentation lookup via context7 for up-to-date library docs and code examples
+
 ## [2.2.0] - 2026-01-21
 
 ### Fixed
