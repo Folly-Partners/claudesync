@@ -1,161 +1,156 @@
 ---
 name: multi-ai-review
-description: Get code reviews from Codex and Gemini CLI tools in parallel. Use when you want external AI perspectives on code changes, plans, or implementations.
+description: Get plan reviews from Codex and Gemini before implementation. Both AIs review the plan against the actual codebase and suggest improvements. Claude then incorporates their feedback.
 ---
 
-# Multi-AI Review Skill
+# Multi-AI Plan Review
 
-Get parallel code reviews from OpenAI Codex and Google Gemini CLI tools. Both tools review the actual codebase, not just plans.
-
-## When to Use
-
-- After implementing a feature, before committing
-- When reviewing a plan before implementation
-- For security/architecture second opinions
-- When stuck and want fresh perspectives
-
-## Usage
-
-```
-/multi-ai-review                    # Review uncommitted changes
-/multi-ai-review --base main        # Review changes vs main branch
-/multi-ai-review --commit abc123    # Review a specific commit
-/multi-ai-review --files src/       # Review specific files/directory
-/multi-ai-review --plan plans/x.md  # Review a plan file with codebase context
-```
+After writing a plan, get feedback from Codex and Gemini. Both review the plan against the actual codebase and suggest improvements. Claude then updates the plan based on their feedback.
 
 ## Workflow
 
-### Step 1: Determine Review Scope
+### Step 1: Claude Writes Initial Plan
 
-Parse arguments to determine what to review:
+Use enhanced-planning or standard plan mode to create an implementation plan. Save it to a file (e.g., `plans/feature-name.md`).
 
-| Argument | What Gets Reviewed |
-|----------|-------------------|
-| (none) | Uncommitted changes (staged + unstaged) |
-| `--base <branch>` | Changes compared to branch |
-| `--commit <sha>` | Single commit changes |
-| `--files <path>` | Specific files or directory |
-| `--plan <file>` | Plan file + relevant codebase files |
+### Step 2: Gather Codebase Context for External Tools
 
-### Step 2: Gather Context
-
-Before calling external tools, gather codebase context:
+Prepare context that helps Codex and Gemini understand the codebase:
 
 ```bash
-# Get project root and structure
-pwd
-ls -la
-cat README.md 2>/dev/null | head -50
-cat CLAUDE.md 2>/dev/null | head -50
+# Create a context summary
+cat > /tmp/codebase-context.txt << 'EOF'
+PROJECT: $(basename $(pwd))
+STRUCTURE:
+$(find . -type f -name "*.ts" -o -name "*.tsx" -o -name "*.py" -o -name "*.rb" -o -name "*.go" | grep -v node_modules | grep -v .git | head -50)
 
-# For uncommitted changes
-git status
-git diff --stat
-
-# For branch comparison
-git log --oneline main..HEAD
-git diff --stat main
+KEY FILES:
+$(cat README.md 2>/dev/null | head -30)
+$(cat CLAUDE.md 2>/dev/null | head -30)
+$(cat ARCHITECTURE.md 2>/dev/null | head -30)
+EOF
 ```
 
-### Step 3: Run Reviews in Parallel
+### Step 3: Run Plan Reviews in Parallel
 
-Launch both reviews simultaneously using Bash tool calls in parallel:
+Launch both reviews simultaneously. Each tool receives:
+1. The plan file
+2. Codebase context
+3. Instructions to suggest improvements
 
 **Codex Review:**
 ```bash
-cd <project_dir> && codex review --uncommitted "Focus on: security, performance, edge cases, and adherence to project conventions"
-```
+cd <project_dir> && codex exec "Review this implementation plan against the codebase.
 
-Or with branch:
-```bash
-cd <project_dir> && codex review --base main "Focus on: security, performance, edge cases"
+YOUR TASK:
+1. Check if the plan accounts for existing code patterns and conventions
+2. Identify missing steps or edge cases
+3. Suggest any strategy improvements
+4. Flag potential conflicts with existing code
+5. Add any tasks the plan missed
+
+Be specific - reference actual files and code when possible.
+
+THE PLAN:
+$(cat <plan_file>)
+
+CODEBASE STRUCTURE:
+$(find . -type f \( -name '*.ts' -o -name '*.tsx' -o -name '*.py' -o -name '*.rb' \) | grep -v node_modules | head -30)
+
+KEY CONTEXT:
+$(cat README.md CLAUDE.md 2>/dev/null | head -50)"
 ```
 
 **Gemini Review:**
 ```bash
-cd <project_dir> && cat <<'CONTEXT' | gemini "You are reviewing code changes. Here is the project context and diff. Provide a thorough review focusing on: 1) Security issues 2) Performance concerns 3) Edge cases 4) Code quality 5) Suggestions for improvement.
+cd <project_dir> && gemini "You are a senior engineer reviewing an implementation plan. Your job is to improve it.
 
-$(git diff --stat)
-$(git diff)
-CONTEXT"
-```
+REVIEW CHECKLIST:
+1. Does the plan account for existing patterns in this codebase?
+2. Are there missing steps or edge cases?
+3. Could the strategy be simplified or improved?
+4. Are there potential conflicts with existing code?
+5. What tasks or considerations did the plan miss?
 
-For file-specific reviews:
-```bash
-cd <project_dir> && gemini "Review these files for issues, improvements, and adherence to best practices: $(cat <files>)"
-```
+Be specific and actionable. Reference actual files when relevant.
 
-For plan reviews with codebase context:
-```bash
-cd <project_dir> && gemini "Review this implementation plan against the actual codebase. Check if the plan accounts for existing patterns, potential conflicts, and edge cases.
-
-PLAN:
+THE PLAN:
 $(cat <plan_file>)
 
-RELEVANT CODE:
-$(find . -name '*.ts' -o -name '*.tsx' | head -20 | xargs head -50 2>/dev/null)"
+CODEBASE FILES:
+$(find . -type f \( -name '*.ts' -o -name '*.tsx' -o -name '*.py' -o -name '*.rb' \) | grep -v node_modules | head -30)
+
+KEY CONTEXT:
+$(cat README.md CLAUDE.md 2>/dev/null | head -50)"
 ```
 
-### Step 4: Aggregate Results
+### Step 4: Synthesize Feedback
 
-Present both reviews with clear sections:
+After both tools respond, Claude synthesizes their feedback:
 
 ```markdown
-## Codex Review
+## External AI Feedback
 
-[Codex output here]
+### Codex Suggestions
+- [List key points from Codex]
 
-## Gemini Review
+### Gemini Suggestions
+- [List key points from Gemini]
 
-[Gemini output here]
+### Consensus (Both Agree)
+- [Items both tools flagged]
 
-## Summary
-
-**Common Concerns:** [Issues both flagged]
-**Unique from Codex:** [Only Codex mentioned]
-**Unique from Gemini:** [Only Gemini mentioned]
-
-### Recommended Actions
-1. [Prioritized action items]
+### Unique Insights
+- From Codex: [...]
+- From Gemini: [...]
 ```
 
-## Example Invocations
+### Step 5: Update the Plan
 
-### Review Uncommitted Changes
-```
-User: /multi-ai-review
-Claude: [Runs both tools on uncommitted changes, presents aggregated feedback]
-```
+Claude incorporates the feedback and updates the plan file:
 
-### Review Against Main Branch
-```
-User: /multi-ai-review --base main
-Claude: [Uses codex review --base main, pipes branch diff to gemini]
-```
+1. Add missing tasks/steps both tools identified
+2. Adjust strategy based on their recommendations
+3. Add edge cases they flagged
+4. Note any disagreements and Claude's resolution
 
-### Review Plan With Codebase Context
-```
-User: /multi-ai-review --plan plans/auth-feature.md
-Claude: [Sends plan + relevant code files to both tools for validation]
-```
+Mark incorporated changes with `[Added per Codex/Gemini review]` so the user can see what changed.
 
-## Custom Review Focus
+### Step 6: Present Updated Plan
 
-You can add a focus area after the flags:
+Show the user:
+1. Summary of what changed
+2. The updated plan
+3. Any feedback Claude disagreed with (and why)
+
+## Usage
+
+After writing a plan in plan mode:
 
 ```
-/multi-ai-review --base main security    # Focus on security
-/multi-ai-review architecture            # Focus on architecture
-/multi-ai-review performance             # Focus on performance
+/multi-ai-review plans/my-feature.md
 ```
 
-Pass the focus to both tools in their prompts.
+Or Claude can invoke this automatically after writing a plan by asking:
+"Want me to get Codex and Gemini to review this plan before we proceed?"
+
+## Example Flow
+
+```
+User: Plan adding user avatars with S3 upload
+Claude: [Uses enhanced-planning, writes plan to plans/avatars.md]
+Claude: Want me to get external AI review of this plan?
+User: Yes
+Claude: [Runs /multi-ai-review plans/avatars.md]
+Claude: [Shows Codex + Gemini feedback]
+Claude: [Updates plan with their suggestions]
+Claude: Here's the updated plan with their feedback incorporated. Ready to implement?
+```
 
 ## Notes
 
-- Both tools run from the project directory, so they have full filesystem context
-- Codex has built-in git awareness via `--uncommitted` and `--base` flags
-- Gemini receives context via stdin/prompt
-- Reviews run in parallel for speed
-- If either tool fails, still present the other's results
+- Both tools run from the project directory for full codebase access
+- Codex uses `codex exec` for one-shot prompts (not `codex review` which is for code diffs)
+- Gemini receives context via the prompt
+- Claude maintains final judgment - not all suggestions must be incorporated
+- The goal is better plans through diverse AI perspectives
