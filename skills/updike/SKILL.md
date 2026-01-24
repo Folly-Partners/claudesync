@@ -202,6 +202,122 @@ deep-env store UPDIKE_WEBFLOW_SITE_ID "your-site-id"
 
 ---
 
+## Automation Server (Mac Studio)
+
+**All posting now executes on the Mac Studio automation-server** instead of locally. This ensures posts happen reliably, even when MacBooks are closed.
+
+### How It Works
+
+1. **Content generation stays local** - Voice matching, image generation (Gemini), archive search (Pinecone)
+2. **Posting executes remotely** - Mac Studio runs the actual API calls
+3. **Git as the queue** - Automations are TypeScript files pushed to GitHub
+
+### Posting Workflow
+
+When the user wants to post content:
+
+#### Immediate Posts
+
+1. Generate and validate content as usual
+2. Generate image if needed (local Gemini → R2 → public URL)
+3. Trigger the automation on Mac Studio:
+
+```bash
+# Use the automation-server MCP tools if available
+run_automation("updike-post-twitter", { text: "...", image_url: "..." })
+
+# Or via HTTP API
+curl -X POST "http://mac-studio.local:3847/api/automations/updike-post-twitter/run" \
+  -H "Content-Type: application/json" \
+  -d '{"triggerData": {"text": "Hello world!", "image_url": "https://pub-updike.r2.dev/..."}}'
+```
+
+4. Report to user: "Posted via automation-server" with the post URL
+
+#### Scheduled Posts
+
+For scheduled posts, create a cron-triggered automation file:
+
+1. Generate the automation file locally:
+
+```typescript
+// ~/automation-server/automations/updike-scheduled-{uuid}.ts
+import type { Context } from "../lib/types";
+
+export const config = {
+  name: "updike-scheduled-{uuid}",
+  description: "Scheduled: {preview}...",
+  trigger: {
+    type: "cron" as const,
+    schedule: "0 9 25 1 *",  // 9:00 AM on Jan 25
+    timezone: "America/Vancouver",
+  },
+  timeout: 60000,
+  retry: { attempts: 3, backoff: "exponential" as const, initialDelay: 5000 },
+  enabled: true,
+};
+
+export async function run(ctx: Context): Promise<void> {
+  // Import the platform automation
+  const { run: postToTwitter } = await import("./updike-post-twitter");
+  await postToTwitter({ ...ctx, triggerData: { text: "..." } } as Context);
+}
+```
+
+2. Push to automation-server repo:
+
+```bash
+cd ~/automation-server
+git pull origin main
+git add automations/updike-scheduled-*.ts
+git commit -m "Schedule post for Jan 25 9am"
+git push origin main
+```
+
+3. Mac Studio syncs every 30 minutes and picks up the new automation
+4. Report to user: "Scheduled for [time]. Mac Studio will execute automatically."
+
+#### Cross-Platform Posts
+
+Create separate automation calls for each platform. This handles partial failures gracefully.
+
+```bash
+# Post to both Twitter and LinkedIn
+run_automation("updike-post-twitter", { text: "..." })
+run_automation("updike-post-linkedin", { text: "..." })
+```
+
+### Available Automations
+
+| Automation | Platform | Trigger Data |
+|------------|----------|--------------|
+| `updike-post-twitter` | Twitter/X | `{ text, image_url? }` |
+| `updike-post-linkedin` | LinkedIn | `{ text, image_url? }` |
+| `updike-post-instagram` | Instagram | `{ text, image_url }` (image required) |
+| `updike-post-threads` | Threads | `{ text, image_url? }` |
+
+### Checking Status
+
+```bash
+# List all automations
+curl http://mac-studio.local:3847/api/automations
+
+# Check recent jobs
+curl http://mac-studio.local:3847/api/jobs
+
+# Get automation details
+curl http://mac-studio.local:3847/api/automations/updike-post-twitter
+```
+
+### Fallback: Local Posting
+
+If the automation-server is unreachable, fall back to local MCP tools:
+- `post_to_x`, `post_to_linkedin`, `post_to_instagram`, `post_to_threads`
+
+These work but require the MacBook to stay open during execution.
+
+---
+
 ## Voice & Judgment
 
 ### Andrew's Voice
