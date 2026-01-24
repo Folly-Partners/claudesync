@@ -91,6 +91,14 @@
         "MCP_EMAIL_SERVER_SMTP_HOST": "smtp.gmail.com",
         "MCP_EMAIL_SERVER_SMTP_PORT": "465"
       }
+    },
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"],
+      "env": {
+        "CONTEXT7_API_KEY": "${CONTEXT7_API_KEY}"
+      }
     }
   }
 }
