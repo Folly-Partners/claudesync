@@ -84,11 +84,13 @@ If the script isn't available, prune manually:
 
 ## Automation
 
-To run weekly, add to the sync launchd job or create a separate one:
+To run weekly cleanup, add to your personal crontab if desired:
 ```bash
 # Add to crontab for weekly Sunday 3am cleanup
-0 3 * * 0 ~/claudesync/skills/history-pruner/prune-history.sh conservative
+0 3 * * 0 ~/.claude/plugins/marketplaces/Folly/skills/history-pruner/prune-history.sh conservative
 ```
+
+Note: Component-sync runs automatically at session start via the SessionStart hook.
 
 ## Important Notes
 

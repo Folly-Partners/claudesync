@@ -2,6 +2,23 @@
 
 All notable changes to ClaudeSync will be documented in this file.
 
+## [Unreleased]
+
+### Removed
+- **setup-new-computer.sh** - Obsolete installation script that conflicted with plugin-based installation
+  - Modern installation uses: `/plugin install claudesync@Folly`
+  - Component syncing handled by SessionStart hook, not launchd
+- **LaunchD agent references** - The `com.claude.config-sync.plist` agent has been replaced
+  - Syncing now occurs via `component-sync.sh` SessionStart hook
+  - Runs once per 24 hours automatically
+  - Syncs via iCloud: `~/Library/Mobile Documents/com~apple~CloudDocs/.claudesync/`
+
+### Changed
+- Installation documentation updated to remove references to obsolete setup methods
+- Updated `install.sh` to reflect component-sync via SessionStart hook instead of launchd
+- Updated `commands/setup.md` to remove launchd plist check section
+- Updated `skills/history-pruner/SKILL.md` to correct path and remove outdated scheduling references
+
 ## [2.5.0] - 2026-01-24
 
 ### Added

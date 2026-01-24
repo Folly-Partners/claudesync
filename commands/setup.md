@@ -84,12 +84,7 @@ echo '  eval "$(deep-env export 2>/dev/null)"' >> ~/.zshrc
 echo 'fi' >> ~/.zshrc
 ```
 
-### 5. Sync Agent (LaunchD)
-- **Check:** `ls ~/Library/LaunchAgents/com.claude.config-sync.plist`
-- **Install:** Run the setup script to create and load the plist
-- **Load if exists but not running:** `launchctl load ~/Library/LaunchAgents/com.claude.config-sync.plist`
-
-### 6. Credentials (Based on MCP Selection)
+### 5. Credentials (Based on MCP Selection)
 
 Only prompt for credentials for MCP servers the user selected in step 2:
 
@@ -114,7 +109,7 @@ For each selected server that needs credentials:
 3. Store: `deep-env store KEY_NAME "value"`
 4. After all credentials: `deep-env push`
 
-### 7. Updike MCP Servers
+### 6. Updike MCP Servers
 
 The 5 updike MCP servers require the `~/updike` repository to be cloned and built.
 
@@ -138,7 +133,7 @@ ls ~/updike/mcp-servers/content-archive/src/index.ts
 ls ~/updike/mcp-servers/webflow/dist/index.js
 ```
 
-### 8. Marketplace Registration
+### 7. Marketplace Registration
 - **Check:** `ls ~/.claude/plugins/marketplaces/claudesync.json`
 - **Add:** `claude plugin marketplace add https://raw.githubusercontent.com/Folly-Partners/claudesync/main/marketplace.json`
 
