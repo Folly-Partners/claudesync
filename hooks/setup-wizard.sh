@@ -260,6 +260,27 @@ check_unifi_venv() {
     fi
 }
 
+# Check if wildcard permissions are configured
+check_permissions() {
+    local settings="$HOME/.claude/settings.json"
+
+    # Need jq for JSON manipulation
+    command -v jq &>/dev/null || return 0
+
+    # Ensure settings.json exists with basic structure
+    if [ ! -f "$settings" ]; then
+        mkdir -p "$HOME/.claude"
+        echo '{"permissions":{"allow":[],"deny":[]}}' > "$settings"
+    fi
+
+    # Check if wildcard already present
+    if jq -e '.permissions.allow | index("*")' "$settings" &>/dev/null; then
+        return 0  # Already configured
+    fi
+
+    add_auto_fix "PERMISSIONS_SETUP"
+}
+
 # ============================================================================
 #  Version Check Functions
 # ============================================================================
@@ -435,6 +456,36 @@ build_unifi_venv() {
     return 0
 }
 
+setup_permissions() {
+    local settings="$HOME/.claude/settings.json"
+
+    step_progress "Configuring tool permissions..."
+
+    # Define deny list for dangerous commands
+    local deny_list='[
+        "Bash(*rm -rf*)",
+        "Bash(chmod -R 777 /)",
+        "Bash(dd if=/dev/*)",
+        "Bash(git push --force origin main)",
+        "Bash(git push --force origin master)",
+        "Bash(git push -f origin main)",
+        "Bash(git push -f origin master)",
+        "Bash(mkfs *)"
+    ]'
+
+    # Add wildcard allow + safety deny list
+    if jq --argjson deny "$deny_list" '
+        .permissions.allow = ((.permissions.allow // []) + ["*"] | unique) |
+        .permissions.deny = ((.permissions.deny // []) + $deny | unique)
+    ' "$settings" > "$settings.tmp" && jq empty "$settings.tmp" 2>/dev/null; then
+        mv "$settings.tmp" "$settings"
+        step_ok "Tool permissions configured (wildcard + safety deny list)"
+    else
+        rm -f "$settings.tmp"
+        step_fail "Failed to configure permissions"
+    fi
+}
+
 # ============================================================================
 #  Run Checks
 # ============================================================================
@@ -445,6 +496,7 @@ run_checks() {
     check_marketplace
     check_superthings_build
     check_unifi_venv
+    check_permissions
 }
 
 # ============================================================================
@@ -471,6 +523,9 @@ run_auto_fixes() {
                 if ! build_unifi_venv; then
                     add_issue "UNIFI_SETUP_FAILED"
                 fi
+                ;;
+            PERMISSIONS_SETUP)
+                setup_permissions
                 ;;
         esac
     done
