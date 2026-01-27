@@ -2,7 +2,7 @@
 name: email
 description: Rapid-fire email processing with AI-generated draft responses
 model: sonnet
-allowed-tools: Read, Write, Bash, Task, AskUserQuestion, MCPSearch, Glob, Grep
+allowed-tools: Read, Write, Bash, Task, AskUserQuestion, MCPSearch, Glob, Grep, mcp__plugin_claudesync_gmail__list_emails_metadata, mcp__plugin_claudesync_gmail__get_emails_content, mcp__plugin_claudesync_gmail__send_email, mcp__plugin_claudesync_gmail__delete_emails
 ---
 
 # Rapid-Fire Email Inbox Processing

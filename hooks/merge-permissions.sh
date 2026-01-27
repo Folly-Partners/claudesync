@@ -14,6 +14,12 @@ command -v jq &>/dev/null || exit 0
 jq empty "$LOCAL" 2>/dev/null || exit 0
 jq empty "$MAIN" 2>/dev/null || exit 0
 
+# Skip merge if wildcard already present (everything already allowed)
+if jq -e '.permissions.allow | index("*")' "$MAIN" &>/dev/null; then
+    rm -f "$LOCAL"  # Clean up local file since it's not needed
+    exit 0
+fi
+
 # Create backup
 cp "$MAIN" "$MAIN.bak"
 

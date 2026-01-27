@@ -4,6 +4,14 @@ All notable changes to ClaudeSync will be documented in this file.
 
 ## [Unreleased]
 
+## [2.6.0] - 2026-01-27
+
+### Fixed
+- **merge-permissions.sh** - Settings getting cluttered with redundant permissions
+  - When `"*"` wildcard exists in `settings.json`, the merge hook now skips merging
+  - Automatically cleans up `settings.local.json` since it's not needed
+  - Prevents entries like `"Bash(brew list:*)"` from accumulating
+
 ### Removed
 - **setup-new-computer.sh** - Obsolete installation script that conflicted with plugin-based installation
   - Modern installation uses: `/plugin install claudesync@Folly`
